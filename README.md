@@ -66,13 +66,13 @@ Firebase AI Logic handles both halves of the hybrid setup through one SDK:
 
 ## Team roles (tentative)
 
-| Role | Owns |
-| --- | --- |
-| **Privacy engine** | Regex and Nano masking, placeholder map, leak check |
-| **Cloud AI and Firebase** | Firebase project, AI Logic setup, App Check, cloud prompt and schema, Hosting |
-| **Frontend** | Web app UI: risk heatmap, clause cards, privacy ledger, on-device/cloud badge |
-| **Extension** | Manifest V3 setup, side panel, capturing contracts from the page |
-| **Documents, testing, and demo** | PDF/DOCX extraction, clause splitting, sample contract testing, README, demo video |
+| Role | Name | Owns |
+| --- | --- | --- |
+| **Privacy engine** | Likhil Gudipati | Regex and Nano masking, placeholder map, leak check |
+| **Cloud AI and Firebase** | TBD | Firebase project, AI Logic setup, App Check, cloud prompt and schema, Hosting |
+| **Frontend** | TBD | Web app UI: risk heatmap, clause cards, privacy ledger, on-device/cloud badge |
+| **Extension** | TBD | Manifest V3 setup, side panel, capturing contracts from the page |
+| **Documents, testing, and demo** | TBD | PDF/DOCX extraction, clause splitting, sample contract testing, README, demo video |
 
 ---
 
