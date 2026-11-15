@@ -2,10 +2,8 @@
 import { mask } from '@clause-guard/core/privacy/mask';
 import { classify } from '@clause-guard/core/privacy/onDevice';
 import type { Clause, MaskResult } from '@clause-guard/core/types';
-import { ai } from './firebase';
+import { initAI } from './firebase';
 import { WebBridge } from './webBridge';
-
-const bridge = new WebBridge(ai);
 
 const element = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 const status = element<HTMLElement>('status');
@@ -14,6 +12,16 @@ const progress = element<HTMLProgressElement>('progress');
 const contract = element<HTMLTextAreaElement>('contract');
 const run = element<HTMLButtonElement>('run');
 const output = element<HTMLPreElement>('output');
+
+let bridge: WebBridge;
+try {
+  bridge = new WebBridge(initAI());
+} catch (error) {
+  status.textContent = 'not configured';
+  output.textContent = error instanceof Error ? error.message : String(error);
+  run.disabled = true;
+  throw error;
+}
 
 async function refreshStatus(): Promise<void> {
   const current = await bridge.onDeviceStatus();
