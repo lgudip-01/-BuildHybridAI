@@ -68,7 +68,7 @@ const ORG_SUFFIX = ORG_SUFFIXES.flatMap((s) => [s, s.toUpperCase()])
 const NAME_WORD = "(?:[A-Z]\\.|[A-Z][\\w&'’-]*)";
 const STREET_TYPE = 'Street|St|Avenue|Ave|Road|Rd|Boulevard|Blvd|Lane|Ln|Drive|Dr|Court|Ct|Way|Place|Pl|Parkway|Pkwy|Highway|Hwy';
 
-const ORG = new RegExp(`\\b(?:${NAME_WORD}\\s+){0,5}${NAME_WORD},?\\s+(?:${ORG_SUFFIX})\\b\\.?`, 'g');
+const ORG = new RegExp(`\\b(?:${NAME_WORD}[^\\S\\r\\n]+){0,5}${NAME_WORD},?[^\\S\\r\\n]+(?:${ORG_SUFFIX})\\b\\.?`, 'g');
 // "42 Elm Street, Suite 300, Springfield, NJ 07001"
 const STREET_ADDRESS = new RegExp(
   `\\b\\d{1,6}\\s+(?:${NAME_WORD}\\s+){1,4}(?:${STREET_TYPE})\\b\\.?` +
@@ -76,9 +76,15 @@ const STREET_ADDRESS = new RegExp(
     `(?:,\\s+${NAME_WORD}(?:\\s+${NAME_WORD})?)?(?:,?\\s+[A-Z]{2})?(?:\\s+\\d{5}(?:-\\d{4})?)?`,
   'g',
 );
-const TITLED_PERSON = /\b(?:Mr|Mrs|Ms|Mx|Dr|Prof)\.?\s+[A-Z][a-z'’-]+(?:\s+[A-Z][a-z'’-]+){0,2}/g;
-const SIGNATURE_NAME = /\b(?:By|Name|Signed|Signature)\s*:\s*([A-Z][a-z'’-]+(?:\s+[A-Z]\.)?(?:\s+[A-Z][a-z'’-]+){1,2})/dg;
-const CAPITALIZED_PHRASE = new RegExp(`\\b${NAME_WORD}(?:\\s+(?:(?:of|and|&)\\s+)?${NAME_WORD}){1,4}`, 'g');
+// Names never span a line break, or "By: Dana Reyes\nName: …" would swallow "Name".
+const SP = '[^\\S\\r\\n]+';
+const PERSON_WORD = "[A-Z][a-z'’-]+";
+const TITLED_PERSON = new RegExp(`\\b(?:Mr|Mrs|Ms|Mx|Dr|Prof)\\.?${SP}${PERSON_WORD}(?:${SP}${PERSON_WORD}){0,2}`, 'g');
+const SIGNATURE_NAME = new RegExp(
+  `\\b(?:By|Name|Signed|Signature)[^\\S\\r\\n]*:[^\\S\\r\\n]*(${PERSON_WORD}(?:${SP}[A-Z]\\.)?(?:${SP}${PERSON_WORD}){1,2})`,
+  'dg',
+);
+const CAPITALIZED_PHRASE = new RegExp(`\\b${NAME_WORD}(?:${SP}(?:(?:of|and|&)${SP})?${NAME_WORD}){1,4}`, 'g');
 
 const TRAILING_ORG_SUFFIX = new RegExp(`[,\\s]+(?:${ORG_SUFFIX})\\.?$`);
 

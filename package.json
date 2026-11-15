@@ -1,0 +1,12 @@
+{
+  "name": "clause-guard",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "test": "npm test -w @clause-guard/core",
+    "dev": "npm run dev -w @clause-guard/web"
+  }
+}

@@ -61,6 +61,13 @@ describe('findNames', () => {
     ]);
   });
 
+  it('does not run a name across a line break', () => {
+    expect(names('By: Dana Reyes\nName: Michael Chen, CEO', false)).toEqual([
+      ['PERSON', 'Dana Reyes'],
+      ['PERSON', 'Michael Chen'],
+    ]);
+  });
+
   it('does not run a name across a sentence end', () => {
     expect(names('Governed by the laws of New York. Notices must be written.', true)).toEqual([['NAME', 'New York']]);
   });
