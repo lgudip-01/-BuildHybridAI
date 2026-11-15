@@ -25,8 +25,18 @@ try {
 
 async function refreshStatus(): Promise<void> {
   const current = await bridge.onDeviceStatus();
-  status.textContent = current;
+  status.textContent = current === 'unavailable' ? `unavailable. ${unavailableReason()}` : current;
   download.hidden = current !== 'downloadable' && current !== 'downloading';
+}
+
+function unavailableReason(): string {
+  if ('LanguageModel' in globalThis) {
+    return 'Chrome says this device cannot run Gemini Nano. Open chrome://on-device-internals to see why.';
+  }
+  const chrome = /Chrome\/(\d+)/.exec(navigator.userAgent)?.[1];
+  if (!chrome || /Edg\//.test(navigator.userAgent)) return 'This browser has no Gemini Nano. Use desktop Chrome.';
+  if (Number(chrome) < 139) return `Chrome ${chrome} is too old. Update to 139 or newer.`;
+  return `Chrome ${chrome} has the Prompt API turned off. Enable chrome://flags/#prompt-api-for-gemini-nano-multimodal-input, then relaunch Chrome.`;
 }
 
 download.addEventListener('click', async () => {
