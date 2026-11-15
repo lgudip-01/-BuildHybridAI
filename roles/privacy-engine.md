@@ -54,7 +54,7 @@ cloud result ──► 7. Unmask: replace only known placeholders, ignore made-u
 
 **Files:**
 - `regex.ts`: pattern matching
-- `onDevice.ts`: the model's entity pass
+- `onDevice.ts`: the model's entity pass, and clause classification
 - `merge.ts`: combining matches and resolving overlaps
 - `placeholders.ts`: assigning placeholders
 - `vault.ts`: the encrypted local map
@@ -64,9 +64,9 @@ cloud result ──► 7. Unmask: replace only known placeholders, ignore made-u
 
 ## What teammates get from you
 
-- `mask(clauses) → MaskResult`, which feeds the cloud call and the privacy ledger
-- `unmask(results) → Analysis[]`, which feeds the UI
-- `classify(clauses) → ClauseType[]`, which runs on device
+- `mask(docId, clauses, bridge) → MaskResult`, which feeds the cloud call and the privacy ledger. If `needsReview` is true, the UI must get the user's approval before sending.
+- `unmask(docId, results) → Analysis[]`, which feeds the UI
+- `classify(bridge, clauses) → ClauseType[]`, which runs on device
 
 ## When there's no on-device model
 

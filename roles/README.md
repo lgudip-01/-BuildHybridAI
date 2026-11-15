@@ -42,16 +42,21 @@ type ClauseType =
   | 'payment' | 'termination' | 'confidentiality' | 'ip' | 'liability'
   | 'indemnity' | 'non_compete' | 'governing_law' | 'other';
 
+type EntityKind =
+  | 'PARTY' | 'PERSON' | 'ORG' | 'NAME' | 'ADDRESS'
+  | 'AMOUNT' | 'DATE' | 'EMAIL' | 'PHONE' | 'ACCOUNT';
+
 // Text that passed the leak check. Only the privacy engine can create one,
 // and the cloud call only accepts this type, so raw text can't be sent by mistake.
 type CleanText = string & { readonly __brand: 'leakChecked' };
 
 type MaskedClause = { id: string; type?: ClauseType; text: CleanText };
 
-type LedgerEntry = { placeholder: string; kind: string; clauseIds: string[] }; // never the real value
+type LedgerEntry = { placeholder: string; kind: EntityKind; clauseIds: string[] }; // never the real value
 
 type MaskResult =
-  | { ok: true; clauses: MaskedClause[]; ledger: LedgerEntry[] }
+  // needsReview: masked without the on-device model, so the user must approve before sending
+  | { ok: true; clauses: MaskedClause[]; ledger: LedgerEntry[]; needsReview: boolean }
   | { ok: false; leaks: { clauseId: string; snippet: string; reason: string }[] };
 
 type Analysis = {
@@ -67,6 +72,14 @@ interface AiBridge {
   onDevice(prompt: string, schema?: object): Promise<string>;                // ONLY_ON_DEVICE
   analyze(clauses: MaskedClause[]): Promise<{ results: Analysis[]; ranOn: 'cloud' | 'device' }>; // PREFER_IN_CLOUD
 }
+```
+
+**Privacy engine entry points** (in `packages/core/src/privacy/`):
+
+```ts
+mask(docId: string, clauses: Clause[], bridge: AiBridge): Promise<MaskResult>   // mask.ts
+unmask(docId: string, results: Analysis[]): Promise<Analysis[]>                  // unmask.ts
+classify(bridge: AiBridge, clauses: Clause[]): Promise<ClauseType[]>             // onDevice.ts
 ```
 
 ## Repo layout
