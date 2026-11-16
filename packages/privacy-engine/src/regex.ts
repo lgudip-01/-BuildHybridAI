@@ -78,7 +78,8 @@ const STREET_ADDRESS = new RegExp(
 );
 // Names never span a line break, or "By: Dana Reyes\nName: …" would swallow "Name".
 const SP = '[^\\S\\r\\n]+';
-const PERSON_WORD = "[A-Z][a-z'’-]+";
+// Dana, O'Connell, McKay, Smith-Jones
+const PERSON_WORD = "[A-Z][a-z]*(?:['’-]?[A-Z]?[a-z]+)+";
 const TITLED_PERSON = new RegExp(`\\b(?:Mr|Mrs|Ms|Mx|Dr|Prof)\\.?${SP}${PERSON_WORD}(?:${SP}${PERSON_WORD}){0,2}`, 'g');
 const SIGNATURE_NAME = new RegExp(
   `\\b(?:By|Name|Signed|Signature)[^\\S\\r\\n]*:[^\\S\\r\\n]*(${PERSON_WORD}(?:${SP}[A-Z]\\.)?(?:${SP}${PERSON_WORD}){1,2})`,

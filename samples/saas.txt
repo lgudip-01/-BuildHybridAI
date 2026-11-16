@@ -1,0 +1,20 @@
+SOFTWARE AS A SERVICE AGREEMENT
+
+This Software as a Service Agreement is effective 2026-05-01 between Halcyon Cloud Systems GmbH ("Provider") and Verdant Logistics B.V. ("Customer").
+
+1. Subscription. Provider grants Customer a non-exclusive right to use the Halcyon Fleet platform for up to 250 named users during the Term.
+
+2. Fees. Customer will pay EUR 84,000 per year, invoiced annually in advance. Late payments accrue interest at 1% per month.
+
+3. Service Levels. Provider will make the platform available 99.9% of each calendar month. If it misses this target, Customer receives a service credit of 5% of the monthly fee.
+
+4. Data Protection. Provider processes personal data only on Customer's documented instructions and in line with the GDPR. Provider's data protection officer is Johanna Weiss (dpo@halcyon-cloud.de).
+
+5. Limitation of Liability. Except for breaches of confidentiality, each party's total liability is capped at the fees paid in the 12 months before the claim.
+
+6. Term and Termination. The initial Term is 36 months and renews for 12-month periods unless either party gives 90 days' notice.
+
+7. Governing Law. This Agreement is governed by the laws of the Netherlands, and the courts of Amsterdam have exclusive jurisdiction.
+
+For Halcyon Cloud Systems GmbH: Stefan Brandt, Managing Director
+For Verdant Logistics B.V.: Eline de Vries, Chief Operating Officer

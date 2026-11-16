@@ -1,0 +1,17 @@
+{
+  "mask": [
+    "Samuel Osei",
+    "Quillfeather",
+    "Anika",
+    "Bose",
+    "April 6, 2026",
+    "$148,000",
+    "recruiting@quillfeather.io",
+    "March 20, 2026",
+    "+1 646-555-0193",
+    "QF-20418"
+  ],
+  "keep": ["the Company", "Senior Data Engineer", "15%", "12 months", "4 years", "United States"],
+  "fallbackMisses": ["Quillfeather", "Anika", "QF-20418"],
+  "fallbackOvermasks": ["Senior Data Engineer", "United States"]
+}

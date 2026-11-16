@@ -1,0 +1,21 @@
+{
+  "mask": [
+    "$25,000.00",
+    "June 12, 2026",
+    "Rafael",
+    "Mendoza",
+    "Isabel",
+    "Coastal Ridge",
+    "Twenty-Five Thousand Dollars",
+    "$489.15",
+    "1st day of August, 2026",
+    "3301 8842 0067",
+    "322271627",
+    "509 Juniper Court",
+    "95818",
+    "621-48-3307"
+  ],
+  "keep": ["Borrower", "Lender", "6.5%", "10 days", "without penalty"],
+  "fallbackMisses": [],
+  "fallbackOvermasks": []
+}

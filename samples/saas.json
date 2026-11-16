@@ -1,0 +1,24 @@
+{
+  "mask": [
+    "2026-05-01",
+    "Halcyon",
+    "Verdant",
+    "EUR 84,000",
+    "Johanna Weiss",
+    "dpo@halcyon-cloud.de",
+    "Stefan Brandt",
+    "Eline de Vries"
+  ],
+  "keep": [
+    "Provider",
+    "Customer",
+    "GDPR",
+    "99.9%",
+    "36 months",
+    "90 days",
+    "Netherlands",
+    "Amsterdam"
+  ],
+  "fallbackMisses": ["Verdant", "Eline de Vries"],
+  "fallbackOvermasks": []
+}

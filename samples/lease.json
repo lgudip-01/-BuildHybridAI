@@ -1,0 +1,21 @@
+{
+  "mask": [
+    "15th day of January, 2026",
+    "Margaret",
+    "O'Connell",
+    "Wei Zhang",
+    "Lucia Fernandez",
+    "2210 Cedar Avenue",
+    "97214",
+    "February 1, 2026",
+    "January 31, 2027",
+    "$2,150",
+    "$75",
+    "Two Thousand One Hundred Fifty Dollars",
+    "(503) 555-0187",
+    "margaret.oconnell@gmail.com"
+  ],
+  "keep": ["Landlord", "Tenants", "5 days", "21 days", "Oregon"],
+  "fallbackMisses": ["97214"],
+  "fallbackOvermasks": ["Oregon"]
+}

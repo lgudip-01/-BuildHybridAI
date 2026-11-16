@@ -68,6 +68,13 @@ describe('findNames', () => {
     ]);
   });
 
+  it('reads names with an apostrophe or hyphen', () => {
+    expect(names("Call Ms. O'Connell or Mr. Smith-Jones.", false)).toEqual([
+      ['PERSON', "Ms. O'Connell"],
+      ['PERSON', 'Mr. Smith-Jones'],
+    ]);
+  });
+
   it('does not run a name across a sentence end', () => {
     expect(names('Governed by the laws of New York. Notices must be written.', true)).toEqual([['NAME', 'New York']]);
   });

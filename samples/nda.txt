@@ -1,0 +1,23 @@
+MUTUAL NON-DISCLOSURE AGREEMENT
+
+This Mutual Non-Disclosure Agreement (the "Agreement") is entered into as of March 3, 2026 by and between Northwind Analytics, Inc., a Delaware corporation ("Northwind"), and Bellhaven Robotics LLC, a California limited liability company ("Bellhaven").
+
+1. Purpose. The parties wish to evaluate a possible joint venture (the "Purpose"). Each party may disclose Confidential Information to the other for the Purpose only.
+
+2. Obligations. The Receiving Party shall protect Confidential Information with at least the same degree of care it uses for its own, and no less than reasonable care. Northwind's obligations survive for 3 years after termination.
+
+3. Exclusions. Confidential Information does not include information that is or becomes public through no fault of the Receiving Party.
+
+4. Notices. Notices to Northwind go to Priya Raman, General Counsel, at legal@northwind-analytics.com or 1180 Harbor Boulevard, Suite 400, Oakland, CA 94607. Notices to Bellhaven go to Mr. Tomas Lindqvist at (415) 555-0142.
+
+5. Remedies. A breach may cause irreparable harm, and the disclosing party may seek injunctive relief. BELLHAVEN acknowledges that damages alone may not be adequate.
+
+6. Governing Law. This Agreement is governed by the laws of the State of Delaware.
+
+NORTHWIND ANALYTICS, INC.
+By: Priya Raman
+Title: General Counsel
+
+BELLHAVEN ROBOTICS LLC
+By: Tomas Lindqvist
+Title: Chief Executive Officer
