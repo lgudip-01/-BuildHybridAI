@@ -1,6 +1,6 @@
 # Web app and extension
 
-**Owner:** TBD
+**Owner:** Sai Nagadheeraj Kamsani
 
 ## What you build
 
