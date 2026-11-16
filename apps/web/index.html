@@ -3,33 +3,11 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Clause Guard: privacy engine test</title>
-    <style>
-      body { font: 15px/1.5 system-ui, sans-serif; max-width: 860px; margin: 0 auto; padding: 16px; background: #fff; color: #111; }
-      textarea { width: 100%; box-sizing: border-box; min-height: 220px; font: 13px/1.5 ui-monospace, monospace; }
-      pre { white-space: pre-wrap; background: #f4f4f5; padding: 12px; border-radius: 6px; font-size: 13px; }
-      button { font: inherit; padding: 6px 14px; margin-right: 8px; }
-      .row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 12px 0; }
-    </style>
+    <meta name="color-scheme" content="dark" />
+    <title>Clause Guard</title>
   </head>
   <body>
-    <h1>Privacy engine test</h1>
-    <div class="row">
-      On-device model: <strong id="status">checking…</strong>
-      <button id="download" hidden>Download model</button>
-      <progress id="progress" max="1" value="0" hidden></progress>
-    </div>
-    <p>Paste a contract. Each blank-line-separated paragraph is one clause.</p>
-    <textarea id="contract">This Mutual Non-Disclosure Agreement is made on January 1, 2026 between Acme Corp ("the Company") and Dana Reyes ("Contractor").
-
-Acme's payment of $12,500 is due to Reyes at dana@reyes.dev within 30 days. Wire to routing 021000021, account 1234 5678 9012.
-
-Notices go to 42 Elm Street, Suite 300, Springfield, NJ 07001. Call (555) 123-4567.
-
-By: Dana Reyes
-Name: Michael Chen, CEO, Acme Corp</textarea>
-    <div class="row"><button id="run">Mask</button></div>
-    <pre id="output">Results show here.</pre>
-    <script type="module" src="/src/main.ts"></script>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
