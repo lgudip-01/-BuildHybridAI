@@ -17,5 +17,5 @@
   ],
   "keep": ["Landlord", "Tenants", "5 days", "21 days", "Oregon"],
   "fallbackMisses": [],
-  "fallbackOvermasks": ["Oregon"]
+  "fallbackOvermasks": []
 }

@@ -89,6 +89,12 @@ const SIGNATURE_NAME = new RegExp(
   'dg',
 );
 const CAPITALIZED_PHRASE = new RegExp(`\\b${NAME_WORD}(?:${SP}(?:(?:of|and|&)${SP}|${PARTICLE})${NAME_WORD}){1,4}`, 'g');
+// Capitalized phrases that are job titles or jurisdictions. They identify no one, and the cloud model needs them.
+const JOB_TITLE = new RegExp(
+  '^(?:Head|VP|Director|Chief) of\\s|\\b(?:Officer|Counsel|Engineer|Director|Manager|President|Secretary|Treasurer|Analyst|Designer|Developer|Architect|Scientist|Accountant|Attorney)s?$',
+);
+const JURISDICTION =
+  /^(?:(?:State|Commonwealth|Province|Republic|District) of\s.+|United States(?: of America)?|United Kingdom|European Union|United Arab Emirates|New Zealand|South Africa|Hong Kong|New (?:York|Jersey|Mexico|Hampshire)|(?:North|South) (?:Carolina|Dakota)|West Virginia|Rhode Island)$/;
 // The short form a contract defines for a name: Northwind Analytics, Inc. ("Northwind").
 const DEFINED_TERM = /\(\s*(?:the\s+)?["“]([^"”\n]{2,60})["”]\s*\)/g;
 
@@ -144,7 +150,8 @@ export function findNames(text: string, broad: boolean): Span[] {
   }
   return spans
     .map((s) => trimLeadingArticle(text, s))
-    .filter((s) => !isGeneric(stripOrgSuffix(s.value)));
+    .filter((s) => !isGeneric(stripOrgSuffix(s.value)))
+    .filter((s) => s.kind !== 'NAME' || !(JOB_TITLE.test(s.value) || JURISDICTION.test(s.value)));
 }
 
 /** Quoted defined terms, such as "Northwind" in `("Northwind")`. Most are roles ("Client"); mask.ts keeps only short forms of a found name. */

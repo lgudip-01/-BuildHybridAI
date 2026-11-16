@@ -90,7 +90,14 @@ describe('findNames', () => {
   });
 
   it('does not run a name across a sentence end', () => {
-    expect(names('Governed by the laws of New York. Notices must be written.', true)).toEqual([['NAME', 'New York']]);
+    expect(names('Signed by Maria Lopez. Notices must be written.', true)).toEqual([['NAME', 'Maria Lopez']]);
+  });
+
+  it('keeps job titles and jurisdictions in broad mode', () => {
+    const text =
+      'Hannah Lee, General Counsel, hires a Senior Data Engineer and a Head of Product under the laws of the State of Oregon, ' +
+      'New York, and the United States.';
+    expect(names(text, true)).toEqual([['NAME', 'Hannah Lee']]);
   });
 
   it('skips role words like "the Company"', () => {

@@ -12,5 +12,5 @@
   ],
   "keep": ["Delaware", "Confidential Information", "Receiving Party", "3 years", "General Counsel"],
   "fallbackMisses": [],
-  "fallbackOvermasks": ["General Counsel"]
+  "fallbackOvermasks": []
 }
