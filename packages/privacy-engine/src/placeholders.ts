@@ -1,4 +1,4 @@
-import type { EntityKind, LedgerEntry } from '../types';
+import type { EntityKind, LedgerEntry } from '@clause-guard/core/types';
 
 export const PLACEHOLDER = /\[[A-Z]+_[A-Z0-9]+\]/g;
 

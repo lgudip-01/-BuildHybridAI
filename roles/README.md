@@ -74,7 +74,7 @@ interface AiBridge {
 }
 ```
 
-**Privacy engine entry points** (in `packages/core/src/privacy/`):
+**Privacy engine entry points** (in `packages/privacy-engine/src/`):
 
 ```ts
 mask(docId: string, clauses: Clause[], bridge: AiBridge): Promise<MaskResult>   // mask.ts
@@ -85,12 +85,13 @@ classify(bridge: AiBridge, clauses: Clause[]): Promise<ClauseType[]>            
 ## Repo layout
 
 ```
-packages/core/       Shared TypeScript: types, documents, privacy engine
-packages/ui/         Shared React components
-apps/web/            Vite web app (also the build that Capacitor wraps)
-apps/extension/      Chrome extension (Manifest V3 side panel)
-apps/mobile/         Capacitor project: android/ and ios/ plus the native AI bridge plugin
-samples/             Public sample contracts and their expected masks
+packages/core/            Shared TypeScript: types and documents
+packages/privacy-engine/  Masking, leak check, vault, unmasking (Privacy engine role)
+packages/ui/              Shared React components
+apps/web/                 Vite web app (also the build that Capacitor wraps)
+apps/extension/           Chrome extension (Manifest V3 side panel)
+apps/mobile/              Capacitor project: android/ and ios/ plus the native AI bridge plugin
+samples/                  Public sample contracts and their expected masks
 ```
 
 ## Timeline

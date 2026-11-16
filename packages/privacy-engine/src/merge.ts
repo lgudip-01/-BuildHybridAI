@@ -1,4 +1,4 @@
-import type { EntityKind } from '../types';
+import type { EntityKind } from '@clause-guard/core/types';
 import { isGeneric, stripOrgSuffix, type Span } from './regex';
 
 /** A name or address, plus the other ways it is written in the contract ("Acme Corp" → "Acme"). */

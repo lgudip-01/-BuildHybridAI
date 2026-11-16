@@ -1,7 +1,7 @@
 import 'fake-indexeddb/auto';
 import { openDB } from 'idb';
 import { describe, expect, it } from 'vitest';
-import type { AiBridge, Analysis, Clause, OnDeviceStatus } from '../types';
+import type { AiBridge, Analysis, Clause, OnDeviceStatus } from '@clause-guard/core/types';
 import { leakCheck } from './leakCheck';
 import { mask } from './mask';
 import { classify } from './onDevice';

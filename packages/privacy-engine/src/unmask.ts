@@ -1,4 +1,4 @@
-import type { Analysis } from '../types';
+import type { Analysis } from '@clause-guard/core/types';
 import { PLACEHOLDER } from './placeholders';
 import { loadVault } from './vault';
 

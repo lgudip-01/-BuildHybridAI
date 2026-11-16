@@ -27,7 +27,7 @@ The Android and iOS apps. They wrap the shared React UI, and each needs a small 
 ## Architecture
 
 ```
-shared React UI + packages/core  (inside the Capacitor WebView)
+shared React UI + packages/core + privacy-engine  (inside the Capacitor WebView)
             │
             │  AiBridge calls go through a Capacitor plugin: "ClauseGuardAI"
             ▼

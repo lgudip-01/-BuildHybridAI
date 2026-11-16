@@ -1,4 +1,4 @@
-import type { EntityKind } from '../types';
+import type { EntityKind } from '@clause-guard/core/types';
 
 export type Span = { start: number; end: number; value: string; kind: EntityKind };
 

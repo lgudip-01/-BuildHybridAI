@@ -1,4 +1,4 @@
-import type { AiBridge, Clause, MaskResult } from '../types';
+import type { AiBridge, Clause, MaskResult } from '@clause-guard/core/types';
 import { leakCheck } from './leakCheck';
 import { dedupeEntities, findOccurrences, normalize, resolveOverlaps, toEntity, type Candidate, type Entity } from './merge';
 import { findEntities } from './onDevice';

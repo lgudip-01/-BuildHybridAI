@@ -1,4 +1,4 @@
-import { CLAUSE_TYPES, type AiBridge, type Clause, type ClauseType } from '../types';
+import { CLAUSE_TYPES, type AiBridge, type Clause, type ClauseType } from '@clause-guard/core/types';
 import { findOccurrences, toEntity, type Entity } from './merge';
 import { isGeneric } from './regex';
 

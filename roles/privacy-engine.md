@@ -19,7 +19,7 @@ The shared TypeScript code that makes sure no sensitive detail reaches the cloud
 
 | Part | Tool |
 | --- | --- |
-| Language | TypeScript (in `packages/core/src/privacy/`) |
+| Language | TypeScript (in `packages/privacy-engine/src/`) |
 | On-device AI | `AiBridge.onDevice()` (Gemini Nano 4 on Chrome and Android, Apple Foundation Models on iOS, all in `ONLY_ON_DEVICE` mode) |
 | Structured output | A JSON schema on the on-device call, so it returns a list of entities |
 | Pattern matching | Plain regex |

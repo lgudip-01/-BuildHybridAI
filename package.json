@@ -6,7 +6,7 @@
     "apps/*"
   ],
   "scripts": {
-    "test": "npm test -w @clause-guard/core",
+    "test": "npm test -w @clause-guard/privacy-engine",
     "dev": "npm run dev -w @clause-guard/web"
   }
 }

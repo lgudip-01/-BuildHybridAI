@@ -31,7 +31,7 @@ apps/web  ─┐
 apps/extension (side panel) ─┼─► packages/ui (shared screens and components)
 apps/mobile (Capacitor) ─────┘          │
                                         ▼
-                   packages/core: documents → mask → analyze → unmask
+                   packages/core + privacy-engine: documents → mask → analyze → unmask
                                         │
                      Results screen ◄───┘  Analysis[] + ledger + ranOn
 

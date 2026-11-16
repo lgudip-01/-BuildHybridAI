@@ -1,4 +1,4 @@
-import type { CleanText, Leak, MaskedClause } from '../types';
+import type { CleanText, Leak, MaskedClause } from '@clause-guard/core/types';
 import { findOccurrences } from './merge';
 import { PLACEHOLDER } from './placeholders';
 import { findNames, findPatterns } from './regex';

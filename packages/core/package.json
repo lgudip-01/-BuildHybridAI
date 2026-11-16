@@ -7,15 +7,9 @@
     "./*": "./src/*.ts"
   },
   "scripts": {
-    "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },
-  "dependencies": {
-    "idb": "^8.0.4"
-  },
   "devDependencies": {
-    "fake-indexeddb": "^6.2.8",
-    "typescript": "^7.0.2",
-    "vitest": "^5.1.0"
+    "typescript": "^7.0.2"
   }
 }
