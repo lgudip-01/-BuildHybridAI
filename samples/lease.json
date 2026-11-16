@@ -16,6 +16,6 @@
     "margaret.oconnell@gmail.com"
   ],
   "keep": ["Landlord", "Tenants", "5 days", "21 days", "Oregon"],
-  "fallbackMisses": ["97214"],
+  "fallbackMisses": [],
   "fallbackOvermasks": ["Oregon"]
 }

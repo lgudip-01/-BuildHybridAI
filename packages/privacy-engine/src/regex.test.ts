@@ -25,6 +25,10 @@ describe('findPatterns', () => {
     expect(found(text)).toContainEqual(['DATE', value]);
   });
 
+  it('finds a labelled ID', () => {
+    expect(found('Employee ID: QF-20418')).toContainEqual(['ACCOUNT', 'QF-20418']);
+  });
+
   it('finds emails, phone numbers, and account numbers', () => {
     const text =
       'Email legal@acme-corp.com or call (555) 123-4567 or +1 555-987-6543. ' +
@@ -58,6 +62,16 @@ describe('findNames', () => {
   it('finds street addresses', () => {
     expect(names('Notices go to 42 Elm Street, Suite 300, Springfield, NJ 07001.', false)).toEqual([
       ['ADDRESS', '42 Elm Street, Suite 300, Springfield, NJ 07001'],
+    ]);
+  });
+
+  it('finds apartment addresses, Dutch company suffixes, and surname particles', () => {
+    expect(names('Rent the unit at 2210 Cedar Avenue, Apt 5B, Portland, OR 97214.', false)).toEqual([
+      ['ADDRESS', '2210 Cedar Avenue, Apt 5B, Portland, OR 97214'],
+    ]);
+    expect(names('Verdant Logistics B.V. agrees.\nBy: Eline de Vries', false)).toEqual([
+      ['ORG', 'Verdant Logistics B.V.'],
+      ['PERSON', 'Eline de Vries'],
     ]);
   });
 

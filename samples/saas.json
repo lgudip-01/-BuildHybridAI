@@ -19,6 +19,6 @@
     "Netherlands",
     "Amsterdam"
   ],
-  "fallbackMisses": ["Verdant", "Eline de Vries"],
+  "fallbackMisses": [],
   "fallbackOvermasks": []
 }

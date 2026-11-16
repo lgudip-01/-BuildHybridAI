@@ -12,6 +12,6 @@
     "QF-20418"
   ],
   "keep": ["the Company", "Senior Data Engineer", "15%", "12 months", "4 years", "United States"],
-  "fallbackMisses": ["Quillfeather", "Anika", "QF-20418"],
+  "fallbackMisses": [],
   "fallbackOvermasks": ["Senior Data Engineer", "United States"]
 }

@@ -23,8 +23,10 @@ export function toEntity(kind: EntityKind, value: string, base: 'person' | 'org'
   if (base === 'person') {
     const name = trimmed.replace(TITLE, '');
     const words = name.split(/\s+/);
+    const [first] = words;
     const last = words.at(-1);
     variants.add(name);
+    if (words.length > 1 && first && first.length >= 3 && !first.endsWith('.')) variants.add(first);
     if (words.length > 1 && last && last.length >= 3) variants.add(last);
   }
   return { kind, value: trimmed, variants: [...variants] };
@@ -59,13 +61,20 @@ export function dedupeEntities(entities: Entity[]): Entity[] {
   return merged;
 }
 
-/** Every whole-word, case-insensitive occurrence of `needle`, tolerant of line breaks inside it. */
+/**
+ * Every whole-word, case-insensitive occurrence of `needle`, tolerant of line breaks inside it.
+ * A one-word capitalized needle only matches where it is capitalized, so the name "Will" or "Price"
+ * still finds "WILL" but leaves "will" and "price" alone.
+ */
 export function findOccurrences(text: string, needle: string): { start: number; end: number }[] {
   const trimmed = needle.trim();
   if (!trimmed) return [];
+  const capitalOnly = !/\s/.test(trimmed) && /^\p{Lu}/u.test(trimmed);
   const pattern = trimmed.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\s+/g, '\\s+');
   const re = new RegExp(`(?<![\\p{L}\\p{N}])${pattern}(?![\\p{L}\\p{N}])`, 'giu');
-  return [...text.matchAll(re)].map((m) => ({ start: m.index, end: m.index + m[0].length }));
+  return [...text.matchAll(re)]
+    .filter((m) => !capitalOnly || /^\p{Lu}/u.test(m[0]))
+    .map((m) => ({ start: m.index, end: m.index + m[0].length }));
 }
 
 /** Keeps non-overlapping spans. The longest wins; on a tie, a pattern match beats a name. */

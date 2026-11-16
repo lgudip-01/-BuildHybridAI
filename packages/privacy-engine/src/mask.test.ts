@@ -83,6 +83,20 @@ describe('mask', () => {
     expect(result.clauses[0]!.text).toContain('[NAME_1]');
   });
 
+  it('gives a defined short form and a first name the placeholder of the full name, but leaves the word "will"', async () => {
+    const texts = [
+      'This Agreement is between Northwind Analytics, Inc. ("Northwind") and Mr. Will Turner ("Consultant").',
+      'Northwind will pay Will within 30 days.',
+    ];
+    const result = await mask('doc-5', texts.map((text, index) => ({ id: `c${index + 1}`, index, text })), fakeBridge([], { status: 'unavailable' }));
+    if (!result.ok) throw new Error(JSON.stringify(result.leaks));
+
+    expect(result.clauses.map((c) => c.text)).toEqual([
+      'This Agreement is between [ORG_1] ("[ORG_1]") and [PERSON_1] ("Consultant").',
+      '[ORG_1] will pay [PERSON_1] within 30 days.',
+    ]);
+  });
+
   it('falls back the same way when the model answers with garbage', async () => {
     const result = await mask('doc-4', clauses, fakeBridge([], { answer: 'Sure! Here are the names:' }));
     if (!result.ok) throw new Error('blocked');

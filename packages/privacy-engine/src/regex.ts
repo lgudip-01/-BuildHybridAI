@@ -41,7 +41,7 @@ const PATTERNS: Pattern[] = [
   // A labelled number of any length, e.g. "Account No. 4417".
   {
     kind: 'ACCOUNT',
-    re: /\b(?:account|acct|routing|ABA|IBAN|SWIFT|BIC|SSN|EIN|TIN|tax\s+ID|card)(?:\s+(?:no\.?|number|num\.?|#))?\s*[:#]?\s*([A-Z0-9-]*\d[A-Z0-9-]*(?:\s[A-Z0-9-]*\d[A-Z0-9-]*)*)/dgi,
+    re: /\b(?:account|acct|routing|ABA|IBAN|SWIFT|BIC|SSN|EIN|TIN|ID|passport|card)(?:\s+(?:no\.?|number|num\.?|#))?\s*[:#]?\s*([A-Z0-9-]*\d[A-Z0-9-]*(?:\s[A-Z0-9-]*\d[A-Z0-9-]*)*)/dgi,
     group: 1,
   },
 ];
@@ -60,7 +60,7 @@ const LEGAL_WORDS = new Set([
   'independent', 'relationship', 'compensation', 'expenses', 'taxes', 'insurance', 'records', 'audit', 'remedies', 'survival',
 ]);
 
-const ORG_SUFFIXES = ['Inc', 'LLC', 'L.L.C', 'Ltd', 'Limited', 'Corp', 'Corporation', 'Co', 'Company', 'LLP', 'LP', 'PLC', 'GmbH', 'AG', 'BV', 'S.A'];
+const ORG_SUFFIXES = ['Inc', 'LLC', 'L.L.C', 'Ltd', 'Limited', 'Corp', 'Corporation', 'Co', 'Company', 'LLP', 'LP', 'PLC', 'GmbH', 'AG', 'BV', 'B.V', 'N.V', 'S.A', 'SAS', 'Pty'];
 const ORG_SUFFIX = ORG_SUFFIXES.flatMap((s) => [s, s.toUpperCase()])
   .map((s) => s.replace(/\./g, '\\.'))
   .join('|');
@@ -72,7 +72,7 @@ const ORG = new RegExp(`\\b(?:${NAME_WORD}[^\\S\\r\\n]+){0,5}${NAME_WORD},?[^\\S
 // "42 Elm Street, Suite 300, Springfield, NJ 07001"
 const STREET_ADDRESS = new RegExp(
   `\\b\\d{1,6}\\s+(?:${NAME_WORD}\\s+){1,4}(?:${STREET_TYPE})\\b\\.?` +
-    `(?:,?\\s+(?:Suite|Ste|Unit|Floor|Fl)\\.?\\s+\\w+)?` +
+    `(?:,?\\s+(?:(?:Suite|Ste|Unit|Floor|Fl|Apt|Apartment|Room|Rm)\\.?\\s+|#\\s*)\\w+)?` +
     `(?:,\\s+${NAME_WORD}(?:\\s+${NAME_WORD})?)?(?:,?\\s+[A-Z]{2})?(?:\\s+\\d{5}(?:-\\d{4})?)?`,
   'g',
 );
@@ -80,12 +80,17 @@ const STREET_ADDRESS = new RegExp(
 const SP = '[^\\S\\r\\n]+';
 // Dana, O'Connell, McKay, Smith-Jones
 const PERSON_WORD = "[A-Z][a-z]*(?:['’-]?[A-Z]?[a-z]+)+";
-const TITLED_PERSON = new RegExp(`\\b(?:Mr|Mrs|Ms|Mx|Dr|Prof)\\.?${SP}${PERSON_WORD}(?:${SP}${PERSON_WORD}){0,2}`, 'g');
+// Lowercase surname particles: Eline de Vries, Jan van der Berg.
+const PARTICLE = `(?:(?:de|del|der|den|van|von|da|di|du|la|le)${SP}){0,2}`;
+const NEXT_PERSON_WORD = `${SP}${PARTICLE}${PERSON_WORD}`;
+const TITLED_PERSON = new RegExp(`\\b(?:Mr|Mrs|Ms|Mx|Dr|Prof)\\.?${SP}${PERSON_WORD}(?:${NEXT_PERSON_WORD}){0,2}`, 'g');
 const SIGNATURE_NAME = new RegExp(
-  `\\b(?:By|Name|Signed|Signature)[^\\S\\r\\n]*:[^\\S\\r\\n]*(${PERSON_WORD}(?:${SP}[A-Z]\\.)?(?:${SP}${PERSON_WORD}){1,2})`,
+  `\\b(?:By|Name|Signed|Signature)[^\\S\\r\\n]*:[^\\S\\r\\n]*(${PERSON_WORD}(?:${SP}[A-Z]\\.)?(?:${NEXT_PERSON_WORD}){1,2})`,
   'dg',
 );
-const CAPITALIZED_PHRASE = new RegExp(`\\b${NAME_WORD}(?:${SP}(?:(?:of|and|&)${SP})?${NAME_WORD}){1,4}`, 'g');
+const CAPITALIZED_PHRASE = new RegExp(`\\b${NAME_WORD}(?:${SP}(?:(?:of|and|&)${SP}|${PARTICLE})${NAME_WORD}){1,4}`, 'g');
+// The short form a contract defines for a name: Northwind Analytics, Inc. ("Northwind").
+const DEFINED_TERM = /\(\s*(?:the\s+)?["“]([^"”\n]{2,60})["”]\s*\)/g;
 
 const TRAILING_ORG_SUFFIX = new RegExp(`[,\\s]+(?:${ORG_SUFFIX})\\.?$`);
 
@@ -140,6 +145,11 @@ export function findNames(text: string, broad: boolean): Span[] {
   return spans
     .map((s) => trimLeadingArticle(text, s))
     .filter((s) => !isGeneric(stripOrgSuffix(s.value)));
+}
+
+/** Quoted defined terms, such as "Northwind" in `("Northwind")`. Most are roles ("Client"); mask.ts keeps only short forms of a found name. */
+export function findDefinedTerms(text: string): string[] {
+  return [...text.matchAll(DEFINED_TERM)].map((m) => m[1]!.trim());
 }
 
 function trimLeadingArticle(text: string, span: Span): Span {

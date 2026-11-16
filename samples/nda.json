@@ -11,6 +11,6 @@
     "(415) 555-0142"
   ],
   "keep": ["Delaware", "Confidential Information", "Receiving Party", "3 years", "General Counsel"],
-  "fallbackMisses": ["Northwind", "Bellhaven"],
+  "fallbackMisses": [],
   "fallbackOvermasks": ["General Counsel"]
 }

@@ -3,7 +3,7 @@ import { leakCheck } from './leakCheck';
 import { dedupeEntities, findOccurrences, normalize, resolveOverlaps, toEntity, type Candidate, type Entity } from './merge';
 import { findEntities } from './onDevice';
 import { PlaceholderRegistry } from './placeholders';
-import { findNames, findPatterns, type Span } from './regex';
+import { findDefinedTerms, findNames, findPatterns, type Span } from './regex';
 import { saveVault } from './vault';
 
 /**
@@ -26,6 +26,10 @@ export async function mask(docId: string, clauses: Clause[], bridge: AiBridge): 
       needsReview = true;
       found.push(...findNames(clause.text, true).map(spanToEntity));
     }
+  }
+  // A defined short form, as in Northwind Analytics, Inc. ("Northwind"), is masked like the full name.
+  for (const term of clauses.flatMap((c) => findDefinedTerms(c.text))) {
+    found.find((e) => normalize(e.value).startsWith(`${normalize(term)} `))?.variants.push(term);
   }
   const entities = dedupeEntities(found);
 

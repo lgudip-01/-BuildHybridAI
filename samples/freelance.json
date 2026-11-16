@@ -17,6 +17,6 @@
     "47-3920185"
   ],
   "keep": ["Client", "Contractor", "15 days", "14 days", "work made for hire"],
-  "fallbackMisses": ["Hannah"],
+  "fallbackMisses": [],
   "fallbackOvermasks": []
 }
