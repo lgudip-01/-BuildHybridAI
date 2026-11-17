@@ -10,6 +10,18 @@ const KEY_ID = 'vault-key';
 
 let dbPromise: Promise<IDBPDatabase> | undefined;
 let keyPromise: Promise<CryptoKey> | undefined;
+let externalKey: (() => Promise<Uint8Array>) | undefined;
+
+/**
+ * Use a key held outside the browser, such as the iOS Keychain or Android Keystore, instead of one stored in
+ * IndexedDB. Mobile WebViews can't store a CryptoKey in IndexedDB, and the OS keystore is the stronger home for
+ * it anyway. `source` returns the 32 raw key bytes; the key is imported into the page as non-extractable.
+ * Call this once at startup, before the first mask or unmask.
+ */
+export function useExternalKey(source: (() => Promise<Uint8Array>) | undefined): void {
+  externalKey = source;
+  keyPromise = undefined;
+}
 
 function db(): Promise<IDBPDatabase> {
   dbPromise ??= openDB(DB_NAME, 1, {
@@ -24,6 +36,11 @@ function db(): Promise<IDBPDatabase> {
 // One AES-GCM key per device. It is non-extractable: the browser can use it, but no code can read it out.
 function vaultKey(): Promise<CryptoKey> {
   keyPromise ??= (async () => {
+    if (externalKey) {
+      const raw = await externalKey();
+      if (raw.byteLength !== 32) throw new Error('The vault key from the device keystore must be 32 bytes.');
+      return crypto.subtle.importKey('raw', raw as Uint8Array<ArrayBuffer>, 'AES-GCM', false, ['encrypt', 'decrypt']);
+    }
     const database = await db();
     const existing: CryptoKey | undefined = await database.get('keys', KEY_ID);
     if (existing) return existing;
