@@ -340,9 +340,9 @@ const FEATURES = [
     caveat: `Runs only in real Chrome. Embedded browsers report it as unavailable.`,
     left: ['Android and iOS versions'], code: 'apps/web/src/webBridge.ts' },
 
-  { id: 'classify', name: 'Clause types', slot: 0, row: 2, owner: 'likhil', status: 'partial',
-    does: `Labels each clause on the device, such as payment, termination or liability, so the cloud knows what kind of clause it is reading.`,
-    left: ['Connect it to masking so the type travels with each clause'], code: 'classify() in onDevice.ts' },
+  { id: 'classify', name: 'Clause types', slot: 0, row: 2, owner: 'likhil', status: 'built',
+    does: `Labels each clause on the device, such as payment, termination or liability, so the cloud knows what kind of clause it is reading. The type travels with each masked clause. Without the model, or if labelling fails, clauses go without a type and masking carries on.`,
+    code: 'classify() in onDevice.ts, called by mask()' },
   { id: 'patterns', name: 'Pattern detection', slot: 1, row: 2, owner: 'likhil', status: 'built',
     does: `Finds amounts, dates, emails, phone numbers and account IDs by pattern, plus companies with legal suffixes, titled people, signature names and street addresses.`,
     code: 'regex.ts' },
