@@ -1,6 +1,6 @@
 # Cloud AI and Firebase
 
-**Owner:** Dhruv
+**Owner:** Dhruv Vyas
 
 ## What you build
 

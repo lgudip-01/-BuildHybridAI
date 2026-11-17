@@ -5,7 +5,7 @@ Pick a role, put your name in the roles table in the [main README](../README.md)
 | Role | Overview | Name |
 | --- | --- | --- |
 | Privacy engine | [privacy-engine.md](privacy-engine.md) | Likhil Gudipati |
-| Cloud AI and Firebase | [cloud-ai-firebase.md](cloud-ai-firebase.md) | Dhruv |
+| Cloud AI and Firebase | [cloud-ai-firebase.md](cloud-ai-firebase.md) | Dhruv Vyas |
 | Web app and extension | [web-and-extension.md](web-and-extension.md) | Sai Nagadheeraj Kamsani |
 | Mobile (Android and iOS) | [mobile.md](mobile.md) | TBD |
 | Documents, testing, and demo | [documents-testing-demo.md](documents-testing-demo.md) | TBD |
