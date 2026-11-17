@@ -50,12 +50,31 @@ export type Analysis = {
   questions: string[];
 };
 
+// Only the privacy engine's approve() creates a valid runtime batch.
+export type ApprovedBatch = {
+  readonly docId: string;
+  readonly clauses: readonly MaskedClause[];
+};
+
+export type ClauseFailure = {
+  clauseId: string;
+  reason: 'unknown_placeholder' | 'invalid_response' | 'model_error';
+  detail: string;
+};
+
+export type AnalyzeResult = {
+  docId: string;
+  results: Analysis[];
+  failed: ClauseFailure[];
+  ranOn: 'cloud' | 'device';
+};
+
 export type OnDeviceStatus = 'available' | 'downloadable' | 'downloading' | 'unavailable';
 
 export interface AiBridge {
   onDeviceStatus(): Promise<OnDeviceStatus>;
   // ONLY_ON_DEVICE. The only call allowed to see raw contract text.
   onDevice(prompt: string, schema?: object): Promise<string>;
-  // PREFER_IN_CLOUD. Accepts leak-checked text only.
-  analyze(clauses: MaskedClause[]): Promise<{ results: Analysis[]; ranOn: 'cloud' | 'device' }>;
+  // PREFER_IN_CLOUD. Requires the privacy engine's runtime approval guard.
+  analyze(batch: ApprovedBatch): Promise<AnalyzeResult>;
 }
