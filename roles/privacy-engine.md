@@ -64,9 +64,9 @@ cloud result ──► 7. Unmask: replace only known placeholders, ignore made-u
 
 ## What teammates get from you
 
-- `mask(docId, clauses, bridge) → MaskResult`, which feeds the cloud call and the privacy ledger. If `needsReview` is true, the UI must get the user's approval before sending.
+- `mask(docId, clauses, bridge) → MaskResult`, which feeds the cloud call and the privacy ledger. If `needsReview` is true, the UI must get the user's approval before sending. When the on-device model is available, each masked clause also carries its `type` for the cloud prompt.
 - `unmask(docId, results) → Analysis[]`, which feeds the UI
-- `classify(bridge, clauses) → ClauseType[]`, which runs on device
+- `classify(bridge, clauses) → ClauseType[]`, which runs on device. `mask` already calls it, so only call it yourself to classify without masking.
 
 ## When there's no on-device model
 

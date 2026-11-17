@@ -81,6 +81,30 @@ describe('mask', () => {
     expect(result.needsReview).toBe(true);
     expect(result.clauses[0]!.text).toContain('[ORG_1]');
     expect(result.clauses[0]!.text).toContain('[NAME_1]');
+    expect(result.clauses.map((c) => c.type)).toEqual([undefined, undefined]);
+  });
+
+  it('labels each masked clause with the type the on-device model gives it', async () => {
+    const result = await mask('doc-7', clauses, fakeBridge(model));
+    if (!result.ok) throw new Error('blocked');
+    expect(result.clauses.map((c) => c.type)).toEqual(['payment', 'payment']);
+  });
+
+  it('still masks, without types, when classification fails', async () => {
+    const working = fakeBridge(model);
+    const bridge: AiBridge = {
+      ...working,
+      onDevice: async (prompt, schema) => {
+        if (prompt.startsWith('Classify')) throw new Error('model busy');
+        return working.onDevice(prompt, schema);
+      },
+    };
+    const result = await mask('doc-8', clauses, bridge);
+    if (!result.ok) throw new Error('blocked');
+
+    expect(result.needsReview).toBe(false);
+    expect(result.clauses[0]!.text).toContain('[PARTY_A]');
+    expect(result.clauses.map((c) => c.type)).toEqual([undefined, undefined]);
   });
 
   it('gives a defined short form and a first name the placeholder of the full name, but leaves the word "will"', async () => {

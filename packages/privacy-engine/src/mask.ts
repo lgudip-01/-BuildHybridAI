@@ -1,14 +1,15 @@
-import type { AiBridge, Clause, MaskResult } from '@clause-guard/core/types';
+import type { AiBridge, Clause, ClauseType, MaskResult } from '@clause-guard/core/types';
 import { leakCheck } from './leakCheck';
 import { dedupeEntities, findOccurrences, normalize, resolveOverlaps, toEntity, type Candidate, type Entity } from './merge';
-import { findEntities } from './onDevice';
+import { classify, findEntities } from './onDevice';
 import { PlaceholderRegistry } from './placeholders';
 import { findDefinedTerms, findNames, findPatterns, type Span } from './regex';
 import { saveVault } from './vault';
 
 /**
  * Masks every clause of one document and leak-checks the result.
- * On success the placeholder map is saved, encrypted, under `docId` for `unmask`.
+ * On success the placeholder map is saved, encrypted, under `docId` for `unmask`,
+ * and each clause carries its type when the on-device model could classify it.
  */
 export async function mask(docId: string, clauses: Clause[], bridge: AiBridge): Promise<MaskResult> {
   const useModel = (await bridge.onDeviceStatus()) === 'available';
@@ -52,8 +53,23 @@ export async function mask(docId: string, clauses: Clause[], bridge: AiBridge): 
   const check = leakCheck(drafts, [...registry.values(), ...entities.flatMap((e) => e.variants)]);
   if (!check.ok) return check;
 
+  const types = useModel ? await clauseTypes(bridge, clauses) : undefined;
   await saveVault(docId, registry.entries());
-  return { ok: true, clauses: check.clauses, ledger: registry.ledger(), needsReview };
+  return {
+    ok: true,
+    clauses: types ? check.clauses.map((clause, i) => ({ ...clause, type: types[i] })) : check.clauses,
+    ledger: registry.ledger(),
+    needsReview,
+  };
+}
+
+/** Types help the cloud read each clause, but masking never depends on them, so a failed call just leaves them out. */
+async function clauseTypes(bridge: AiBridge, clauses: Clause[]): Promise<ClauseType[] | undefined> {
+  try {
+    return await classify(bridge, clauses);
+  } catch {
+    return undefined;
+  }
 }
 
 function spanToEntity(span: Span): Entity {
