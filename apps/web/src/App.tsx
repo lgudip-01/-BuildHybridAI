@@ -5,7 +5,7 @@ import { classify } from '@clause-guard/privacy-engine/onDevice';
 import { PLACEHOLDER } from '@clause-guard/privacy-engine/placeholders';
 import { Download, LoaderCircle, ShieldCheck, ShieldX, TriangleAlert } from 'lucide-react';
 import { useCallback, useEffect, useState, type KeyboardEvent } from 'react';
-import type { WebBridge } from './webBridge';
+import type { AiBridge } from '@clause-guard/core/types';
 
 const SAMPLE_CONTRACT = `This Mutual Non-Disclosure Agreement is made on January 1, 2026 between Acme Corp ("the Company") and Dana Reyes ("Contractor").
 
@@ -62,7 +62,7 @@ function unavailableReason(): string {
   return `Chrome ${chrome} has the Prompt API turned off. Enable chrome://flags/#prompt-api-for-gemini-nano-multimodal-input, then relaunch Chrome.`;
 }
 
-export function App({ bridge }: { bridge: WebBridge }) {
+export function App({ bridge }: { bridge: AiBridge & { downloadModel(onProgress: (fraction: number) => void): Promise<void> } }) {
   const [status, setStatus] = useState<OnDeviceStatus | 'checking'>('checking');
   const [progress, setProgress] = useState<number | null>(null);
   const [contract, setContract] = useState(SAMPLE_CONTRACT);

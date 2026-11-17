@@ -1,0 +1,12 @@
+{
+  "name": "@clause-guard/clause-guard-ai",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Native AiBridge for Clause Guard: Firebase AI Logic on Android (Gemini Nano) and iOS (Apple Foundation Models).",
+  "files": ["android/", "ios/", "Package.swift"],
+  "capacitor": {
+    "ios": { "src": "ios" },
+    "android": { "src": "android" }
+  },
+  "peerDependencies": { "@capacitor/core": "^7.4.0" }
+}
