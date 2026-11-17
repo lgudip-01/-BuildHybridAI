@@ -17,15 +17,15 @@ export async function mask(docId: string, clauses: Clause[], bridge: AiBridge): 
 
   // Names are collected across the whole contract first, so a name the model
   // spots in one clause is also masked in clauses where it missed it.
+  // The broad pattern pass runs even with the model, so a name the model misses is still masked.
   const found: Entity[] = [];
   for (const clause of clauses) {
-    found.push(...findNames(clause.text, !useModel).map(spanToEntity));
+    found.push(...findNames(clause.text, true).map(spanToEntity));
     if (!useModel) continue;
     try {
       found.push(...(await findEntities(bridge, clause.text)));
     } catch {
       needsReview = true;
-      found.push(...findNames(clause.text, true).map(spanToEntity));
     }
   }
   // A defined short form, as in Northwind Analytics, Inc. ("Northwind"), is masked like the full name.

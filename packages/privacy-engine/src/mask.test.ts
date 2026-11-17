@@ -84,6 +84,17 @@ describe('mask', () => {
     expect(result.clauses.map((c) => c.type)).toEqual([undefined, undefined]);
   });
 
+  it('still masks names the on-device model misses', async () => {
+    const texts = ['The landlord rents the unit to Wei Zhang and Lucia Fernandez.', 'Coastal Ridge Lending holds the deposit.'];
+    const result = await mask('doc-9', texts.map((text, index) => ({ id: `c${index + 1}`, index, text })), fakeBridge([]));
+    if (!result.ok) throw new Error(JSON.stringify(result.leaks));
+
+    expect(result.needsReview).toBe(false);
+    const sent = result.clauses.map((c) => c.text).join(' ');
+    for (const name of ['Wei Zhang', 'Lucia Fernandez', 'Coastal Ridge']) expect(sent).not.toContain(name);
+    expect(sent).toContain('The landlord rents the unit to');
+  });
+
   it('labels each masked clause with the type the on-device model gives it', async () => {
     const result = await mask('doc-7', clauses, fakeBridge(model));
     if (!result.ok) throw new Error('blocked');
