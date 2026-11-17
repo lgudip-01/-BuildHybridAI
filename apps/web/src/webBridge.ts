@@ -1,4 +1,5 @@
-import type { AiBridge, OnDeviceStatus } from '@clause-guard/core/types';
+import { analyzeApproved } from './cloudAnalyzer';
+import type { AiBridge, AnalyzeResult, ApprovedBatch, OnDeviceStatus } from '@clause-guard/core/types';
 import {
   getGenerativeModel,
   InferenceMode,
@@ -37,8 +38,8 @@ export class WebBridge implements AiBridge {
     return result.response.text();
   }
 
-  async analyze(): Promise<never> {
-    throw new Error('analyze() is part of the Cloud AI role and is not built yet');
+  analyze(batch: ApprovedBatch): Promise<AnalyzeResult> {
+    return analyzeApproved(this.ai, batch);
   }
 
   private model(schema?: object): GenerativeModel {
