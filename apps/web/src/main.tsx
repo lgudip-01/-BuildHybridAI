@@ -8,11 +8,19 @@ import { StrictMode, type ReactNode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { App } from './App';
 import { initAI } from './firebase';
+import { Capacitor } from '@capacitor/core';
+import { useExternalKey } from '@clause-guard/privacy-engine/vault';
+import { NativeBridge, nativeVaultKey } from './nativeBridge';
 import { WebBridge } from './webBridge';
 
 function start(): ReactNode {
   try {
-    return <App bridge={new WebBridge(initAI())} />;
+    // Phones reach Firebase through the native plugin, so the web SDK is only set up in browsers.
+    const native = Capacitor.isNativePlatform();
+    // The vault key lives in the phone's keystore: WebViews can't store a CryptoKey in IndexedDB.
+    if (native) useExternalKey(nativeVaultKey);
+    const bridge = native ? new NativeBridge() : new WebBridge(initAI());
+    return <App bridge={bridge} />;
   } catch (error) {
     return (
       <main className="setup-error">
