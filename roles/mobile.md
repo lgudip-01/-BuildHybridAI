@@ -1,6 +1,6 @@
 # Mobile (Android and iOS)
 
-**Owner:** TBD (whoever has a Mac should own iOS, so this role can split in two)
+**Owner:** Aarush Goel
 
 ## What you build
 

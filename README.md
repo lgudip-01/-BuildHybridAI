@@ -94,7 +94,7 @@ Each role has a one-page overview in [`roles/`](roles/). Read them and pick one.
 | [**Privacy engine**](roles/privacy-engine.md) | Likhil Gudipati | Pattern and on-device masking, placeholder map, leak check, unmasking |
 | [**Cloud AI and Firebase**](roles/cloud-ai-firebase.md) | Dhruv Vyas | Firebase project, AI Logic and App Check on all platforms, cloud prompt and schema, Hosting |
 | [**Web app and extension**](roles/web-and-extension.md) | Sai Nagadheeraj Kamsani | Shared React UI, Chrome extension, first-run and offline screens |
-| [**Mobile (Android and iOS)**](roles/mobile.md) | TBD | Capacitor apps, native AI bridges in Kotlin and Swift, testing on real phones |
+| [**Mobile (Android and iOS)**](roles/mobile.md) | Aarush Goel | Capacitor apps, native AI bridges in Kotlin and Swift, testing on real phones |
 | [**Documents, testing, and demo**](roles/documents-testing-demo.md) | TBD | PDF/DOCX extraction, clause splitting, sample contracts, demo video, submission |
 
 ---
