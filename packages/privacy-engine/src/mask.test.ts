@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 import type { AiBridge, Analysis, Clause, OnDeviceStatus } from '@clause-guard/core/types';
 import { leakCheck } from './leakCheck';
 import { mask } from './mask';
-import { classify } from './onDevice';
+import { classify, findEntities } from './onDevice';
 import { unmask } from './unmask';
 
 type ModelEntity = { text: string; kind: string; party: boolean };
@@ -177,6 +177,31 @@ describe('unmask', () => {
 
   it('refuses a document it has no vault for', async () => {
     await expect(unmask('missing', [])).rejects.toThrow('No vault');
+  });
+});
+
+describe('findEntities', () => {
+  it('drops role words, section titles and bare places the model reports', async () => {
+    const text = '3. Service Levels. The Tenants, Wei Zhang, rent 2210 Cedar Avenue under the laws of Oregon.';
+    const bridge = fakeBridge([
+      { text: 'Service Levels', kind: 'organization', party: false },
+      { text: 'Tenants', kind: 'organization', party: true },
+      { text: 'Oregon', kind: 'address', party: false },
+      { text: 'Wei Zhang', kind: 'person', party: true },
+      { text: '2210 Cedar Avenue', kind: 'address', party: false },
+    ]);
+    expect((await findEntities(bridge, text)).map((e) => e.value)).toEqual(['Wei Zhang', '2210 Cedar Avenue']);
+  });
+
+  it('drops places of law the model reports as organizations', async () => {
+    const text = 'Halcyon Cloud, a Delaware corporation, agrees that the laws of the Netherlands apply and the courts of Amsterdam decide.';
+    const bridge = fakeBridge([
+      { text: 'Halcyon Cloud', kind: 'organization', party: true },
+      { text: 'Delaware', kind: 'organization', party: false },
+      { text: 'Netherlands', kind: 'organization', party: true },
+      { text: 'Amsterdam', kind: 'organization', party: true },
+    ]);
+    expect((await findEntities(bridge, text)).map((e) => e.value)).toEqual(['Halcyon Cloud']);
   });
 });
 

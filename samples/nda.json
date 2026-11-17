@@ -11,7 +11,7 @@
     "(415) 555-0142"
   ],
   "keep": ["Delaware", "Confidential Information", "Receiving Party", "3 years", "General Counsel"],
-  "types": ["other", "other", ["confidentiality", "other"], "confidentiality", "confidentiality", "other", ["liability", "other"], "governing_law", "other", "other"],
+  "types": [["other", "confidentiality"], "other", ["confidentiality", "other"], "confidentiality", "confidentiality", "other", ["liability", "other"], "governing_law", "other", "other"],
   "fallbackMisses": [],
   "fallbackOvermasks": []
 }

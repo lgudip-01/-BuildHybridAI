@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { findNames, findPatterns } from './regex';
+import { findNames, findPatterns, isGeneric } from './regex';
 
 const found = (text: string) => findPatterns(text).map((s) => [s.kind, s.value]);
 
@@ -102,6 +102,18 @@ describe('findNames', () => {
 
   it('skips role words like "the Company"', () => {
     expect(names('The Company and the Receiving Party agree.', true)).toEqual([]);
+  });
+
+  it('treats roles and document titles as contract vocabulary, plural or not', () => {
+    const vocabulary = ['Tenants', 'Borrower', 'Security Deposit', 'Software as a Service Agreement', 'RESIDENTIAL LEASE AGREEMENT'];
+    expect(vocabulary.filter((v) => !isGeneric(v))).toEqual([]);
+    expect(isGeneric('Coastal Ridge Credit Union')).toBe(false);
+  });
+
+  it('skips numbered section headings in broad mode', () => {
+    expect(names('3. Service Levels. Uptime is reported to Maria Lopez.\n4. Data Protection: see the policy.', true)).toEqual([
+      ['NAME', 'Maria Lopez'],
+    ]);
   });
 
   it('adds capitalized phrases only in broad mode', () => {
