@@ -10,10 +10,18 @@ interface ClauseGuardAIPlugin {
   onDevice(options: { prompt: string; schema?: object }): Promise<{ text: string }>;
   /** PREFER_IN_CLOUD. Receives leak-checked text only. */
   analyze(options: { clauses: MaskedClause[] }): Promise<{ results: Analysis[]; ranOn: 'cloud' | 'device' }>;
+  /** The vault's AES key as base64 (32 bytes). Created on first use and kept in the iOS Keychain or Android Keystore. */
+  vaultKey(): Promise<{ key: string }>;
   addListener(event: 'downloadProgress', cb: (e: { fraction: number }) => void): Promise<{ remove(): Promise<void> }>;
 }
 
 const Native = registerPlugin<ClauseGuardAIPlugin>('ClauseGuardAI');
+
+/** The vault key from the device keystore, for `useExternalKey` in the privacy engine. */
+export async function nativeVaultKey(): Promise<Uint8Array> {
+  const { key } = await Native.vaultKey();
+  return Uint8Array.from(atob(key), (c) => c.charCodeAt(0));
+}
 
 /** AiBridge for the Android and iOS apps. Same contract as WebBridge, backed by the native plugin. */
 export class NativeBridge implements AiBridge {

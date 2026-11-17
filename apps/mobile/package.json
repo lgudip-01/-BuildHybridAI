@@ -14,13 +14,13 @@
     "run:ios": "npm run sync && cap run ios"
   },
   "dependencies": {
-    "@capacitor/android": "^7.4.0",
-    "@capacitor/core": "^7.4.0",
-    "@capacitor/ios": "^7.4.0",
+    "@capacitor/android": "^8.6.0",
+    "@capacitor/core": "^8.6.0",
+    "@capacitor/ios": "^8.6.0",
     "@clause-guard/clause-guard-ai": "*"
   },
   "devDependencies": {
-    "@capacitor/cli": "^7.4.0",
+    "@capacitor/cli": "^8.6.0",
     "typescript": "^7.0.2"
   }
 }

@@ -9,7 +9,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@capacitor/core": "^7.4.0",
+    "@capacitor/core": "^8.6.0",
     "@clause-guard/core": "*",
     "@clause-guard/privacy-engine": "*",
     "@fontsource/ibm-plex-mono": "^5.3.0",

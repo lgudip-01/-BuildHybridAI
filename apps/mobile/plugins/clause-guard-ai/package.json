@@ -8,5 +8,5 @@
     "ios": { "src": "ios" },
     "android": { "src": "android" }
   },
-  "peerDependencies": { "@capacitor/core": "^7.4.0" }
+  "peerDependencies": { "@capacitor/core": "^8.6.0" }
 }
