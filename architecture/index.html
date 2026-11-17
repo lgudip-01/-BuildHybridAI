@@ -10,13 +10,13 @@
 <style>
 body { margin: 0; }
 [hidden] { display: none !important; }
-/* Layout: layered map in data-flow order (apps → engine → boundary → cloud), detail panel docked right, repo index below. */
+/* Layout: feature graph flowing top to bottom in the order a contract moves, privacy boundary across the middle, detail panel docked right. */
 :root {
   --bg: oklch(0.16 0.012 255);
   --panel: oklch(0.195 0.014 255);
-  --raised: oklch(0.23 0.016 255);
-  --line: oklch(0.29 0.016 255);
-  --line-strong: oklch(0.38 0.018 255);
+  --raised: oklch(0.235 0.016 255);
+  --line: oklch(0.3 0.016 255);
+  --line-strong: oklch(0.44 0.018 255);
   --text: oklch(0.95 0.006 255);
   --muted: oklch(0.76 0.014 255);
   --faint: oklch(0.64 0.014 255);
@@ -25,9 +25,11 @@ body { margin: 0; }
   --accent-edge: oklch(0.82 0.13 168 / 0.45);
   --warn: oklch(0.84 0.12 82);
   --warn-soft: oklch(0.84 0.12 82 / 0.12);
+  --danger: oklch(0.74 0.15 25);
   --cloud: oklch(0.78 0.1 262);
-  --cloud-soft: oklch(0.78 0.1 262 / 0.08);
-  --cloud-edge: oklch(0.78 0.1 262 / 0.35);
+  --cloud-soft: oklch(0.78 0.1 262 / 0.07);
+  --cloud-node: oklch(0.27 0.03 262);
+  --cloud-edge: oklch(0.78 0.1 262 / 0.4);
   --sans: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --mono: 'IBM Plex Mono', ui-monospace, 'Cascadia Mono', Consolas, monospace;
   color-scheme: dark;
@@ -36,40 +38,44 @@ body { margin: 0; }
   :root:not([data-theme="dark"]) {
     --bg: oklch(0.975 0.005 255);
     --panel: oklch(0.995 0.003 255);
-    --raised: oklch(0.95 0.008 255);
-    --line: oklch(0.88 0.01 255);
-    --line-strong: oklch(0.78 0.014 255);
+    --raised: oklch(0.96 0.007 255);
+    --line: oklch(0.87 0.01 255);
+    --line-strong: oklch(0.7 0.014 255);
     --text: oklch(0.22 0.015 255);
     --muted: oklch(0.42 0.015 255);
     --faint: oklch(0.52 0.014 255);
     --accent: oklch(0.5 0.11 168);
     --accent-soft: oklch(0.5 0.11 168 / 0.1);
     --accent-edge: oklch(0.5 0.11 168 / 0.45);
-    --warn: oklch(0.56 0.13 70);
-    --warn-soft: oklch(0.56 0.13 70 / 0.1);
+    --warn: oklch(0.58 0.13 70);
+    --warn-soft: oklch(0.58 0.13 70 / 0.1);
+    --danger: oklch(0.55 0.17 25);
     --cloud: oklch(0.5 0.13 262);
-    --cloud-soft: oklch(0.5 0.13 262 / 0.06);
-    --cloud-edge: oklch(0.5 0.13 262 / 0.3);
+    --cloud-soft: oklch(0.5 0.13 262 / 0.05);
+    --cloud-node: oklch(0.95 0.02 262);
+    --cloud-edge: oklch(0.5 0.13 262 / 0.35);
     color-scheme: light;
   }
 }
 :root[data-theme="light"] {
   --bg: oklch(0.975 0.005 255);
   --panel: oklch(0.995 0.003 255);
-  --raised: oklch(0.95 0.008 255);
-  --line: oklch(0.88 0.01 255);
-  --line-strong: oklch(0.78 0.014 255);
+  --raised: oklch(0.96 0.007 255);
+  --line: oklch(0.87 0.01 255);
+  --line-strong: oklch(0.7 0.014 255);
   --text: oklch(0.22 0.015 255);
   --muted: oklch(0.42 0.015 255);
   --faint: oklch(0.52 0.014 255);
   --accent: oklch(0.5 0.11 168);
   --accent-soft: oklch(0.5 0.11 168 / 0.1);
   --accent-edge: oklch(0.5 0.11 168 / 0.45);
-  --warn: oklch(0.56 0.13 70);
-  --warn-soft: oklch(0.56 0.13 70 / 0.1);
+  --warn: oklch(0.58 0.13 70);
+  --warn-soft: oklch(0.58 0.13 70 / 0.1);
+  --danger: oklch(0.55 0.17 25);
   --cloud: oklch(0.5 0.13 262);
-  --cloud-soft: oklch(0.5 0.13 262 / 0.06);
-  --cloud-edge: oklch(0.5 0.13 262 / 0.3);
+  --cloud-soft: oklch(0.5 0.13 262 / 0.05);
+  --cloud-node: oklch(0.95 0.02 262);
+  --cloud-edge: oklch(0.5 0.13 262 / 0.35);
   color-scheme: light;
 }
 
@@ -83,38 +89,37 @@ body {
 h1, h2, h3, p, ul { margin: 0; }
 button { font: inherit; color: inherit; }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-code, .mono { font-family: var(--mono); font-size: 0.92em; }
+code { font-family: var(--mono); font-size: 0.92em; }
+a { color: var(--accent); }
 
 .wrap {
-  max-width: 1320px;
+  max-width: 1360px;
   margin: 0 auto;
   padding-block: 28px 48px;
   padding-left: max(16px, env(safe-area-inset-left, 0px));
   padding-right: max(16px, env(safe-area-inset-right, 0px));
   display: grid;
-  gap: 20px;
+  gap: 18px;
 }
 
 /* Header */
-.top { display: grid; gap: 14px; }
+.top { display: grid; gap: 12px; }
 .eyebrow { font: 500 11px/1 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); }
 h1 { font-size: clamp(22px, 3vw, 28px); font-weight: 600; letter-spacing: -0.01em; text-wrap: balance; }
-.lede { color: var(--muted); max-width: 68ch; }
-.legend { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 12.5px; color: var(--muted); }
+.lede { color: var(--muted); max-width: 72ch; }
+.legend { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 12.5px; color: var(--muted); align-items: center; }
 .legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend svg { display: block; }
+.legend .sep { width: 1px; height: 14px; background: var(--line); }
 
-/* Status marks: shape and border carry the state, not color alone */
 .mark { width: 10px; height: 10px; border-radius: 50%; flex: none; display: inline-block; }
 .mark.built { background: var(--accent); }
 .mark.partial { background: linear-gradient(90deg, var(--warn) 50%, transparent 50%); box-shadow: inset 0 0 0 1.5px var(--warn); }
 .mark.todo { box-shadow: inset 0 0 0 1.5px var(--faint); }
-.zone-key { width: 14px; height: 10px; border-radius: 2px; display: inline-block; }
-.zone-key.device { background: var(--accent-soft); box-shadow: inset 0 0 0 1px var(--accent-edge); }
-.zone-key.cloud { background: var(--cloud-soft); box-shadow: inset 0 0 0 1px var(--cloud-edge); }
 
 /* Toolbar */
 .toolbar {
-  display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px;
+  display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px;
   padding: 10px 12px; background: var(--panel); border: 1px solid var(--line); border-radius: 8px;
 }
 .group { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
@@ -122,12 +127,11 @@ h1 { font-size: clamp(22px, 3vw, 28px); font-weight: 600; letter-spacing: -0.01e
 .seg { display: inline-flex; flex-wrap: wrap; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
 .seg button {
   border: 0; background: transparent; padding: 5px 10px; font-size: 12.5px; cursor: pointer; color: var(--muted);
-  border-right: 1px solid var(--line);
+  border-right: 1px solid var(--line); display: inline-flex; align-items: center; gap: 6px;
 }
 .seg button:last-child { border-right: 0; }
 .seg button:hover { color: var(--text); background: var(--raised); }
 .seg button[aria-pressed="true"] { background: var(--accent-soft); color: var(--text); }
-.spacer { flex: 1; }
 .btn {
   border: 1px solid var(--accent-edge); background: var(--accent-soft); color: var(--text);
   padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 13px;
@@ -137,67 +141,69 @@ h1 { font-size: clamp(22px, 3vw, 28px); font-weight: 600; letter-spacing: -0.01e
 .btn.ghost:hover { color: var(--text); border-color: var(--line-strong); }
 .btn:disabled { opacity: 0.4; cursor: default; }
 
-/* Trace stepper */
+/* Journey stepper */
 .trace {
   display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 14px; align-items: center;
   padding: 12px 14px; border: 1px solid var(--accent-edge); background: var(--accent-soft); border-radius: 8px;
 }
 .trace-num { font: 500 22px/1 var(--mono); color: var(--accent); font-variant-numeric: tabular-nums; }
 .trace-num small { font-size: 12px; color: var(--faint); }
-.trace h3 { font-size: 14.5px; font-weight: 600; }
-.trace p { color: var(--muted); font-size: 13px; margin-top: 2px; }
+.trace-kicker { font: 500 11px/1 var(--mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--faint); }
+.trace h3 { font-size: 14.5px; font-weight: 600; margin-top: 3px; }
+.trace p { color: var(--muted); font-size: 13px; margin-top: 2px; max-width: 80ch; }
 .trace-nav { display: flex; gap: 6px; }
 .dots { grid-column: 1 / -1; display: flex; gap: 4px; }
 .dots button { flex: 1; height: 4px; border: 0; border-radius: 2px; background: var(--line); cursor: pointer; padding: 0; }
 .dots button.on { background: var(--accent); }
 
 /* Main split */
-.main { display: grid; grid-template-columns: minmax(0, 1fr) 370px; gap: 20px; align-items: start; }
-.map { display: grid; gap: 10px; min-width: 0; }
+.main { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 18px; align-items: start; }
+.map-wrap { overflow-x: auto; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 8px 4px; min-width: 0; }
+#graph { display: block; width: 100%; min-width: 720px; height: auto; }
 
-.band {
-  display: grid; grid-template-columns: 180px minmax(0, 1fr); gap: 14px;
-  padding: 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--panel);
-}
-.band.device { box-shadow: inset 3px 0 0 var(--accent-edge); }
-.band.cloud { background: var(--cloud-soft); border-color: var(--cloud-edge); box-shadow: inset 3px 0 0 var(--cloud-edge); }
-.band.boundary {
-  background: repeating-linear-gradient(-45deg, transparent 0 8px, var(--warn-soft) 8px 9px), var(--panel);
-  border: 1px dashed var(--warn);
-}
-.band.shared { background: transparent; border-style: dashed; }
-.band-head { display: grid; gap: 4px; align-content: start; }
-.band-head h2 { font-size: 14px; font-weight: 600; }
-.band-head p { font-size: 12px; color: var(--faint); line-height: 1.45; }
-.zone-tag { font: 500 10.5px/1 var(--mono); letter-spacing: 0.07em; text-transform: uppercase; }
-.device .zone-tag { color: var(--accent); }
-.cloud .zone-tag { color: var(--cloud); }
-.boundary .zone-tag { color: var(--warn); }
-.shared .zone-tag { color: var(--faint); }
+/* Graph */
+.stage-n { fill: var(--accent); font: 500 12px var(--mono); }
+.stage-t { fill: var(--muted); font: 500 12px var(--sans); }
+.boundary { stroke: var(--warn); stroke-width: 1.2; stroke-dasharray: 6 5; }
+.boundary-t { fill: var(--warn); font: 500 10.5px var(--mono); letter-spacing: 0.06em; }
+.cloud-zone { fill: var(--cloud-soft); stroke: var(--cloud-edge); stroke-dasharray: 4 4; }
+.cloud-t { fill: var(--cloud); font: 600 12.5px var(--sans); }
+.cloud-s { fill: var(--cloud); font: 400 11.5px var(--sans); opacity: 0.85; }
 
-.nodes { display: grid; grid-template-columns: repeat(auto-fill, minmax(172px, 1fr)); gap: 8px; min-width: 0; }
-.node {
-  text-align: left; cursor: pointer; display: grid; gap: 4px; align-content: start;
-  padding: 9px 10px; border-radius: 6px; background: var(--raised); border: 1px solid var(--line);
-  transition: opacity 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
-  min-width: 0;
-}
-.node:hover { border-color: var(--line-strong); }
-.node.todo { background: transparent; border-style: dashed; border-color: var(--line-strong); }
-.node.wide { grid-column: 1 / -1; }
-.node-top { display: flex; align-items: center; gap: 7px; min-width: 0; }
-.node-name { font-weight: 600; font-size: 13.5px; overflow-wrap: anywhere; }
-.node-path { font: 400 11px/1.35 var(--mono); color: var(--faint); overflow-wrap: anywhere; }
-.node-owner { font-size: 11.5px; color: var(--muted); }
-.node.wide .node-sub { color: var(--muted); font-size: 12.5px; }
-.node[aria-current="true"] { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
-.node.dim { opacity: 0.28; }
-.node.lit { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft), 0 0 0 1px var(--accent); opacity: 1; }
-.cross {
-  grid-column: 1 / -1; font-size: 12.5px; color: var(--muted);
-  display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center;
-}
-.cross code { color: var(--text); background: var(--raised); padding: 1px 6px; border-radius: 4px; border: 1px solid var(--line); }
+.edge { fill: none; stroke: var(--line-strong); stroke-width: 1.5; transition: opacity 160ms ease; }
+.edge.enables { stroke: var(--faint); stroke-dasharray: 5 4; }
+.edge.fallback { stroke: var(--warn); stroke-dasharray: 1.5 4; stroke-linecap: round; stroke-width: 1.8; }
+.edge.secures { stroke: var(--cloud); stroke-dasharray: 5 4; }
+.edge.block { stroke: var(--danger); stroke-dasharray: 1.5 4; stroke-linecap: round; stroke-width: 1.8; }
+.edge.hot { stroke-width: 2.4; }
+.edge.flow.hot { stroke: var(--accent); }
+.edge.dim { opacity: 0.1; }
+.arrow-flow { fill: var(--line-strong); }
+.arrow-hot { fill: var(--accent); }
+.arrow-enables { fill: var(--faint); }
+.arrow-fallback { fill: var(--warn); }
+.arrow-secures { fill: var(--cloud); }
+.arrow-block { fill: var(--danger); }
+.elabel rect { fill: var(--panel); stroke: var(--line); }
+.elabel text { fill: var(--text); font: 500 10.5px var(--sans); }
+
+.fnode { cursor: pointer; transition: opacity 160ms ease; }
+.fnode rect.box { fill: var(--raised); stroke: var(--line); stroke-width: 1; }
+.fnode.todo rect.box { fill: var(--bg); stroke: var(--line-strong); stroke-dasharray: 4 3; }
+.fnode.cloud rect.box { fill: var(--cloud-node); stroke: var(--cloud-edge); }
+.fnode.cloud.todo rect.box { stroke-dasharray: 4 3; }
+.fnode:hover rect.box { stroke: var(--line-strong); }
+.fnode.lit rect.box { stroke: var(--accent); stroke-width: 1.5; }
+.fnode.sel rect.box { stroke: var(--accent); stroke-width: 2.4; }
+.fnode.dim { opacity: 0.22; }
+.fnode:focus { outline: none; }
+.fnode:focus-visible rect.box { stroke: var(--accent); stroke-width: 2.4; }
+.n-name { fill: var(--text); font: 600 13px var(--sans); }
+.n-meta { fill: var(--faint); font: 400 11px var(--sans); }
+.mk-built { fill: var(--accent); }
+.mk-half { fill: var(--warn); }
+.mk-ring-partial { fill: none; stroke: var(--warn); stroke-width: 1.5; }
+.mk-ring-todo { fill: none; stroke: var(--faint); stroke-width: 1.5; }
 
 /* Detail panel */
 .detail {
@@ -206,69 +212,50 @@ h1 { font-size: clamp(22px, 3vw, 28px); font-weight: 600; letter-spacing: -0.01e
   padding: 16px; display: grid; gap: 14px; max-height: calc(100vh - 32px); overflow: auto; min-width: 0;
 }
 .detail h2 { font-size: 17px; font-weight: 600; overflow-wrap: anywhere; }
-.detail .path { font: 400 12px/1.4 var(--mono); color: var(--faint); overflow-wrap: anywhere; }
 .chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .chip {
   display: inline-flex; align-items: center; gap: 6px; font-size: 12px; padding: 3px 8px;
   border-radius: 999px; border: 1px solid var(--line); color: var(--muted);
 }
+.chip.cloud { border-color: var(--cloud-edge); color: var(--cloud); }
+.chip.device { border-color: var(--accent-edge); color: var(--accent); }
 .sec { display: grid; gap: 6px; }
 .sec h3 { font: 500 11px/1 var(--mono); letter-spacing: 0.07em; text-transform: uppercase; color: var(--faint); }
-.sec p, .sec li { color: var(--text); font-size: 13.5px; }
+.sec p, .sec li { font-size: 13.5px; }
 .sec ul { padding-left: 18px; display: grid; gap: 4px; }
 .sec li::marker { color: var(--faint); }
-.io { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 10px; font-size: 13px; }
-.io dt { color: var(--faint); font-size: 12px; padding-top: 1px; }
-.io dd { margin: 0; overflow-wrap: anywhere; }
 .caveat { border-left: 2px solid var(--warn); padding: 6px 10px; background: var(--warn-soft); font-size: 13px; border-radius: 0 4px 4px 0; }
-.links { display: flex; flex-wrap: wrap; gap: 6px; }
-.links button {
-  border: 1px solid var(--line); background: var(--raised); border-radius: 5px; padding: 3px 8px;
-  font-size: 12.5px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+.conn { display: grid; gap: 6px; }
+.conn button {
+  text-align: left; border: 1px solid var(--line); background: var(--raised); border-radius: 6px;
+  padding: 6px 9px; cursor: pointer; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 2px 8px; align-items: center;
 }
-.links button:hover { border-color: var(--accent-edge); }
+.conn button:hover { border-color: var(--accent-edge); }
+.conn .c-name { font-size: 13px; font-weight: 500; }
+.conn .c-label { grid-column: 2 / -1; font-size: 12px; color: var(--muted); }
+.kind { font: 500 10px/1 var(--mono); letter-spacing: 0.05em; text-transform: uppercase; padding: 3px 5px; border-radius: 3px; border: 1px solid var(--line); color: var(--faint); }
+.kind.fallback { color: var(--warn); border-color: var(--warn); }
+.kind.secures { color: var(--cloud); border-color: var(--cloud-edge); }
+.kind.block { color: var(--danger); border-color: var(--danger); }
+.kind.flow { color: var(--accent); border-color: var(--accent-edge); }
+.code { font: 400 12px/1.4 var(--mono); color: var(--faint); overflow-wrap: anywhere; }
 .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
 .stat { border: 1px solid var(--line); border-radius: 6px; padding: 8px 10px; display: grid; gap: 2px; }
 .stat b { font: 500 22px/1 var(--mono); font-variant-numeric: tabular-nums; }
 .stat span { font-size: 12px; color: var(--muted); display: inline-flex; align-items: center; gap: 6px; }
-.path-list { display: grid; gap: 6px; }
-.path-list button {
-  text-align: left; border: 1px solid var(--line); background: var(--raised); border-radius: 6px;
-  padding: 7px 9px; cursor: pointer; display: grid; gap: 2px; font-size: 13px;
-}
-.path-list button:hover { border-color: var(--accent-edge); }
-.path-list small { color: var(--faint); font-size: 12px; }
 .back { justify-self: start; }
-a { color: var(--accent); }
+.empty { color: var(--faint); font-size: 13px; }
 
-/* Repository index */
-.repo { display: grid; gap: 10px; }
-.repo h2 { font-size: 16px; font-weight: 600; }
-.repo > p { color: var(--muted); font-size: 13px; }
-.table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); }
-table { border-collapse: collapse; width: 100%; min-width: 640px; font-size: 13px; }
-th { text-align: left; font: 500 11px/1 var(--mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--faint); padding: 10px 12px; border-bottom: 1px solid var(--line); }
-td { padding: 8px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
-tr:last-child td { border-bottom: 0; }
-tbody tr { cursor: pointer; }
-tbody tr:hover td { background: var(--raised); }
-tbody tr.dim td { opacity: 0.35; }
-td.mono { color: var(--muted); white-space: nowrap; }
-td .st { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
-
-@media (max-width: 1020px) {
+@media (max-width: 1080px) {
   .main { grid-template-columns: minmax(0, 1fr); }
   .detail { position: static; max-height: none; }
 }
 @media (max-width: 640px) {
-  .band { grid-template-columns: minmax(0, 1fr); }
-  .nodes { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
   .trace { grid-template-columns: auto minmax(0, 1fr); }
   .trace-nav { grid-column: 1 / -1; }
-  .spacer { display: none; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .node { transition: none; }
+  .fnode, .edge { transition: none; }
 }
 </style>
 </head>
@@ -276,18 +263,26 @@ td .st { display: inline-flex; align-items: center; gap: 6px; white-space: nowra
 <div class="wrap">
   <header class="top">
     <div class="eyebrow">Clause Guard · #BuildHybridAI 2026</div>
-    <h1>How Clause Guard is put together</h1>
-    <p class="lede">Contracts are masked on the device, so names, amounts and account numbers never reach the cloud. Only placeholder text crosses to Gemini, and the real values go back in on the device. Click any part to see what it does, who owns it and what is left, or trace one contract through the system.</p>
+    <h1>Clause Guard feature map</h1>
+    <p class="lede">Each box is a feature, and each arrow shows what it feeds, enables, protects or falls back to. A contract moves from top to bottom. Everything above the dashed line runs on the device with the real text; below it, the cloud only sees placeholders. Click a feature to see how it connects, or walk through a journey.</p>
     <div class="legend" aria-label="Legend">
       <span><i class="mark built"></i>Built</span>
       <span><i class="mark partial"></i>Partly built</span>
       <span><i class="mark todo"></i>Not started</span>
-      <span><i class="zone-key device"></i>On device: raw text allowed</span>
-      <span><i class="zone-key cloud"></i>Cloud: placeholders only</span>
+      <i class="sep" aria-hidden="true"></i>
+      <span><svg width="26" height="8" aria-hidden="true"><line x1="0" y1="4" x2="26" y2="4" class="edge flow"/></svg>Feeds</span>
+      <span><svg width="26" height="8" aria-hidden="true"><line x1="0" y1="4" x2="26" y2="4" class="edge enables"/></svg>Enables or requires</span>
+      <span><svg width="26" height="8" aria-hidden="true"><line x1="1" y1="4" x2="26" y2="4" class="edge fallback"/></svg>Falls back to</span>
+      <span><svg width="26" height="8" aria-hidden="true"><line x1="0" y1="4" x2="26" y2="4" class="edge secures"/></svg>Secures or configures</span>
+      <span><svg width="26" height="8" aria-hidden="true"><line x1="1" y1="4" x2="26" y2="4" class="edge block"/></svg>Blocks</span>
     </div>
   </header>
 
-  <div class="toolbar" role="toolbar" aria-label="Filters">
+  <div class="toolbar" role="toolbar" aria-label="Journeys and filters">
+    <div class="group">
+      <span class="group-label" id="journey-label">Walk through</span>
+      <div class="seg" id="journeys" aria-labelledby="journey-label"></div>
+    </div>
     <div class="group">
       <span class="group-label" id="owner-label">Owner</span>
       <div class="seg" id="owner-filter" aria-labelledby="owner-label"></div>
@@ -296,13 +291,11 @@ td .st { display: inline-flex; align-items: center; gap: 6px; white-space: nowra
       <span class="group-label" id="status-label">Status</span>
       <div class="seg" id="status-filter" aria-labelledby="status-label"></div>
     </div>
-    <span class="spacer"></span>
-    <button class="btn" id="trace-toggle" type="button">Trace a contract</button>
   </div>
 
   <section class="trace" id="trace" hidden aria-live="polite">
     <div class="trace-num" id="trace-num"></div>
-    <div><h3 id="trace-title"></h3><p id="trace-text"></p></div>
+    <div><div class="trace-kicker" id="trace-kicker"></div><h3 id="trace-title"></h3><p id="trace-text"></p></div>
     <div class="trace-nav">
       <button class="btn ghost" id="trace-prev" type="button">Back</button>
       <button class="btn" id="trace-next" type="button">Next step</button>
@@ -312,365 +305,444 @@ td .st { display: inline-flex; align-items: center; gap: 6px; white-space: nowra
   </section>
 
   <div class="main">
-    <div class="map" id="map"></div>
+    <div class="map-wrap"><svg id="graph" viewBox="0 0 896 790" role="group" aria-label="Feature map"></svg></div>
     <aside class="detail" id="detail" aria-live="polite"></aside>
   </div>
-
-  <section class="repo">
-    <h2>Repository index</h2>
-    <p>Every part above, by where it lives in <code>lgudip-01/-BuildHybridAI</code>. Click a row to open it on the map.</p>
-    <div class="table-wrap">
-      <table>
-        <thead><tr><th>Path</th><th>Part</th><th>Owner</th><th>Status</th></tr></thead>
-        <tbody id="repo-rows"></tbody>
-      </table>
-    </div>
-  </section>
 </div>
 
 <script>
-const OWNERS = {
-  likhil: 'Likhil Gudipati',
-  dhruv: 'Dhruv Vyas',
-  sai: 'Sai Nagadheeraj Kamsani',
-  team: 'Shared',
-  none: 'Unassigned',
-};
-const OWNER_SHORT = { likhil: 'Likhil', dhruv: 'Dhruv', sai: 'Sai', team: 'Shared', none: 'Unassigned' };
+const OWNERS = { likhil: 'Likhil Gudipati', dhruv: 'Dhruv Vyas', sai: 'Sai Nagadheeraj Kamsani', none: 'Unassigned' };
+const OWNER_SHORT = { likhil: 'Likhil', dhruv: 'Dhruv', sai: 'Sai', none: 'Unassigned' };
 const STATUS = { built: 'Built', partial: 'Partly built', todo: 'Not started' };
+const KIND = { flow: 'Feeds', enables: 'Enables', fallback: 'Fallback', secures: 'Secures', block: 'Blocks' };
+const STAGES = ['Open', 'Prepare', 'Find', 'Mask', 'Check', 'Analyze', 'Restore', 'Show'];
 
-const LAYERS = [
-  { id: 'apps', name: 'Apps', zone: 'device', tag: 'On device', note: 'What people use. The raw contract is shown here and stays here.' },
-  { id: 'docs', name: 'Documents', zone: 'device', tag: 'On device', note: 'Turns a file or pasted text into clauses.' },
-  { id: 'engine', name: 'Privacy engine', zone: 'device', tag: 'On device', note: 'packages/privacy-engine. Finds, masks, checks, stores and restores.' },
-  { id: 'bridge', name: 'AI bridge', zone: 'device', tag: 'On device', note: 'One interface, one version per platform. The only door to a model.' },
-  { id: 'gate', name: 'Privacy boundary', zone: 'boundary', tag: 'Gate', note: 'Nothing crosses unless it passed the leak check.' },
-  { id: 'cloud', name: 'Cloud', zone: 'cloud', tag: 'Firebase', note: 'Sees placeholders such as [PARTY_A], never real names.' },
-  { id: 'shared', name: 'Shared and quality', zone: 'shared', tag: 'Whole team', note: 'The contract between parts, test data and the submission.' },
+// slot = column (0–4), row = stage (0–7)
+const FEATURES = [
+  { id: 'web', name: 'Web app', slot: 0, row: 0, owner: 'sai', status: 'partial',
+    does: `Where people paste a contract and read the review in Chrome. Today it shows the model status, the masked text and the privacy ledger. The analysis results come next.`,
+    left: ['Approve step, clause cards, source badge and error states'], code: 'apps/web' },
+  { id: 'extension', name: 'Extension capture', slot: 1, row: 0, owner: 'sai', status: 'todo',
+    does: `A Chrome side panel that reviews the contract on the page you are reading, with no copying and pasting.`,
+    left: ['Side panel', 'Capture the text on the page', 'App Check inside an extension'], code: 'apps/extension (planned)' },
+  { id: 'mobile', name: 'Mobile import', slot: 2, row: 0, owner: 'none', status: 'todo',
+    does: `Open a contract file on an Android phone or an iPhone and review it there, with the same on-device masking.`,
+    left: ['Needs an owner', 'Capacitor shell, file import and sharing', 'Native model bridges for Gemini Nano and Apple Foundation Models'], code: 'apps/mobile (planned)' },
+
+  { id: 'input', name: 'Contract input', slot: 1, row: 1, owner: 'none', status: 'partial',
+    does: `Takes the contract in. Pasted text works today. PDF and DOCX import are planned.`,
+    left: ['PDF and DOCX text extraction', 'Needs an owner'], code: 'apps/web/src/App.tsx' },
+  { id: 'split', name: 'Clause splitting', slot: 2, row: 1, owner: 'none', status: 'partial',
+    does: `Breaks the contract into clauses with ids, so every result maps back to the right clause. For v1 it splits on blank lines.`,
+    left: ['A splitter that understands headings and numbered sections'], code: 'splitClauses() in App.tsx' },
+  { id: 'model', name: 'On-device model', slot: 4, row: 1, owner: 'likhil', status: 'built',
+    does: `Checks whether Gemini Nano can run here and downloads it on a click. Every feature that reads the raw contract uses it.`,
+    caveat: `Runs only in real Chrome. Embedded browsers report it as unavailable.`,
+    left: ['Android and iOS versions'], code: 'apps/web/src/webBridge.ts' },
+
+  { id: 'classify', name: 'Clause types', slot: 0, row: 2, owner: 'likhil', status: 'partial',
+    does: `Labels each clause on the device, such as payment, termination or liability, so the cloud knows what kind of clause it is reading.`,
+    left: ['Connect it to masking so the type travels with each clause'], code: 'classify() in onDevice.ts' },
+  { id: 'patterns', name: 'Pattern detection', slot: 1, row: 2, owner: 'likhil', status: 'built',
+    does: `Finds amounts, dates, emails, phone numbers and account IDs by pattern, plus companies with legal suffixes, titled people, signature names and street addresses.`,
+    code: 'regex.ts' },
+  { id: 'names', name: 'Name detection', slot: 2, row: 2, owner: 'likhil', status: 'built',
+    does: `The on-device model lists the people, companies and addresses in each clause. Names it invents are dropped, and every way a name is written is found, such as "Acme" for Acme Corp.`,
+    caveat: `Not yet scored on real Gemini Nano.`,
+    left: ['Score it on the six sample contracts with the real model'], code: 'onDevice.ts, merge.ts' },
+  { id: 'broad', name: 'Fallback masking', slot: 3, row: 2, owner: 'likhil', status: 'built',
+    does: `Without the model, masks every capitalized phrase except job titles, jurisdictions and role words like "the Company". On the six sample contracts it masks all 70 sensitive values and keeps all 34 terms the cloud needs.`,
+    code: 'regex.ts (broad mode)' },
+
+  { id: 'ledger', name: 'Privacy ledger', slot: 0, row: 3, owner: 'likhil', status: 'built',
+    does: `Shows the user every placeholder, its kind and the clauses it appears in, without the real values.`,
+    left: ['Final design on the results screen'], code: 'LedgerEntry in types.ts' },
+  { id: 'placeholders', name: 'Placeholders', slot: 2, row: 3, owner: 'likhil', status: 'built',
+    does: `Replaces each sensitive value with a placeholder such as [PARTY_A] or [AMOUNT_1], the same one everywhere in the contract, so the cloud can still follow who owes what to whom.`,
+    caveat: `Two people who share a last name share its placeholder where the last name appears alone.`,
+    code: 'mask.ts, placeholders.ts' },
+  { id: 'vault', name: 'Encrypted vault', slot: 4, row: 3, owner: 'likhil', status: 'built',
+    does: `Keeps the placeholder-to-value map on the device, encrypted with a key that no code can read out. It never leaves the device.`,
+    code: 'vault.ts' },
+
+  { id: 'blocked', name: 'Blocked send', slot: 0, row: 4, owner: 'likhil', status: 'built',
+    does: `When the leak check finds something, nothing is sent, and the user sees each leak with the text around it.`,
+    left: ['Final design in the web app'], code: 'MaskResult with ok: false' },
+  { id: 'leak', name: 'Leak check', slot: 2, row: 4, owner: 'likhil', status: 'built',
+    does: `Scans the masked text one last time for any real value or pattern. Only text that passes can be sent.`,
+    code: 'leakCheck.ts' },
+  { id: 'approve', name: 'Review & approve', slot: 3, row: 4, owner: 'sai', status: 'todo',
+    does: `When the model was not used, the user reads the masked text and approves it before it is sent.`,
+    left: ['Approve step in the web app', 'Runtime approval check, proposed in the interface review'], code: 'needsReview in MaskResult' },
+
+  { id: 'appcheck', name: 'App Check', slot: 1, row: 5, owner: 'dhruv', status: 'todo', cloud: true,
+    does: `Proves each cloud call comes from the real Clause Guard app. The hackathon requires it, and debug tokens are accepted.`,
+    left: ['reCAPTCHA Enterprise on web, Play Integrity on Android, App Attest on iOS'], code: 'Firebase App Check' },
+  { id: 'analysis', name: 'Clause analysis', slot: 2, row: 5, owner: 'dhruv', status: 'todo', cloud: true,
+    does: `Gemini reads each masked clause and returns a risk level, an explanation, a suggested redline and questions to ask.`,
+    left: ['Prompt and response schema', 'analyze() in WebBridge, which is a stub today', 'Reject answers that use placeholders it was not sent'], code: 'WebBridge.analyze(), Firebase AI Logic' },
+  { id: 'remote', name: 'Remote prompts', slot: 3, row: 5, owner: 'dhruv', status: 'todo', cloud: true,
+    does: `Keeps the prompt and model names in Remote Config, so web, Android and iOS all use the same ones.`,
+    left: ['Move the prompt here once it is tuned'], code: 'Firebase Remote Config' },
+
+  { id: 'unmask', name: 'Restore names', slot: 3, row: 6, owner: 'likhil', status: 'built',
+    does: `Swaps the placeholders in the answer back to real values, on the device. Placeholders the cloud made up stay as they are.`,
+    caveat: `Not yet tried on real cloud output.`, code: 'unmask.ts' },
+  { id: 'offline', name: 'Offline review', slot: 4, row: 6, owner: 'dhruv', status: 'todo',
+    does: `With no connection, a shorter red-flags review runs on the device model instead of the cloud.`,
+    left: ['Shorter on-device prompt', 'Check that the fallback really happens on each platform'], code: 'WebBridge.analyze() with PREFER_IN_CLOUD' },
+
+  { id: 'source', name: 'Source badge', slot: 2, row: 7, owner: 'sai', status: 'todo',
+    does: `Tells the user whether the review ran in the cloud or on the device.`, code: 'ranOn from analyze()' },
+  { id: 'results', name: 'Clause cards', slot: 3, row: 7, owner: 'sai', status: 'todo',
+    does: `One card per clause with its risk, explanation, suggested redline and questions, with the real names back in.`,
+    code: 'apps/web, packages/ui (planned)' },
+  { id: 'heatmap', name: 'Risk heatmap', slot: 4, row: 7, owner: 'sai', status: 'todo',
+    does: `The whole contract at a glance, with each clause shaded by its risk.`, code: 'packages/ui (planned)' },
 ];
 
-const NODES = [
-  // Apps
-  { id: 'web-app', layer: 'apps', name: 'Web app', path: 'apps/web', owner: 'sai', status: 'partial',
-    does: 'The React app people use in Chrome. Today it is the privacy engine test page: on-device model status and download, a contract box, Mask, the masked output and the privacy ledger.',
-    takes: 'Contract text from the user', gives: 'Clauses for mask(), and results on screen',
-    parts: ['App.tsx: the page, model status, masked output, ledger', 'main.tsx: starts the app with a WebBridge', 'firebase.ts: Firebase AI Logic setup from .env.local', 'React 19 and Vite 8'],
-    left: ['Approve step when needsReview is true', 'Call analyze() and unmask()', 'A card per clause: risk, explanation, redline, questions', 'On-device or cloud badge from ranOn', 'Errors for a blocked send and a failed cloud call'],
-    links: ['documents', 'mask', 'approve', 'web-bridge', 'unmask', 'ui-pkg'] },
-  { id: 'extension', layer: 'apps', name: 'Chrome extension', path: 'apps/extension', owner: 'sai', status: 'todo',
-    does: 'A Manifest V3 side panel that reviews the contract on the page you are viewing, with the same components and engine as the web app.',
-    takes: 'Text captured from the current page', gives: 'The same flow as the web app',
-    left: ['Scaffold the side panel', 'Page text capture', 'App Check debug provider, which is harder inside an extension'],
-    links: ['ui-pkg', 'mask', 'web-bridge', 'appcheck'] },
-  { id: 'mobile-shell', layer: 'apps', name: 'Mobile shell', path: 'apps/mobile', owner: 'none', status: 'todo',
-    does: 'A Capacitor project that wraps the web build for Android and iOS and hosts the native AI bridge plugins.',
-    takes: 'The web build', gives: 'Android and iOS apps',
-    left: ['Needs an owner', 'Capacitor shell opening the web build on both phones', 'File import and sharing'],
-    links: ['web-app', 'android-bridge', 'ios-bridge'] },
-  { id: 'ui-pkg', layer: 'apps', name: 'Shared UI', path: 'packages/ui', owner: 'sai', status: 'todo',
-    does: 'React components shared by the web app, the extension and the mobile shell: the risk heatmap, clause cards and the privacy ledger.',
-    takes: 'Unmasked results and the ledger', gives: 'Screens for every platform',
-    left: ['Move the components out of apps/web once they settle'],
-    links: ['web-app', 'extension', 'mobile-shell'] },
+// [from, to, kind, label, labelPosition]
+const EDGES = [
+  ['web', 'input', 'flow', 'pasted text'],
+  ['extension', 'input', 'flow', 'text on the page'],
+  ['mobile', 'input', 'flow', 'imported file'],
+  ['input', 'split', 'flow', 'contract text'],
+  ['split', 'classify', 'flow', 'clauses'],
+  ['split', 'patterns', 'flow', 'clauses'],
+  ['split', 'names', 'flow', 'clauses'],
+  ['model', 'names', 'enables', 'runs on'],
+  ['model', 'broad', 'fallback', 'unavailable'],
+  ['names', 'broad', 'fallback', 'model failed'],
+  ['classify', 'placeholders', 'flow', 'clause type'],
+  ['patterns', 'placeholders', 'flow', 'amounts, dates, IDs'],
+  ['names', 'placeholders', 'flow', 'people, companies'],
+  ['broad', 'placeholders', 'flow', 'capitalized phrases'],
+  ['placeholders', 'ledger', 'flow', 'what was hidden'],
+  ['placeholders', 'vault', 'flow', 'real values'],
+  ['placeholders', 'leak', 'flow', 'masked text'],
+  ['leak', 'blocked', 'block', 'real value found'],
+  ['leak', 'approve', 'flow', 'needs review'],
+  ['broad', 'approve', 'enables', 'requires', 0.62],
+  ['leak', 'analysis', 'flow', 'leak-checked text'],
+  ['approve', 'analysis', 'flow', 'approved'],
+  ['appcheck', 'analysis', 'secures', 'verified app'],
+  ['remote', 'analysis', 'secures', 'prompt'],
+  ['analysis', 'unmask', 'flow', 'answer with placeholders'],
+  ['analysis', 'offline', 'fallback', 'offline', 0.62],
+  ['analysis', 'source', 'flow', 'cloud or device', 0.55],
+  ['vault', 'unmask', 'flow', 'real values', 0.3],
+  ['offline', 'unmask', 'flow', 'red flags'],
+  ['unmask', 'results', 'flow', 'real names'],
+  ['unmask', 'heatmap', 'flow', 'risk per clause'],
+  ['source', 'results', 'flow', 'badge'],
+].map(([from, to, kind, label, t]) => ({ id: `${from}>${to}`, from, to, kind, label, t: t ?? 0.5 }));
 
-  // Documents
-  { id: 'documents', layer: 'docs', name: 'Import and clause splitting', path: 'packages/core (planned)', owner: 'none', status: 'partial',
-    does: 'Turns a PDF, a DOCX file or pasted text into numbered clauses with ids. For v1, the web app splits pasted text on blank lines.',
-    takes: 'A file or pasted text', gives: 'Clause[]: id, index, heading, text',
-    parts: ['v1: splitClauses() in apps/web/src/App.tsx'],
-    left: ['PDF and DOCX text extraction', 'A splitter that understands headings and numbered sections', 'Needs an owner'],
-    links: ['web-app', 'mask', 'core-types'] },
+const JOURNEYS = {
+  normal: { name: 'Normal path', steps: [
+    { t: 'Open a contract', x: 'Someone pastes a contract into the web app, captures a page with the extension, or imports a file on a phone.', n: ['web', 'extension', 'mobile', 'input'], e: ['web>input', 'extension>input', 'mobile>input'] },
+    { t: 'Split into clauses', x: 'Each clause gets an id, so results can be matched back to it later.', n: ['input', 'split'], e: ['input>split'] },
+    { t: 'Find sensitive details', x: 'Patterns catch amounts, dates, emails and IDs. Gemini Nano, on the device, finds people, companies and addresses.', n: ['split', 'patterns', 'names', 'model'], e: ['split>patterns', 'split>names', 'model>names'] },
+    { t: 'Swap in placeholders', x: 'Every value gets one placeholder for the whole contract. The ledger lists them, and the real values go into the encrypted vault.', n: ['split', 'classify', 'patterns', 'names', 'placeholders', 'ledger', 'vault'], e: ['split>classify', 'classify>placeholders', 'patterns>placeholders', 'names>placeholders', 'placeholders>ledger', 'placeholders>vault'] },
+    { t: 'Leak check', x: 'The masked text is scanned again for any real value or pattern before anything can leave.', n: ['placeholders', 'leak'], e: ['placeholders>leak'] },
+    { t: 'Cross the privacy boundary', x: 'Only leak-checked text goes to Gemini in the cloud, from a verified app, using the shared prompt.', n: ['leak', 'analysis', 'appcheck', 'remote'], e: ['leak>analysis', 'appcheck>analysis', 'remote>analysis'] },
+    { t: 'Restore real names', x: 'Back on the device, the placeholders in the answer are swapped for the real values from the vault.', n: ['analysis', 'unmask', 'vault'], e: ['analysis>unmask', 'vault>unmask'] },
+    { t: 'Show results', x: 'Clause cards and the risk heatmap show the real names, with a badge saying where the review ran.', n: ['analysis', 'unmask', 'results', 'heatmap', 'source'], e: ['unmask>results', 'unmask>heatmap', 'analysis>source', 'source>results'] },
+  ] },
+  nomodel: { name: 'No model', steps: [
+    { t: 'The model is unavailable', x: 'The device cannot run the on-device model, or the model gives an answer that cannot be used.', n: ['model', 'names', 'broad'], e: ['model>broad', 'names>broad'] },
+    { t: 'Fallback masking', x: 'Every capitalized phrase is masked, except job titles, jurisdictions and role words such as "the Company". Patterns still run as usual.', n: ['broad', 'patterns', 'placeholders'], e: ['broad>placeholders', 'patterns>placeholders'] },
+    { t: 'The leak check still runs', x: 'The same check guards the send.', n: ['placeholders', 'leak'], e: ['placeholders>leak'] },
+    { t: 'The user must approve', x: 'No model checked the text, so a person reads the masked text and approves it before it is sent.', n: ['broad', 'leak', 'approve', 'analysis'], e: ['broad>approve', 'leak>approve', 'approve>analysis'] },
+  ] },
+  leak: { name: 'Leak found', steps: [
+    { t: 'Masked text reaches the check', x: 'Masking has finished and the text is about to be sent.', n: ['placeholders', 'leak'], e: ['placeholders>leak'] },
+    { t: 'A real value is still there', x: 'The leak check finds a name, an amount or a pattern that was not masked.', n: ['leak', 'blocked'], e: ['leak>blocked'] },
+    { t: 'Nothing is sent', x: 'The send is blocked and the user sees each leak with the text around it. The cloud receives nothing.', n: ['blocked'], e: [] },
+  ] },
+  offline: { name: 'Offline', steps: [
+    { t: 'The cloud is unreachable', x: 'With no connection, the analysis falls back to the model on the device.', n: ['analysis', 'offline'], e: ['analysis>offline'] },
+    { t: 'A shorter review on the device', x: 'The device model gives a red-flags-only review, which has less detail than the cloud analysis.', n: ['offline', 'unmask'], e: ['offline>unmask'] },
+    { t: 'Results say where they came from', x: 'The badge tells the user the review ran on the device.', n: ['unmask', 'results', 'source'], e: ['unmask>results', 'source>results'] },
+  ] },
+};
 
-  // Privacy engine
-  { id: 'mask', layer: 'engine', wide: true, name: 'mask()', path: 'packages/privacy-engine/src/mask.ts', owner: 'likhil', status: 'built',
-    sub: 'Runs the pipeline below for one document and returns masked clauses plus the ledger, or the leaks that blocked it.',
-    does: 'Runs the whole masking pipeline for one document. Names are collected across every clause first, so a name found in one clause is masked in all of them. Then placeholders are assigned, the text is replaced, the result is leak-checked and the vault is saved.',
-    takes: 'docId, Clause[], AiBridge', gives: 'MaskResult: masked clauses, ledger and needsReview, or the leaks that blocked the send',
-    parts: ['Uses the model only when onDeviceStatus() is "available"', 'Without the model, or if it fails, falls back to broad pattern masking and sets needsReview', 'Defined short forms such as ("Northwind") are masked like the full name'],
-    caveat: 'Never run on real Gemini Nano yet. The fallback path is fully tested.',
-    links: ['regex', 'ondevice', 'merge', 'placeholders', 'leakcheck', 'vault', 'approve'] },
-  { id: 'regex', layer: 'engine', name: 'Pattern pass', path: 'src/regex.ts', owner: 'likhil', status: 'built',
-    does: 'Finds sensitive values by pattern, with no model needed.',
-    takes: 'Clause text', gives: 'Spans with kind, value and position',
-    parts: ['findPatterns: AMOUNT, DATE, EMAIL, PHONE, ACCOUNT', 'findNames: companies with suffixes (Inc, LLC, B.V., GmbH), titled people, signature lines, street addresses', 'Broad mode, used without the model: every capitalized phrase except job titles, jurisdictions and role words like "the Company"', 'findDefinedTerms: quoted short forms'],
-    links: ['mask', 'merge', 'leakcheck'] },
-  { id: 'ondevice', layer: 'engine', name: 'On-device model pass', path: 'src/onDevice.ts', owner: 'likhil', status: 'built',
-    does: 'Asks the on-device model, through AiBridge.onDevice(), for the people, organizations and addresses in each clause, with a JSON schema. Names that are not really in the text are dropped.',
-    takes: 'Raw clause text, device only', gives: 'Entities with a kind and a party flag',
-    parts: ['Long clauses go in pieces of up to 2,000 characters', 'classify(): one clause type per clause, such as payment or termination'],
-    left: ['Run on real Gemini Nano and Apple Foundation Models', 'Connect classify() so clause types reach the cloud prompt'],
-    caveat: 'Tested only with a mocked model so far.',
-    links: ['mask', 'merge', 'web-bridge', 'android-bridge', 'ios-bridge'] },
-  { id: 'merge', layer: 'engine', name: 'Merge and match', path: 'src/merge.ts', owner: 'likhil', status: 'built',
-    does: 'Combines what the pattern pass and the model found into one list of entities, each with every way it is written, then finds every place each one appears.',
-    takes: 'Spans and entities', gives: 'Non-overlapping spans to replace',
-    parts: ['Variants: Acme Corp → Acme; Mr. John Smith → John Smith, John, Smith', 'Whole-word, case-insensitive matching that works across line breaks', 'A one-word capitalized name only matches capitalized text, so "Will" skips "will"', 'Overlaps: the longest match wins, and a pattern beats a name on a tie'],
-    caveat: 'Two people who share a last name share its placeholder where the last name appears alone.',
-    links: ['regex', 'ondevice', 'placeholders'] },
-  { id: 'placeholders', layer: 'engine', name: 'Placeholders', path: 'src/placeholders.ts', owner: 'likhil', status: 'built',
-    does: 'Gives each distinct value one placeholder, numbered per kind and kept the same across the whole contract.',
-    takes: 'A kind and a value', gives: '[ORG_1], [AMOUNT_2], [PARTY_A], and the ledger',
-    parts: ['Parties are lettered: [PARTY_A], [PARTY_B]', 'The ledger lists placeholder, kind and clauses, never the real value'],
-    links: ['merge', 'leakcheck', 'vault', 'web-app'] },
-  { id: 'leakcheck', layer: 'engine', name: 'Leak check', path: 'src/leakCheck.ts', owner: 'likhil', status: 'built',
-    does: 'The last gate before the cloud. Scans the masked text again with every pattern and searches for every real value that was masked. Any hit blocks the send and shows where.',
-    takes: 'Masked drafts and the real values', gives: 'MaskedClause[] holding CleanText, or Leak[] with snippets',
-    parts: ['The only code that creates CleanText', 'Placeholders themselves are skipped'],
-    links: ['mask', 'regex', 'approve'] },
-  { id: 'vault', layer: 'engine', name: 'Encrypted vault', path: 'src/vault.ts', owner: 'likhil', status: 'built',
-    does: 'Keeps the placeholder-to-real-value map for each document on the device, encrypted. It never leaves the device.',
-    takes: 'docId and the placeholder map', gives: 'The map back, for unmask()',
-    parts: ['AES-GCM 256 with a non-extractable key', 'IndexedDB through idb, which also works in mobile WebViews', 'docId is bound in, so one document’s vault cannot stand in for another’s'],
-    links: ['mask', 'unmask'] },
-  { id: 'unmask', layer: 'engine', name: 'unmask()', path: 'src/unmask.ts', owner: 'likhil', status: 'built',
-    does: 'Puts the real values back into the cloud’s answer, on the device. Only placeholders in the vault are restored. Made-up ones such as [PARTY_C] stay as text.',
-    takes: 'docId and Analysis[]', gives: 'Analysis[] with real names',
-    left: ['Test on real cloud output once analyze() works'],
-    links: ['vault', 'ai-logic', 'web-app'] },
+const W = 140, H = 50, X0 = 100, SX = 160, Y0 = 40, SY = 96;
+const nx = (f) => X0 + f.slot * SX;
+const ny = (f) => Y0 + f.row * SY;
+const byId = Object.fromEntries(FEATURES.map((f) => [f.id, f]));
+const state = { owner: 'all', status: 'all', selected: null, hover: null, journey: null, step: 0 };
+const $ = (s) => document.querySelector(s);
+const NS = 'http://www.w3.org/2000/svg';
 
-  // AI bridge
-  { id: 'web-bridge', layer: 'bridge', name: 'WebBridge', path: 'apps/web/src/webBridge.ts', owner: 'dhruv', status: 'partial',
-    does: 'The AiBridge for Chrome. onDevice() runs Gemini Nano through Firebase AI Logic in ONLY_ON_DEVICE mode. analyze() will call Gemini in the cloud in PREFER_IN_CLOUD mode.',
-    takes: 'Prompts (device) and MaskedClause[] (cloud)', gives: 'Model answers, and Analysis[] with ranOn',
-    parts: ['onDeviceStatus(): Chrome’s availability check', 'downloadModel(): starts the model download from a click', 'onDevice(): one model per JSON schema'],
-    left: ['analyze() is a stub that throws', 'Reject results that use placeholders it was not sent'],
-    caveat: 'Gemini Nano runs only in real Chrome. Embedded browsers, such as app preview panes, report it as unavailable.',
-    links: ['ondevice', 'ai-logic', 'approve', 'core-types'] },
-  { id: 'android-bridge', layer: 'bridge', name: 'Android bridge', path: 'apps/mobile/android (planned)', owner: 'none', status: 'todo',
-    does: 'A Kotlin Capacitor plugin that implements AiBridge with Gemini Nano on the phone and Firebase AI Logic in the cloud.',
-    takes: 'The same calls as WebBridge', gives: 'The same answers as WebBridge',
-    left: ['Needs an owner', 'onDevice(), analyze() and App Check with Play Integrity'],
-    links: ['mobile-shell', 'ondevice', 'ai-logic'] },
-  { id: 'ios-bridge', layer: 'bridge', name: 'iOS bridge', path: 'apps/mobile/ios (planned)', owner: 'none', status: 'todo',
-    does: 'A Swift Capacitor plugin that implements AiBridge with Apple Foundation Models on the phone and Firebase AI Logic in the cloud.',
-    takes: 'The same calls as WebBridge', gives: 'The same answers as WebBridge',
-    left: ['Needs an owner and a Mac with Xcode', 'Test the entity prompt, since Apple Foundation Models answers differently from Gemini Nano', 'App Check with App Attest'],
-    links: ['mobile-shell', 'ondevice', 'ai-logic'] },
-
-  // Boundary
-  { id: 'approve', layer: 'gate', name: 'Review and approve', path: 'apps/web (planned)', owner: 'sai', status: 'todo',
-    does: 'When masking ran without the on-device model (needsReview), the user reads the masked text and approves it before anything is sent.',
-    takes: 'MaskResult with needsReview', gives: 'Permission to call analyze()',
-    left: ['Build the approve step in the web app', 'Proposed in the interface review: approve() and assertApproved(), so the bridge can check approval at runtime'],
-    links: ['mask', 'leakcheck', 'web-bridge'] },
-
-  // Cloud
-  { id: 'ai-logic', layer: 'cloud', name: 'Cloud analysis', path: 'Firebase AI Logic · Gemini', owner: 'dhruv', status: 'partial',
-    does: 'Turns each masked clause into a risk level, an explanation, a suggested redline and questions to ask, using a prompt and a JSON schema.',
-    takes: 'MaskedClause[] with placeholders only', gives: 'Analysis[], one per clause',
-    parts: ['firebase.ts already sets up AI Logic with the Gemini Developer API', 'Offline, PREFER_IN_CLOUD falls back to the device with a shorter red-flags prompt'],
-    left: ['The analysis prompt and response schema', 'The first real cloud call', 'Reply to the interface review: docId echoed back, a failed list per clause'],
-    links: ['web-bridge', 'appcheck', 'remote-config', 'unmask'] },
-  { id: 'appcheck', layer: 'cloud', name: 'App Check', path: 'Firebase', owner: 'dhruv', status: 'todo',
-    does: 'Proves calls come from Clause Guard. The hackathon requires it, and debug tokens are accepted.',
-    left: ['reCAPTCHA Enterprise on web, Play Integrity on Android, App Attest on iOS', 'Debug provider for development and the extension'],
-    links: ['ai-logic', 'web-bridge'] },
-  { id: 'remote-config', layer: 'cloud', name: 'Remote Config', path: 'Firebase', owner: 'dhruv', status: 'todo',
-    does: 'Holds the prompts and model names, so every platform uses the same ones without a new release.',
-    left: ['Move the prompts here once they are tuned'],
-    links: ['ai-logic'] },
-  { id: 'hosting', layer: 'cloud', name: 'Hosting', path: 'Firebase', owner: 'dhruv', status: 'todo',
-    does: 'Serves the web app at a public link for the judges.',
-    left: ['Deploy by Nov 27'],
-    links: ['web-app', 'demo'] },
-
-  // Shared and quality
-  { id: 'core-types', layer: 'shared', name: 'Shared types', path: 'packages/core/src/types.ts', owner: 'team', status: 'built',
-    does: 'The contract every part builds against: Clause, MaskedClause, CleanText, MaskResult, LedgerEntry, Analysis and the AiBridge interface.',
-    parts: ['CleanText is a branded string, so analyze() only accepts leak-checked text', 'LedgerEntry never holds a real value'],
-    left: ['Agree the interface review changes: ApprovedBatch, docId in MaskResult, AnalyzeResult with a failed list'],
-    links: ['mask', 'web-bridge', 'documents'] },
-  { id: 'samples', layer: 'shared', name: 'Samples and tests', path: 'samples/ · src/*.test.ts', owner: 'likhil', status: 'built',
-    does: 'Six fictional contracts, each with the values that must be masked and the terms that must stay. Vitest scores the engine on them.',
-    parts: ['NDA, freelance, lease, offer letter, SaaS, promissory note', 'Without the model: 70 of 70 values masked, 34 of 34 terms kept', '46 tests pass'],
-    left: ['Score real Gemini Nano output on the same samples'],
-    links: ['mask', 'regex'] },
-  { id: 'demo', layer: 'shared', name: 'Demo and submission', path: 'Devpost', owner: 'none', status: 'todo',
-    does: 'A public demo video of 3 minutes or less that shows web, Android and iOS, the ledger, a blocked send and offline mode, then the Devpost entry.',
-    left: ['Needs an owner', 'Deadline: Nov 30, 2 PM PT'],
-    links: ['hosting', 'web-app'] },
-];
-
-const TRACE = [
-  { title: 'Paste or import a contract', nodes: ['web-app'], text: 'The contract is raw text in the browser. In this form it never leaves the device.' },
-  { title: 'Split into clauses', nodes: ['documents'], text: 'Each clause gets an id. v1 splits pasted text on blank lines.' },
-  { title: 'Pattern pass', nodes: ['regex'], text: 'Amounts, dates, emails, phone numbers and account numbers, plus companies, titled people, signature names and addresses.' },
-  { title: 'On-device model pass', nodes: ['ondevice', 'web-bridge'], text: 'Gemini Nano, in ONLY_ON_DEVICE mode, lists the people, organizations and addresses. Without it, broad pattern masking runs and needsReview is set.' },
-  { title: 'Merge and number', nodes: ['merge', 'placeholders'], text: 'Each name gets one placeholder for the whole contract, including short forms such as "Acme".' },
-  { title: 'Leak check', nodes: ['leakcheck'], text: 'The masked text is scanned again. Any real value or pattern still there blocks the send.' },
-  { title: 'Save the vault', nodes: ['vault'], text: 'The placeholder-to-value map is encrypted and kept on the device.' },
-  { title: 'User approves', nodes: ['approve'], text: 'Required when needsReview is true, so a person checks the masked text before it leaves.' },
-  { title: 'Cloud analysis', nodes: ['web-bridge', 'ai-logic', 'appcheck'], text: 'Only CleanText crosses. Gemini returns a risk level, explanation, redline and questions for each clause.' },
-  { title: 'Unmask', nodes: ['unmask', 'vault'], text: 'Real values go back in on the device. Placeholders the cloud made up stay as they are.' },
-  { title: 'Show results', nodes: ['web-app', 'ui-pkg'], text: 'Clause cards, the privacy ledger and an on-device or cloud badge.' },
-];
-
-const byId = Object.fromEntries(NODES.map((n) => [n.id, n]));
-const state = { owner: 'all', status: 'all', selected: null, step: null };
-
-const $ = (sel) => document.querySelector(sel);
-const mark = (status) => `<i class="mark ${status}" aria-hidden="true"></i>`;
-
-function renderFilters() {
-  const owners = [['all', 'All'], ...Object.keys(OWNER_SHORT).map((k) => [k, OWNER_SHORT[k]])];
-  const statuses = [['all', 'All'], ...Object.entries(STATUS)];
-  $('#owner-filter').innerHTML = owners.map(([k, v]) => `<button type="button" data-owner="${k}" aria-pressed="${state.owner === k}">${v}</button>`).join('');
-  $('#status-filter').innerHTML = statuses.map(([k, v]) => `<button type="button" data-status="${k}" aria-pressed="${state.status === k}">${k === 'all' ? v : mark(k) + ' ' + v}</button>`).join('');
+function el(name, attrs = {}, text) {
+  const node = document.createElementNS(NS, name);
+  for (const [k, v] of Object.entries(attrs)) node.setAttribute(k, v);
+  if (text !== undefined) node.textContent = text;
+  return node;
 }
 
-function renderMap() {
-  $('#map').innerHTML = LAYERS.map((layer) => {
-    const nodes = NODES.filter((n) => n.layer === layer.id);
-    const cross = layer.id === 'gate'
-      ? `<div class="cross">Only <code>MaskedClause[]</code> holding <code>CleanText</code> crosses, created by the leak check. Real values stay behind in the vault.</div>`
-      : '';
-    return `<section class="band ${layer.zone}" aria-label="${layer.name}">
-      <div class="band-head">
-        <span class="zone-tag">${layer.tag}</span>
-        <h2>${layer.name}</h2>
-        <p>${layer.note}</p>
-      </div>
-      <div class="nodes">${nodes.map(nodeCard).join('')}${cross}</div>
-    </section>`;
-  }).join('');
+function geometry(e) {
+  const a = byId[e.from], b = byId[e.to];
+  if (b.row > a.row) {
+    const p0 = [nx(a) + W / 2, ny(a) + H], p3 = [nx(b) + W / 2, ny(b) - 2];
+    const d = Math.max(22, (p3[1] - p0[1]) / 2);
+    const p1 = [p0[0], p0[1] + d], p2 = [p3[0], p3[1] - d];
+    return { d: `M${p0} C${p1} ${p2} ${p3}`, pts: [p0, p1, p2, p3] };
+  }
+  const y = ny(a) + H / 2;
+  const p0 = b.slot > a.slot ? [nx(a) + W, y] : [nx(a), y];
+  const p3 = b.slot > a.slot ? [nx(b) - 2, y] : [nx(b) + W + 2, y];
+  return { d: `M${p0} L${p3}`, pts: [p0, p0, p3, p3] };
 }
 
-function nodeCard(n) {
-  return `<button type="button" class="node ${n.status}${n.wide ? ' wide' : ''}" data-id="${n.id}">
-    <span class="node-top">${mark(n.status)}<span class="node-name">${n.name}</span></span>
-    <span class="node-path">${n.path}</span>
-    ${n.sub ? `<span class="node-sub">${n.sub}</span>` : ''}
-    <span class="node-owner">${OWNERS[n.owner]} · ${STATUS[n.status]}</span>
-  </button>`;
+function pointAt([p0, p1, p2, p3], t) {
+  const u = 1 - t;
+  const c = [u * u * u, 3 * u * u * t, 3 * u * t * t, t * t * t];
+  return [0, 1].map((i) => c[0] * p0[i] + c[1] * p1[i] + c[2] * p2[i] + c[3] * p3[i]);
 }
 
-function renderRepo() {
-  const rows = [...NODES].sort((a, b) => a.path.localeCompare(b.path));
-  $('#repo-rows').innerHTML = rows.map((n) => `<tr data-id="${n.id}">
-    <td class="mono">${n.path}</td><td>${n.name}</td><td>${OWNERS[n.owner]}</td>
-    <td><span class="st">${mark(n.status)}${STATUS[n.status]}</span></td></tr>`).join('');
+function markMarkup(status) {
+  if (status === 'built') return el('circle', { cx: 14, cy: 17, r: 4.5, class: 'mk-built' });
+  const g = el('g');
+  g.append(el('circle', { cx: 14, cy: 17, r: 4.5, class: status === 'partial' ? 'mk-ring-partial' : 'mk-ring-todo' }));
+  if (status === 'partial') g.append(el('path', { d: 'M14,12.5 a4.5,4.5 0 0 0 0,9 z', class: 'mk-half' }));
+  return g;
 }
 
-function matches(n) {
-  return (state.owner === 'all' || n.owner === state.owner) && (state.status === 'all' || n.status === state.status);
+function buildGraph() {
+  const svg = $('#graph');
+  const defs = el('defs');
+  for (const k of ['flow', 'hot', 'enables', 'fallback', 'secures', 'block']) {
+    const m = el('marker', { id: `arrow-${k}`, viewBox: '0 0 10 10', refX: 9, refY: 5, markerWidth: 7, markerHeight: 7, orient: 'auto-start-reverse', markerUnits: 'userSpaceOnUse' });
+    m.append(el('path', { d: 'M0,0 L10,5 L0,10 z', class: `arrow-${k}` }));
+    defs.append(m);
+  }
+  svg.append(defs);
+
+  STAGES.forEach((name, r) => {
+    const y = Y0 + r * SY;
+    svg.append(el('text', { x: 10, y: y + 20, class: 'stage-n' }, String(r + 1).padStart(2, '0')));
+    svg.append(el('text', { x: 10, y: y + 37, class: 'stage-t' }, name));
+  });
+
+  const cloudX = X0 + SX - 10, cloudY = Y0 + 5 * SY - 12;
+  svg.append(el('rect', { x: cloudX, y: cloudY, width: 3 * SX - SX + W + 20, height: H + 24, rx: 10, class: 'cloud-zone' }));
+  svg.append(el('text', { x: X0 + 4 * SX, y: Y0 + 5 * SY + 20, class: 'cloud-t' }, 'Cloud'));
+  svg.append(el('text', { x: X0 + 4 * SX, y: Y0 + 5 * SY + 37, class: 'cloud-s' }, 'sees placeholders only'));
+
+  const by = Y0 + 4 * SY + H + (SY - H) / 2 - 6;
+  svg.append(el('line', { x1: 10, x2: 886, y1: by, y2: by, class: 'boundary' }));
+  svg.append(el('text', { x: 10, y: by - 6, class: 'boundary-t' }, 'PRIVACY BOUNDARY'));
+  svg.append(el('text', { x: 886, y: by - 6, class: 'boundary-t', 'text-anchor': 'end' }, 'ONLY LEAK-CHECKED TEXT CROSSES'));
+
+  const edgeLayer = el('g');
+  for (const e of EDGES) {
+    const g = geometry(e);
+    e.geo = g;
+    e.node = el('path', { d: g.d, class: `edge ${e.kind}`, 'marker-end': `url(#arrow-${e.kind})` });
+    edgeLayer.append(e.node);
+  }
+  svg.append(edgeLayer);
+
+  const nodeLayer = el('g');
+  for (const f of FEATURES) {
+    const g = el('g', { class: `fnode ${f.status}${f.cloud ? ' cloud' : ''}`, transform: `translate(${nx(f)},${ny(f)})`, tabindex: 0, role: 'button', 'data-id': f.id, 'aria-label': `${f.name}, ${STATUS[f.status]}, ${OWNERS[f.owner]}` });
+    g.append(el('rect', { class: 'box', width: W, height: H, rx: 6 }));
+    g.append(markMarkup(f.status));
+    g.append(el('text', { x: 26, y: 21, class: 'n-name' }, f.name));
+    g.append(el('text', { x: 12, y: 39, class: 'n-meta' }, `${OWNER_SHORT[f.owner]} · ${STATUS[f.status]}`));
+    f.node = g;
+    nodeLayer.append(g);
+  }
+  svg.append(nodeLayer);
+
+  state.labelLayer = el('g');
+  svg.append(state.labelLayer);
+}
+
+function renderControls() {
+  $('#journeys').innerHTML = Object.entries(JOURNEYS).map(([k, j]) => `<button type="button" data-journey="${k}" aria-pressed="${state.journey === k}">${j.name}</button>`).join('');
+  $('#owner-filter').innerHTML = [['all', 'All'], ...Object.entries(OWNER_SHORT)].map(([k, v]) => `<button type="button" data-owner="${k}" aria-pressed="${state.owner === k}">${v}</button>`).join('');
+  $('#status-filter').innerHTML = [['all', 'All'], ...Object.entries(STATUS)].map(([k, v]) => `<button type="button" data-status="${k}" aria-pressed="${state.status === k}">${k === 'all' ? '' : `<i class="mark ${k}"></i>`}${v}</button>`).join('');
+}
+
+const matches = (f) => (state.owner === 'all' || f.owner === state.owner) && (state.status === 'all' || f.status === state.status);
+
+function focusSets() {
+  if (state.journey) {
+    const s = JOURNEYS[state.journey].steps[state.step];
+    return { nodes: new Set(s.n), edges: new Set(s.e) };
+  }
+  const id = state.hover || state.selected;
+  if (!id) return null;
+  const edges = EDGES.filter((e) => e.from === id || e.to === id);
+  return { nodes: new Set([id, ...edges.flatMap((e) => [e.from, e.to])]), edges: new Set(edges.map((e) => e.id)) };
 }
 
 function paint() {
-  const lit = state.step === null ? null : new Set(TRACE[state.step].nodes);
-  document.querySelectorAll('.node').forEach((el) => {
-    const n = byId[el.dataset.id];
-    el.classList.toggle('lit', !!lit && lit.has(n.id));
-    el.classList.toggle('dim', lit ? !lit.has(n.id) : !matches(n));
-    el.setAttribute('aria-current', String(state.selected === n.id));
-  });
-  document.querySelectorAll('#repo-rows tr').forEach((tr) => tr.classList.toggle('dim', !matches(byId[tr.dataset.id])));
-  document.querySelectorAll('#owner-filter button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.owner === state.owner)));
-  document.querySelectorAll('#status-filter button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.status === state.status)));
+  const focus = focusSets();
+  for (const f of FEATURES) {
+    const on = focus ? focus.nodes.has(f.id) : matches(f);
+    f.node.classList.toggle('dim', !on);
+    f.node.classList.toggle('lit', !!focus && on);
+    f.node.classList.toggle('sel', state.selected === f.id);
+  }
+  state.labelLayer.replaceChildren();
+  for (const e of EDGES) {
+    const hot = !!focus && focus.edges.has(e.id);
+    const on = focus ? hot : matches(byId[e.from]) && matches(byId[e.to]);
+    e.node.classList.toggle('hot', hot);
+    e.node.classList.toggle('dim', !on);
+    e.node.setAttribute('marker-end', `url(#arrow-${hot && e.kind === 'flow' ? 'hot' : e.kind})`);
+    if (hot) addLabel(e);
+  }
+  document.querySelectorAll('[data-journey]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.journey === state.journey)));
+  document.querySelectorAll('[data-owner]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.owner === state.owner)));
+  document.querySelectorAll('[data-status]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.status === state.status)));
   renderTrace();
   renderDetail();
 }
 
-function renderTrace() {
-  const box = $('#trace');
-  box.hidden = state.step === null;
-  $('#trace-toggle').textContent = state.step === null ? 'Trace a contract' : 'Stop tracing';
-  if (state.step === null) return;
-  const s = TRACE[state.step];
-  $('#trace-num').innerHTML = `${state.step + 1}<small>/${TRACE.length}</small>`;
-  $('#trace-title').textContent = s.title;
-  $('#trace-text').textContent = s.text;
-  $('#trace-prev').disabled = state.step === 0;
-  $('#trace-next').disabled = state.step === TRACE.length - 1;
-  $('#trace-dots').innerHTML = TRACE.map((t, i) => `<button type="button" class="${i <= state.step ? 'on' : ''}" data-step="${i}" aria-label="Step ${i + 1}: ${t.title}"></button>`).join('');
+function addLabel(e) {
+  let [x, y] = pointAt(e.geo.pts, e.t);
+  const w = e.label.length * 5.6 + 12;
+  // Neighbours in the same row leave too little room between them, so the label sits just above the row.
+  const a = byId[e.from], b = byId[e.to];
+  if (a.row === b.row && Math.abs(a.slot - b.slot) === 1) y = ny(a) - 12;
+  const g = el('g', { class: 'elabel', transform: `translate(${x - w / 2},${y - 9})` });
+  g.append(el('rect', { width: w, height: 18, rx: 4 }));
+  g.append(el('text', { x: w / 2, y: 12.5, 'text-anchor': 'middle' }, e.label));
+  state.labelLayer.append(g);
 }
 
-function list(items) {
-  return `<ul>${items.map((i) => `<li>${i}</li>`).join('')}</ul>`;
+function renderTrace() {
+  const box = $('#trace');
+  box.hidden = !state.journey;
+  if (!state.journey) return;
+  const j = JOURNEYS[state.journey], s = j.steps[state.step];
+  $('#trace-num').innerHTML = `${state.step + 1}<small>/${j.steps.length}</small>`;
+  $('#trace-kicker').textContent = j.name;
+  $('#trace-title').textContent = s.t;
+  $('#trace-text').textContent = s.x;
+  $('#trace-prev').disabled = state.step === 0;
+  $('#trace-next').disabled = state.step === j.steps.length - 1;
+  $('#trace-dots').innerHTML = j.steps.map((st, i) => `<button type="button" class="${i <= state.step ? 'on' : ''}" data-step="${i}" aria-label="Step ${i + 1}: ${st.t}"></button>`).join('');
+}
+
+const mark = (s) => `<i class="mark ${s}" aria-hidden="true"></i>`;
+const list = (items) => `<ul>${items.map((i) => `<li>${i}</li>`).join('')}</ul>`;
+
+function connections(items, dir) {
+  if (!items.length) return `<p class="empty">${dir === 'in' ? 'Nothing. This is where a journey starts.' : 'Nothing. This is where a journey ends.'}</p>`;
+  return `<div class="conn">${items.map((e) => {
+    const other = byId[dir === 'in' ? e.from : e.to];
+    return `<button type="button" data-id="${other.id}">${mark(other.status)}<span class="c-name">${other.name}</span><span class="kind ${e.kind}">${KIND[e.kind]}</span><span class="c-label">${e.label}</span></button>`;
+  }).join('')}</div>`;
 }
 
 function renderDetail() {
   const box = $('#detail');
-  const n = state.selected && byId[state.selected];
-  if (!n) { box.innerHTML = overview(); return; }
+  const f = state.selected && byId[state.selected];
+  if (!f) { box.innerHTML = overview(); return; }
+  const zone = f.cloud ? '<span class="chip cloud">Cloud</span>' : '<span class="chip device">On device</span>';
   box.innerHTML = `
-    <button type="button" class="btn ghost back" data-back>All parts</button>
-    <div class="sec">
-      <h2>${n.name}</h2>
-      <div class="path">${n.path}</div>
-    </div>
-    <div class="chips">
-      <span class="chip">${mark(n.status)}${STATUS[n.status]}</span>
-      <span class="chip">${OWNERS[n.owner]}</span>
-      <span class="chip">${LAYERS.find((l) => l.id === n.layer).name}</span>
-    </div>
-    <div class="sec"><h3>What it does</h3><p>${n.does}</p></div>
-    ${n.takes ? `<div class="sec"><h3>Takes and gives</h3><dl class="io"><dt>Takes</dt><dd>${n.takes}</dd><dt>Gives</dt><dd>${n.gives}</dd></dl></div>` : ''}
-    ${n.parts ? `<div class="sec"><h3>Inside</h3>${list(n.parts)}</div>` : ''}
-    ${n.caveat ? `<p class="caveat">${n.caveat}</p>` : ''}
-    <div class="sec"><h3>Still to do</h3>${n.left && n.left.length ? list(n.left) : '<p>Nothing for v1.</p>'}</div>
-    <div class="sec"><h3>Connected to</h3><div class="links">${n.links.map((id) => `<button type="button" data-id="${id}">${mark(byId[id].status)}${byId[id].name}</button>`).join('')}</div></div>`;
+    <button type="button" class="btn ghost back" data-back>All features</button>
+    <div class="sec"><h3>Stage ${f.row + 1} · ${STAGES[f.row]}</h3><h2>${f.name}</h2></div>
+    <div class="chips"><span class="chip">${mark(f.status)}${STATUS[f.status]}</span><span class="chip">${OWNERS[f.owner]}</span>${zone}</div>
+    <div class="sec"><h3>What it does</h3><p>${f.does}</p></div>
+    ${f.caveat ? `<p class="caveat">${f.caveat}</p>` : ''}
+    <div class="sec"><h3>Comes from</h3>${connections(EDGES.filter((e) => e.to === f.id), 'in')}</div>
+    <div class="sec"><h3>Leads to</h3>${connections(EDGES.filter((e) => e.from === f.id), 'out')}</div>
+    <div class="sec"><h3>Still to do</h3>${f.left && f.left.length ? list(f.left) : '<p class="empty">Nothing for v1.</p>'}</div>
+    <div class="sec"><h3>In the code</h3><p class="code">${f.code}</p></div>`;
 }
 
 function overview() {
-  const count = (s) => NODES.filter((n) => n.status === s).length;
-  const critical = ['web-bridge', 'approve', 'web-app', 'ondevice'];
+  const count = (s) => FEATURES.filter((f) => f.status === s).length;
+  const waiting = ['analysis', 'approve', 'results', 'names'];
   return `
-    <div class="sec"><h3>Overview</h3><h2>${NODES.length} parts, 7 layers</h2></div>
-    <div class="stats">
-      ${Object.keys(STATUS).map((s) => `<div class="stat"><b>${count(s)}</b><span>${mark(s)}${STATUS[s]}</span></div>`).join('')}
-    </div>
+    <div class="sec"><h3>Overview</h3><h2>${FEATURES.length} features, ${EDGES.length} connections</h2></div>
+    <div class="stats">${Object.keys(STATUS).map((s) => `<div class="stat"><b>${count(s)}</b><span>${mark(s)}${STATUS[s]}</span></div>`).join('')}</div>
+    <div class="sec"><h3>How to read it</h3>
+      <p>Rows run in the order a contract moves, from opening it to showing the review. Hover a feature to light up its connections, and click it to keep them lit and read the details here.</p></div>
     <div class="sec"><h3>The rule everything follows</h3>
-      <p>Raw contract text only goes to the on-device model. The cloud gets text that passed the leak check, and real values come back only on the device.</p></div>
+      <p>The raw contract only goes to the on-device model. The cloud gets text that passed the leak check, and real names come back only on the device.</p></div>
     <div class="sec"><h3>What v1 is waiting on</h3>
-      <div class="path-list">${critical.map((id) => {
-        const n = byId[id];
-        return `<button type="button" data-id="${id}"><span>${mark(n.status)} ${n.name}</span><small>${OWNERS[n.owner]} · ${n.left[0]}</small></button>`;
+      <div class="conn">${waiting.map((id) => {
+        const f = byId[id];
+        return `<button type="button" data-id="${id}">${mark(f.status)}<span class="c-name">${f.name}</span><span class="kind">${OWNER_SHORT[f.owner]}</span><span class="c-label">${(f.left && f.left[0]) || f.caveat}</span></button>`;
       }).join('')}</div></div>
     <div class="sec"><h3>Team tracker</h3>
       <p><a href="https://github.com/lgudip-01/-BuildHybridAI/issues/1" target="_blank" rel="noopener">Issue #1: v1 by tonight</a></p></div>`;
 }
 
 function select(id) {
-  state.selected = id;
+  state.selected = state.selected === id && !state.journey ? null : id;
   paint();
-  if (id && window.matchMedia('(max-width: 1020px)').matches) {
+  if (state.selected && window.matchMedia('(max-width: 1080px)').matches) {
     $('#detail').scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
   }
 }
 
+function startJourney(k) {
+  if (state.journey === k) { state.journey = null; paint(); return; }
+  state.journey = k;
+  goStep(0);
+}
+
 function goStep(i) {
-  state.step = Math.max(0, Math.min(TRACE.length - 1, i));
-  state.selected = TRACE[state.step].nodes[0];
+  const steps = JOURNEYS[state.journey].steps;
+  state.step = Math.max(0, Math.min(steps.length - 1, i));
+  state.selected = steps[state.step].n[steps[state.step].n.length - 1];
+  state.hover = null;
   paint();
 }
 
-document.addEventListener('click', (e) => {
-  const t = e.target.closest('button, tr');
+document.addEventListener('click', (ev) => {
+  const t = ev.target.closest('button, .fnode');
   if (!t) return;
-  if (t.dataset.owner) { state.owner = t.dataset.owner; paint(); return; }
-  if (t.dataset.status) { state.status = t.dataset.status; paint(); return; }
-  if (t.dataset.step) { goStep(Number(t.dataset.step)); return; }
-  if (t.hasAttribute('data-back')) { select(null); return; }
-  if (t.id === 'trace-toggle') { state.step === null ? goStep(0) : (state.step = null, paint()); return; }
-  if (t.id === 'trace-prev') { goStep(state.step - 1); return; }
-  if (t.id === 'trace-next') { goStep(state.step + 1); return; }
-  if (t.id === 'trace-close') { state.step = null; paint(); return; }
-  if (t.dataset.id) {
-    select(t.dataset.id);
-    if (t.tagName === 'TR') document.querySelector(`.node[data-id="${t.dataset.id}"]`)?.scrollIntoView({ block: 'center' });
-  }
+  const d = t.dataset;
+  if (d.journey) return startJourney(d.journey);
+  if (d.owner) { state.owner = d.owner; return paint(); }
+  if (d.status) { state.status = d.status; return paint(); }
+  if (d.step) return goStep(Number(d.step));
+  if (t.hasAttribute('data-back')) { state.selected = null; return paint(); }
+  if (t.id === 'trace-prev') return goStep(state.step - 1);
+  if (t.id === 'trace-next') return goStep(state.step + 1);
+  if (t.id === 'trace-close') { state.journey = null; return paint(); }
+  if (d.id) select(d.id);
 });
 
-document.addEventListener('keydown', (e) => {
-  if (state.step === null || e.target.closest('input, textarea')) return;
-  if (e.key === 'ArrowRight') goStep(state.step + 1);
-  if (e.key === 'ArrowLeft') goStep(state.step - 1);
-  if (e.key === 'Escape') { state.step = null; paint(); }
+const graph = $('#graph');
+graph.addEventListener('mouseover', (ev) => {
+  const n = ev.target.closest('.fnode');
+  if (!n || state.journey || state.hover === n.dataset.id) return;
+  state.hover = n.dataset.id;
+  paint();
+});
+graph.addEventListener('mouseleave', () => {
+  if (!state.hover) return;
+  state.hover = null;
+  paint();
+});
+graph.addEventListener('mouseout', (ev) => {
+  const from = ev.target.closest('.fnode');
+  const to = ev.relatedTarget && ev.relatedTarget.closest && ev.relatedTarget.closest('.fnode');
+  if (from && !to && state.hover) { state.hover = null; paint(); }
+});
+graph.addEventListener('keydown', (ev) => {
+  const n = ev.target.closest('.fnode');
+  if (n && (ev.key === 'Enter' || ev.key === ' ')) { ev.preventDefault(); select(n.dataset.id); }
+});
+document.addEventListener('keydown', (ev) => {
+  if (!state.journey) return;
+  if (ev.key === 'ArrowRight') goStep(state.step + 1);
+  if (ev.key === 'ArrowLeft') goStep(state.step - 1);
+  if (ev.key === 'Escape') { state.journey = null; paint(); }
 });
 
-renderFilters();
-renderMap();
-renderRepo();
+buildGraph();
+renderControls();
 paint();
 </script>
 </body>
