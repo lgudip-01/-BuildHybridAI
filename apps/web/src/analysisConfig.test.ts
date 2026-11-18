@@ -25,6 +25,15 @@ it('retains application output rules when prompts change', () => {
   const c = parseAnalysisConfig(JSON.stringify({...DEFAULT_PAYLOAD,cloudPrompt:'A sufficiently long alternate analysis instruction.'}));
   expect(c.cloudPrompt).toContain(ANALYSIS_OUTPUT_RULES);
 });
+it('appends current drafting rules to previously published remote prompts', () => {
+  const previous = { ...DEFAULT_PAYLOAD, cloudPrompt: 'Previously published cloud review instructions. Return JSON and preserve placeholders.',
+    devicePrompt: 'Previously published preliminary offline scan instructions.' };
+  const config = parseAnalysisConfig(JSON.stringify(previous));
+  expect(config.cloudPrompt).toContain(previous.cloudPrompt);
+  expect(config.cloudPrompt).toContain(ANALYSIS_OUTPUT_RULES);
+  expect(config.devicePrompt).toContain(ANALYSIS_OUTPUT_RULES);
+  expect(config.cloudPrompt).toContain('leave redline empty');
+});
 it('loads once per app and reuses the same batch snapshot', async () => {
   const app = {} as FirebaseApp; const [a,b] = await Promise.all([loadAnalysisConfig(app),loadAnalysisConfig(app)]);
   expect(a).toBe(b); expect(sdk.fetch).toHaveBeenCalledTimes(1);

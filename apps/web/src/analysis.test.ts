@@ -76,6 +76,18 @@ describe('approved web analysis', () => {
     mocks.generate.mockResolvedValueOnce(output('c1', 'in_cloud', { ...answer(), explanation: 'Clarify [AMOUNT_1].' })).mockResolvedValueOnce(output('c2'));
     expect((await new WebBridge(ai).analyze(batch())).failed).toEqual([]);
   });
+  it.each(['[NUM]', '[years/months]', '[EMAIL_2]', '[ADDRESS_2]'])('rejects observed NDA drafting blank %s', async token => {
+    mocks.generate.mockResolvedValueOnce(output('c1', 'in_cloud', { ...answer(), redline: `Supply ${token}.` }));
+    const result = await new WebBridge(ai).analyze(batch(1));
+    expect(result.results).toEqual([]);
+    expect(result.failed).toMatchObject([{ clauseId: 'c1', reason: 'unknown_placeholder' }]);
+  });
+  it('accepts an empty redline with a question about missing notice details', async () => {
+    const data = { ...answer(), redline: '', questions: ['What email address should be used for [PARTY_B]?'] };
+    mocks.generate.mockResolvedValueOnce(output('c1', 'in_cloud', data));
+    const result = await new WebBridge(ai).analyze(batch(1));
+    expect(result.results).toEqual([data]); expect(result.failed).toEqual([]);
+  });
   it('isolates malformed JSON/IDs and sanitizes model errors without automatic retries', async () => {
     mocks.generate.mockResolvedValueOnce(output('wrong')).mockRejectedValueOnce(new Error('secret internal detail')).mockResolvedValueOnce(output('c3'));
     const result = await new WebBridge(ai).analyze(batch(3));
