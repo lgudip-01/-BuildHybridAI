@@ -199,8 +199,12 @@ export function findDefinedTerms(text: string): string[] {
   return [...text.matchAll(DEFINED_TERM)].map((m) => m[1]!.trim());
 }
 
+// Words a capitalized match can pick up in front of a name: "This Lease", or "For" in a signature block's
+// "For Halcyon Cloud Systems GmbH:". Never part of the name itself.
+const LEADING_WORDS = /^(?:(?:The|This|For|By|From|Between|Dear)|(?:THE|THIS|FOR|BY|FROM|BETWEEN|DEAR))\s+/;
+
 function trimLeadingArticle(text: string, span: Span): Span {
-  const lead = /^(?:The|This|THE|THIS)\s+/.exec(span.value);
+  const lead = LEADING_WORDS.exec(span.value);
   if (!lead) return span;
   const start = span.start + lead[0].length;
   return { ...span, start, value: text.slice(start, span.end) };

@@ -137,6 +137,37 @@ describe('mask', () => {
     ]);
   });
 
+  it('gives a company written short, or after "For" in a signature block, the placeholder of its full name', async () => {
+    const texts = [
+      'Payments go to Coastal Ridge Credit Union ("Lender") and Halcyon Cloud Systems GmbH ("Provider").',
+      'The account is held at Coastal Ridge.',
+      'For Halcyon Cloud Systems GmbH: Stefan Brandt',
+    ];
+    const result = await mask('doc-10', texts.map((text, index) => ({ id: `c${index + 1}`, index, text })), fakeBridge([], { status: 'unavailable' }));
+    if (!result.ok) throw new Error(JSON.stringify(result.leaks));
+
+    const [first, second, third] = result.clauses.map((c) => c.text);
+    const [lender, provider] = first!.match(/\[[A-Z]+_\d+\]/g)!;
+    expect(second).toBe(`The account is held at ${lender}.`);
+    expect(third).toContain(`For ${provider}:`);
+  });
+
+  it('gives a last name two people share a placeholder of its own', async () => {
+    const text = 'Rafael Mendoza borrows the money and Isabel Mendoza guarantees it. Rafael pays monthly, and Mendoza pays the costs.';
+    const people = [
+      { text: 'Rafael Mendoza', kind: 'person', party: false },
+      { text: 'Isabel Mendoza', kind: 'person', party: false },
+    ];
+    const result = await mask('doc-11', [{ id: 'c1', index: 0, text }], fakeBridge(people));
+    if (!result.ok) throw new Error(JSON.stringify(result.leaks));
+
+    const sent = result.clauses[0]!.text;
+    const [rafael, isabel, rafaelAgain, surname] = sent.match(/\[[A-Z]+_\d+\]/g)!;
+    expect(sent).not.toMatch(/Mendoza|Rafael|Isabel/);
+    expect(rafaelAgain).toBe(rafael);
+    expect(new Set([rafael, isabel, surname]).size).toBe(3);
+  });
+
   it('falls back the same way when the model answers with garbage', async () => {
     const result = await mask('doc-4', clauses, fakeBridge([], { answer: 'Sure! Here are the names:' }));
     if (!result.ok) throw new Error('blocked');
