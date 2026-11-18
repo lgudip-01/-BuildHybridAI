@@ -116,3 +116,21 @@ mask -> approve -> cloud analyze -> unmask path, plus real offline Nano fallback
 and a Network request audit. A passing mock suite/build is not evidence for
 these checks. Each teammate needs their own registered App Check development
 token. Never upload real contract values or tokens into an issue or test log.
+
+## Real engine integration gate (issue #8)
+
+Run `npm run test:engine-integration --workspace @clause-guard/web` after the
+engine implementation is published. The runner currently exits **2 (BLOCKED)**
+with an explicit missing-dependency message; it never reports a passing suite
+when approval.ts is absent. Running the test file directly through Vitest
+shows nine explicit skips in that case.
+
+The prepared suite imports the real mask(), approve(), assertApproved(), vault,
+and unmask() code. It mocks only the cloud SDK, uses pattern-only local masking,
+and exercises a synthetic fixture: a full roundtrip, missing review, forged or
+copied objects, post-mask mutation, needsReview tampering, remasking, invalidation
+before the first await, and invalidation during a cloud request. It does not
+verify Gemini/Nano execution, real cloud responses, or an outgoing-request audit.
+
+No production approval code or bypass is supplied by this test harness. Until
+the actual engine lands and this gate passes, Step 1 remains blocked.

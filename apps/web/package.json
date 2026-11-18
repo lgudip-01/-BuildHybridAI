@@ -8,7 +8,8 @@
     "build": "tsc --noEmit && vite build",
     "typecheck": "tsc --noEmit",
     "test:firebase": "node --experimental-vm-modules checkFirebase.mjs",
-    "test:analysis": "vitest run src/analysis.test.ts src/approvalGuard.test.ts"
+    "test:analysis": "vitest run src/analysis.test.ts src/approvalGuard.test.ts",
+    "test:engine-integration": "node checkEngineIntegration.mjs"
   },
   "dependencies": {
     "@capacitor/core": "^8.6.0",
@@ -27,6 +28,7 @@
     "@vitejs/plugin-react": "^6.3.0",
     "typescript": "^7.0.2",
     "vite": "^8.3.8",
-    "vitest": "^5.1.0"
+    "vitest": "^5.1.0",
+    "fake-indexeddb": "^6.2.8"
   }
 }
