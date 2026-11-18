@@ -16,7 +16,7 @@ export const ANALYSIS_JSON_SCHEMA = {
   additionalProperties: false,
 } as const;
 
-const FORMAT = 'Return only JSON: {clauseId, risk: low|medium|high, explanation, redline, questions: string[]}. ' +
+export const ANALYSIS_OUTPUT_RULES = 'Return only JSON: {clauseId, risk: low|medium|high, explanation, redline, questions: string[]}. ' +
   'Echo the exact clause id as clauseId. Preserve every placeholder exactly, including brackets and case, ' +
   'in all fields and questions. Never invent a placeholder or rewrite [PARTY_A] as Party A. ' +
   'Do not guess names, amounts, dates, jurisdictions, facts, or legal citations. ' +
@@ -30,11 +30,11 @@ export const CLOUD_ANALYSIS_PROMPT = 'You help a founder or freelancer review an
   'Risk high means a substantial obligation or exposure needs negotiation; medium means a meaningful ambiguity or imbalance; ' +
   'low means no clear major red flag in the supplied text, not approval of the contract. ' +
   'Explain the textual reason and missing context. Suggest narrow replacement wording without inventing commercial terms. ' +
-  'Use questions to resolve uncertainty. Do not make definitive enforceability claims or present this as legal advice. ' + FORMAT;
+  'Use questions to resolve uncertainty. Do not make definitive enforceability claims or present this as legal advice. ' + ANALYSIS_OUTPUT_RULES;
 
 export const DEVICE_ANALYSIS_PROMPT = 'Offline preliminary red-flag scan only. Flag obvious broad indemnity, uncapped liability, ' +
   'IP transfer, restrictive covenants, payment ambiguity or one-sided termination in this masked clause. ' +
-  'Say the scan is preliminary and limited; low risk is not contract approval. Leave redline empty if unsure. ' + FORMAT;
+  'Say the scan is preliminary and limited; low risk is not contract approval. Leave redline empty if unsure. ' + ANALYSIS_OUTPUT_RULES;
 
 // Same placeholder grammar as privacy-engine/placeholders.ts, with alphabetic party suffixes.
 const PLACEHOLDER = /\[[A-Z]+_[A-Z0-9]+\]/g;
