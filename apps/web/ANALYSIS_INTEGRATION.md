@@ -4,6 +4,13 @@ Related: issues #5, #7, #8, and Firebase setup PR #6.
 
 ## Current status
 
+Update: engine d7af3b4 is now integrated. approvalGuard.ts uses a direct package
+import, and all nine real-engine integration cases run and pass (cloud SDK mocked).
+The pending-engine descriptions below are retained as historical context and are
+superseded by ENGINE_INTEGRATION_CHECKS.md, which contains current status and the
+review-before-send six-sample helper. Remote Config is implemented and the project
+owner verified its published values in Chrome. Live cloud/offline checks remain.
+
 `WebBridge.analyze(batch)` is implemented against the approved-batch proposal.
 The real privacy-engine `approval.ts` is still pending in issue #8. Until that
 file exists, `approvalGuard.ts` throws `approval_unavailable` before any analysis
