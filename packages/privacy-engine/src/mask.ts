@@ -2,7 +2,7 @@ import type { AiBridge, Clause, ClauseType, MaskResult } from '@clause-guard/cor
 import { isCurrent, seal, startRun, type Run } from './approval';
 import { leakCheck } from './leakCheck';
 import { dedupeEntities, findOccurrences, normalize, resolveOverlaps, toEntity, type Candidate, type Entity } from './merge';
-import { classify, findEntities } from './onDevice';
+import { readClause } from './onDevice';
 import { PlaceholderRegistry } from './placeholders';
 import { findDefinedTerms, findNames, findPatterns, type Span } from './regex';
 import { saveVault } from './vault';
@@ -28,14 +28,19 @@ export async function mask(docId: string, clauses: Clause[], bridge: AiBridge): 
   // Names are collected across the whole contract first, so a name the model
   // spots in one clause is also masked in clauses where it missed it.
   // The broad pattern pass runs even with the model, so a name the model misses is still masked.
+  // The same on-device call also gives each clause its type, which the cloud uses but masking never needs.
   const found: Entity[] = [];
+  const types: (ClauseType | undefined)[] = [];
   for (const clause of clauses) {
     found.push(...findNames(clause.text, true).map(spanToEntity));
     if (!useModel) continue;
     try {
-      found.push(...(await findEntities(bridge, clause.text)));
+      const reading = await readClause(bridge, clause);
+      found.push(...reading.entities);
+      types.push(reading.type);
     } catch {
       needsReview = true;
+      types.push(undefined);
     }
   }
   // A defined short form, as in Northwind Analytics, Inc. ("Northwind"), is masked like the full name.
@@ -63,13 +68,12 @@ export async function mask(docId: string, clauses: Clause[], bridge: AiBridge): 
   const check = leakCheck(drafts, [...registry.values(), ...entities.flatMap((e) => e.variants)]);
   if (!check.ok) return seal({ ok: false, docId, leaks: check.leaks }, run);
 
-  const types = useModel ? await clauseTypes(bridge, clauses) : undefined;
   await saveVaultInOrder(run, registry.entries());
   return seal(
     {
       ok: true,
       docId,
-      clauses: types ? check.clauses.map((clause, i) => ({ ...clause, type: types[i] })) : check.clauses,
+      clauses: check.clauses.map((clause, i) => (types[i] ? { ...clause, type: types[i] } : clause)),
       ledger: registry.ledger(),
       needsReview,
     },
@@ -95,15 +99,6 @@ function saveVaultInOrder(run: Run, entries: Record<string, string>): Promise<vo
     if (vaultWrites.get(run.docId) === write) vaultWrites.delete(run.docId);
   }).catch(() => undefined);
   return write;
-}
-
-/** Types help the cloud read each clause, but masking never depends on them, so a failed call just leaves them out. */
-async function clauseTypes(bridge: AiBridge, clauses: Clause[]): Promise<ClauseType[] | undefined> {
-  try {
-    return await classify(bridge, clauses);
-  } catch {
-    return undefined;
-  }
 }
 
 function spanToEntity(span: Span): Entity {

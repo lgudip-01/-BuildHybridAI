@@ -110,6 +110,13 @@ describe('findNames', () => {
     expect(isGeneric('Coastal Ridge Credit Union')).toBe(false);
   });
 
+  it('keeps contract references out of names, but keeps middle initials in them', () => {
+    const text = 'Contractor will build the app as described in Exhibit A. Adebayo will report to Hannah Kowalczyk, Head of Product.';
+    expect(names(text, true)).toEqual([['NAME', 'Hannah Kowalczyk']]);
+    expect(names('Exhibit B and Schedule 2 apply, as do Section 4.1 and Annex C.', true)).toEqual([]);
+    expect(names('Payment goes to Jane Q. Doe on time.', true)).toEqual([['NAME', 'Jane Q. Doe']]);
+  });
+
   it('skips numbered section headings in broad mode', () => {
     expect(names('3. Service Levels. Uptime is reported to Maria Lopez.\n4. Data Protection: see the policy.', true)).toEqual([
       ['NAME', 'Maria Lopez'],
