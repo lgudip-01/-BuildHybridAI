@@ -90,3 +90,17 @@ The sample helper adds `groundingPolicy`, `cloudGroundingRulesPresent`, and `dev
 Verification: 92 targeted tests passed, plus TypeScript and the production build. Regression coverage includes the observed c8 explanation, cloud and device response paths, neutral questions, source-scoped “no cap is stated in this excerpt,” explicit affirmative wording, qualified/negated sources, and validation ordering. No live cloud request was made for this correction.
 
 Next live check: prepare only `prepareSample('promissory-note', ['c8'])`, review the masked preview, then run it once. A grounded response or a visible grounding rejection provides useful evidence; do not repeatedly rerun until green. Broader document-context reasoning remains a separate task.
+
+## Source-quoted guarantee generation
+
+The next live c8 check returned 0/1 results with the grounding-specific rejection. This confirmed the guard operates in Chrome, but did not resolve answer availability: free-form generation still produced a rejected explanation.
+
+For short, otherwise unspecified clauses ending in a guarantee of all Borrower's obligations under this Note/Agreement, generation now uses `source-quoted-guarantee-v1`. The shared `sourceQuotedGuaranteeReview` function builds an explicitly application-authored review explanation that quotes the approved clause exactly and directs review toward obligations, limits, conditions and amendments elsewhere. It does not invent those terms or claim they are absent from the full agreement.
+
+The cloud JSON response schema permits only that explanation string and a fixed set of neutral review questions. The device JSON constraint carries the same restrictions. Both receive a per-clause instruction to follow this format. Risk remains a model-selected preliminary review priority; redline must be empty. Runtime checks still reject schema noncompliance, unsupported guarantee labels, unknown tokens or bad JSON. No rejected answer is silently rewritten into a successful one; there is no automatic retry or extra model call.
+
+This is a deliberately limited, **source-based review template**, not unrestricted AI legal interpretation or proof of risk-rating correctness. The template is visibly labeled in the explanation. Explicit/qualified, long, unrelated or differently worded clauses stay on the normal guarded path; the known lexical guard is still not a general semantic verifier. This change trades drafting/reasoning flexibility for a constrained response on the observed short-guarantee case. It must not be described as fixing every guarantee or every hallucination.
+
+The public five-field response contract remains unchanged. `promptCheck.guaranteeReviewFormat` reports the format revision. Native owners would need to adopt the same per-clause schema selection and validation to get equivalent behavior.
+
+Verification: 103 targeted tests and web TypeScript passed. Tests check the serialized Firebase cloud schema and device constraint at the actual provider boundary, successful bounded responses, rejection when the provider ignores the format, preserved request projection, and normal-path selection for other clauses. These responses are mocked. One real c8 call is still needed to check Gemini's handling of the bounded schema; do not claim live success before that result.
