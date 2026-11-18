@@ -1,11 +1,11 @@
-// Test bench for the privacy engine against real Gemini Nano. The Web app role replaces this with the product UI.
-import type { Clause, ClauseType, EntityKind, LedgerEntry, MaskResult, OnDeviceStatus } from '@clause-guard/core/types';
-import { mask } from '@clause-guard/privacy-engine/mask';
-import { classify } from '@clause-guard/privacy-engine/onDevice';
+// Minimal review flow for the existing bench; the UI teammate owns the full product screens.
+import type { Clause, EntityKind, LedgerEntry, MaskResult, OnDeviceStatus } from '@clause-guard/core/types';
 import { PLACEHOLDER } from '@clause-guard/privacy-engine/placeholders';
 import { Download, LoaderCircle, ShieldCheck, ShieldX, TriangleAlert } from 'lucide-react';
-import { useCallback, useEffect, useState, type KeyboardEvent } from 'react';
+import { useCallback, useEffect, useState, useSyncExternalStore, type KeyboardEvent } from 'react';
 import type { AiBridge } from '@clause-guard/core/types';
+import { REDLINE_REVIEW_NOTICE } from '@clause-guard/core/analysis';
+import { ReviewSession, reviewBusy, splitClauses, type ReviewOutcome } from './reviewFlow';
 
 const SAMPLE_CONTRACT = `This Mutual Non-Disclosure Agreement is made on January 1, 2026 between Acme Corp ("the Company") and Dana Reyes ("Contractor").
 
@@ -40,17 +40,9 @@ const KIND_LABEL: Record<EntityKind, string> = {
 // Splitting on a capture group keeps the placeholders at the odd indexes.
 const SPLIT_ON_PLACEHOLDER = new RegExp(`(${PLACEHOLDER.source})`);
 
-type Run = { result: MaskResult; ms: number; types?: ClauseType[] };
+type Run = { result: MaskResult; ms: number };
 
 const errorText = (error: unknown) => (error instanceof Error ? error.message : String(error));
-
-function splitClauses(text: string): Clause[] {
-  return text
-    .split(/\n\s*\n/)
-    .map((part) => part.trim())
-    .filter(Boolean)
-    .map((part, index) => ({ id: `c${index + 1}`, index, text: part }));
-}
 
 function unavailableReason(): string {
   if ('LanguageModel' in globalThis) {
@@ -65,10 +57,12 @@ function unavailableReason(): string {
 export function App({ bridge }: { bridge: AiBridge & { downloadModel(onProgress: (fraction: number) => void): Promise<void> } }) {
   const [status, setStatus] = useState<OnDeviceStatus | 'checking'>('checking');
   const [progress, setProgress] = useState<number | null>(null);
-  const [contract, setContract] = useState(SAMPLE_CONTRACT);
-  const [run, setRun] = useState<Run | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
+  const [session] = useState(() => new ReviewSession(bridge, SAMPLE_CONTRACT));
+  const review = useSyncExternalStore(session.subscribe, session.getSnapshot, session.getSnapshot);
+  const { contract } = review;
+  const busy = reviewBusy(review);
+  const run: Run | null = review.masked ? { result: review.masked, ms: review.ms ?? 0 } : null;
+  const [downloadError, setDownloadError] = useState<string | null>(null);
   const [active, setActive] = useState<string | null>(null);
 
   const clauses = splitClauses(contract);
@@ -81,39 +75,21 @@ export function App({ bridge }: { bridge: AiBridge & { downloadModel(onProgress:
 
   async function download() {
     setProgress(0);
-    setError(null);
+    setDownloadError(null);
     try {
       await bridge.downloadModel(setProgress);
     } catch (e) {
-      setError(`Download failed: ${errorText(e)}`);
+      setDownloadError(`Download failed: ${errorText(e)}`);
     } finally {
       setProgress(null);
       await refreshStatus();
     }
   }
 
-  async function runMask() {
-    if (busy || clauses.length === 0) return;
-    setBusy(true);
-    setError(null);
-    try {
-      const started = performance.now();
-      const result = await mask(crypto.randomUUID(), clauses, bridge);
-      const ms = performance.now() - started;
-      const types = result.ok && !result.needsReview ? await classify(bridge, clauses) : undefined;
-      setRun({ result, ms, types });
-    } catch (e) {
-      setRun(null);
-      setError(errorText(e));
-    } finally {
-      setBusy(false);
-    }
-  }
-
   function onContractKey(event: KeyboardEvent<HTMLTextAreaElement>) {
     if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) {
       event.preventDefault();
-      void runMask();
+      if (progress === null) void session.mask();
     }
   }
 
@@ -123,9 +99,9 @@ export function App({ bridge }: { bridge: AiBridge & { downloadModel(onProgress:
         <div className="brand">
           <ShieldCheck className="brand-mark" size={20} strokeWidth={1.75} aria-hidden />
           <span className="brand-name">Clause Guard</span>
-          <span className="brand-sub">Privacy engine</span>
+          <span className="brand-sub">Contract review</span>
         </div>
-        <ModelStatus status={status} progress={progress} onDownload={download} />
+        <ModelStatus status={status} progress={progress} onDownload={download} disabled={busy} />
       </header>
 
       {status === 'unavailable' && (
@@ -148,7 +124,9 @@ export function App({ bridge }: { bridge: AiBridge & { downloadModel(onProgress:
           <textarea
             className="contract"
             value={contract}
-            onChange={(e) => setContract(e.target.value)}
+            onChange={(e) => { if (session.edit(e.target.value)) setActive(null); }}
+            readOnly={busy}
+            aria-describedby={busy ? 'review-busy-hint' : undefined}
             onKeyDown={onContractKey}
             spellCheck={false}
             aria-labelledby="contract-title"
@@ -156,20 +134,31 @@ export function App({ bridge }: { bridge: AiBridge & { downloadModel(onProgress:
           />
           <div className="pane-foot">
             <kbd className="shortcut">Ctrl Enter</kbd>
-            <button className="primary" onClick={runMask} disabled={busy || clauses.length === 0}>
-              {busy && <LoaderCircle className="spin" size={16} aria-hidden />}
-              {busy ? 'Masking' : 'Mask contract'}
+            {busy && <span id="review-busy-hint" className="meta">Editing is locked until this review finishes.</span>}
+            <button className="primary" onClick={() => void session.mask()} disabled={busy || progress !== null || clauses.length === 0}>
+              {review.phase === 'masking' && <LoaderCircle className="spin" size={16} aria-hidden />}
+              {review.phase === 'masking' ? 'Masking' : 'Mask contract'}
             </button>
           </div>
         </section>
 
         <section className="pane" aria-labelledby="output-title" aria-busy={busy}>
           <div className="pane-head">
-            <h2 id="output-title">Sent to the cloud</h2>
+            <h2 id="output-title">Masked preview</h2>
             {run?.result.ok && <span className="meta">{run.result.ledger.length} values replaced</span>}
           </div>
           <div className="pane-body">
-            <Output run={run} error={error} active={active} onActive={setActive} />
+            {downloadError && <div className="banner" data-tone="warn" role="alert"><p>{downloadError}</p></div>}
+            <Output run={run} active={active} onActive={setActive} />
+            {review.error && <div className="banner review-actions" data-tone="warn" role="alert"><p>{review.error}</p></div>}
+            {review.phase === 'review' && (
+              <div className="review-actions">
+                <p>Review the masked text above. Approving allows analysis of this masked version; original values stay in this browser’s vault.</p>
+                <button className="primary" onClick={() => void session.analyzeReviewed()}>Approve &amp; analyze</button>
+              </div>
+            )}
+            {review.phase === 'analyzing' && <p className="review-actions" role="status">Analyzing reviewed text. This may take a moment.</p>}
+            {review.outcome && <AnalysisResults clauses={clauses} outcome={review.outcome} />}
           </div>
         </section>
       </main>
@@ -177,7 +166,7 @@ export function App({ bridge }: { bridge: AiBridge & { downloadModel(onProgress:
   );
 }
 
-function ModelStatus(props: { status: OnDeviceStatus | 'checking'; progress: number | null; onDownload: () => void }) {
+function ModelStatus(props: { status: OnDeviceStatus | 'checking'; progress: number | null; onDownload: () => void; disabled: boolean }) {
   const { status, progress, onDownload } = props;
   if (progress !== null) {
     return (
@@ -193,7 +182,7 @@ function ModelStatus(props: { status: OnDeviceStatus | 'checking'; progress: num
       <span className="dot" aria-hidden />
       <span>{STATUS_LABEL[status]}</span>
       {(status === 'downloadable' || status === 'downloading') && (
-        <button className="ghost" onClick={onDownload}>
+        <button className="ghost" onClick={onDownload} disabled={props.disabled}>
           <Download size={14} aria-hidden />
           Download
         </button>
@@ -202,20 +191,8 @@ function ModelStatus(props: { status: OnDeviceStatus | 'checking'; progress: num
   );
 }
 
-function Output(props: { run: Run | null; error: string | null; active: string | null; onActive: (p: string | null) => void }) {
-  const { run, error, active, onActive } = props;
-
-  if (error) {
-    return (
-      <div className="banner" data-tone="danger">
-        <ShieldX size={18} strokeWidth={1.75} aria-hidden />
-        <div>
-          <p className="banner-title">Something went wrong</p>
-          <p>{error}</p>
-        </div>
-      </div>
-    );
-  }
+function Output(props: { run: Run | null; active: string | null; onActive: (p: string | null) => void }) {
+  const { run, active, onActive } = props;
 
   if (!run) {
     return (
@@ -226,7 +203,7 @@ function Output(props: { run: Run | null; error: string | null; active: string |
     );
   }
 
-  const { result, ms, types } = run;
+  const { result, ms } = run;
 
   if (!result.ok) {
     return (
@@ -275,11 +252,11 @@ function Output(props: { run: Run | null; error: string | null; active: string |
       )}
 
       <ol className="clauses">
-        {result.clauses.map((clause, i) => (
+        {result.clauses.map((clause) => (
           <li key={clause.id}>
             <div className="clause-head">
               <span className="clause-id">{clause.id}</span>
-              {types?.[i] && <span className="clause-type">{types[i].replace('_', ' ')}</span>}
+              {clause.type && <span className="clause-type">{clause.type.replace('_', ' ')}</span>}
             </div>
             <p className="clause-text">
               {clause.text.split(SPLIT_ON_PLACEHOLDER).map((part, j) =>
@@ -304,6 +281,57 @@ function Output(props: { run: Run | null; error: string | null; active: string |
 
       <Ledger ledger={result.ledger} active={active} onActive={onActive} />
     </>
+  );
+}
+
+export function AnalysisResults({ clauses, outcome }: { clauses: Clause[]; outcome: ReviewOutcome }) {
+  const results = new Map(outcome.restored.map(result => [result.clauseId, result]));
+  const failures = new Map(outcome.failed.map(failure => [failure.clauseId, failure]));
+  return (
+    <section className="analysis-results" aria-labelledby="analysis-title">
+      <div className="results-heading">
+        <h2 id="analysis-title">Contract review</h2>
+        {outcome.ranOn && <span className="source-badge">{outcome.ranOn === 'cloud' ? 'Analyzed in cloud' : 'On-device preliminary scan'}</span>}
+      </div>
+      <p role="status">{outcome.restored.length} of {clauses.length} clauses returned a validated review. {clauses.length - outcome.restored.length} need review.</p>
+      <p className="meta">Risk ratings are preliminary. Low risk does not mean contract approval.</p>
+      <nav className="risk-map" aria-label="Clause review overview">
+        {clauses.map(clause => {
+          const result = results.get(clause.id);
+          return <a key={clause.id} href={`#review-${clause.id}`} data-risk={result?.risk ?? 'unreviewed'} aria-label={`${clause.id}: ${result ? `${result.risk} risk` : 'needs review'}`}>{clause.id}</a>;
+        })}
+      </nav>
+      {clauses.map(clause => {
+        const result = results.get(clause.id);
+        const failure = failures.get(clause.id);
+        const withheld = result?.explanation.startsWith(REDLINE_REVIEW_NOTICE);
+        const explanation = withheld ? result!.explanation.slice(REDLINE_REVIEW_NOTICE.length).trim() : result?.explanation;
+        return (
+          <article key={clause.id} className="analysis-card" id={`review-${clause.id}`} aria-labelledby={`review-title-${clause.id}`}>
+            <div className="clause-head">
+              <h3 id={`review-title-${clause.id}`}>{clause.id}</h3>
+              {result ? <span className="risk-label" data-risk={result.risk}>{result.risk} risk</span> : <span className="risk-label" data-risk="unreviewed">Needs review</span>}
+            </div>
+            <details><summary>Original clause — shown only on this device</summary><p className="clause-text">{clause.text}</p></details>
+            {result ? (
+              <>
+                {withheld && <p className="draft-notice">Suggested wording withheld. Confirm the intended commercial changes before drafting a replacement.</p>}
+                {explanation && <p className="analysis-explanation">{explanation}</p>}
+                {result.redline ? <div><h4>Suggested wording — review before use</h4><p className="clause-text">{result.redline}</p></div>
+                  : !withheld && <p className="meta">No replacement wording proposed.</p>}
+                {!!result.questions.length && <div><h4>Questions to ask</h4><ul>{result.questions.map((question, i) => <li key={i}>{question}</li>)}</ul></div>}
+              </>
+            ) : (
+              <div className="failed-review">
+                <p>{failure?.reason === 'model_error' ? 'Analysis was unavailable for this clause.' : 'The AI answer could not be verified.'}</p>
+                <p>{failure?.reason === 'unknown_placeholder' ? 'The answer used a reference that was not in the approved text. Review the original clause; no AI risk rating or rewrite is shown.'
+                  : 'Review the original clause. No verified AI risk rating or replacement wording is available.'}</p>
+              </div>
+            )}
+          </article>
+        );
+      })}
+    </section>
   );
 }
 
