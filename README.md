@@ -99,9 +99,30 @@ Each role has a one-page overview in [`roles/`](roles/). Read them and pick one.
 
 ---
 
+## Run it locally
+
+You need Node.js 22 or later, and desktop Chrome on a device that can run Gemini Nano (check `chrome://on-device-internals`).
+
+1. Install the dependencies from the repo root:
+   ```bash
+   npm install
+   ```
+2. Copy `apps/web/.env.example` to `apps/web/.env.local`, and fill it in from the Firebase console under **Project settings > Your apps > Web app**.
+3. Start the web app:
+   ```bash
+   npm run dev -w @clause-guard/web
+   ```
+4. Open `http://localhost:5173` in Chrome, click **Download model** the first time, then paste a contract and click **Mask**.
+
+To run the privacy engine's tests:
+
+```bash
+npm test
+```
+
 ## Status
 
-In development. Submission due **Nov 30, 2026 at 2 PM PT**.
+In development. Submission due **Nov 30, 2026 at 2 PM PT**. See [HACKATHON.md](HACKATHON.md) for the rules and where each requirement stands.
 
 For local web setup, App Check registration, and synthetic cloud checks, see
 [Firebase web setup](apps/web/FIREBASE_SETUP.md).

@@ -16,6 +16,7 @@
     "margaret.oconnell@gmail.com"
   ],
   "keep": ["Landlord", "Tenants", "5 days", "21 days", "Oregon"],
+  "types": ["other", "other", "other", ["termination", "other"], "payment", "payment", "other", "other", "governing_law", "other"],
   "fallbackMisses": [],
   "fallbackOvermasks": []
 }

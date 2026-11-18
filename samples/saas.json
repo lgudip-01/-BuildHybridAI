@@ -19,6 +19,7 @@
     "Netherlands",
     "Amsterdam"
   ],
+  "types": ["other", "other", ["ip", "other"], "payment", ["other", "payment"], ["confidentiality", "other"], "liability", "termination", "governing_law", "other"],
   "fallbackMisses": [],
   "fallbackOvermasks": []
 }

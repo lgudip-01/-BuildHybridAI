@@ -16,6 +16,7 @@
     "621-48-3307"
   ],
   "keep": ["Borrower", "Lender", "6.5%", "10 days", "without penalty"],
+  "types": ["other", ["payment", "other"], "payment", "payment", "payment", "payment", ["termination", "payment"], ["indemnity", "liability", "other"], "other"],
   "fallbackMisses": [],
   "fallbackOvermasks": []
 }

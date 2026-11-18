@@ -12,6 +12,7 @@
     "QF-20418"
   ],
   "keep": ["the Company", "Senior Data Engineer", "15%", "12 months", "4 years", "United States"],
+  "types": ["other", "other", "other", "payment", ["payment", "other"], "non_compete", ["confidentiality", "ip"], "termination", "other", "other", "other"],
   "fallbackMisses": [],
   "fallbackOvermasks": []
 }

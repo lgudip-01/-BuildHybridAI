@@ -39,8 +39,9 @@ export type Leak = { clauseId: string; snippet: string; reason: string };
 
 export type MaskResult =
   // needsReview: masking ran without the on-device model, so the user must approve the text before it is sent.
-  | { ok: true; clauses: MaskedClause[]; ledger: LedgerEntry[]; needsReview: boolean }
-  | { ok: false; leaks: Leak[] };
+  // docId: the document this run masked. Pass the result to approve() unchanged; it is frozen.
+  | { ok: true; docId: string; clauses: MaskedClause[]; ledger: LedgerEntry[]; needsReview: boolean }
+  | { ok: false; docId: string; leaks: Leak[] };
 
 export type Analysis = {
   clauseId: string;

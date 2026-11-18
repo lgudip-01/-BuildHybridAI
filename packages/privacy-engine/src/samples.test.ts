@@ -1,17 +1,26 @@
 /// <reference types="vite/client" />
 import 'fake-indexeddb/auto';
 import { describe, expect, it } from 'vitest';
-import type { AiBridge, Clause } from '@clause-guard/core/types';
+import { CLAUSE_TYPES, type AiBridge, type Clause, type ClauseType } from '@clause-guard/core/types';
 import { mask } from './mask';
 import { findOccurrences } from './merge';
 
 // Each samples/<name>.txt has a samples/<name>.json:
 //   mask               real values that must not reach the cloud, in every form they appear
 //   keep               terms the cloud model needs, which must survive masking
+//   types              the type of each clause, in order (clauses are split on blank lines);
+//                      a list means any of those types is a right answer
 //   fallbackMisses     values from `mask` that the pattern-only fallback is known to leave in
 //   fallbackOvermasks  values from `keep` that the pattern-only fallback is known to hide
 // Remove entries from the two fallback lists as they get fixed; the test fails until you do.
-type Expected = { mask: string[]; keep: string[]; fallbackMisses: string[]; fallbackOvermasks: string[] };
+// The types need the on-device model to score, so here they are only checked for shape.
+type Expected = {
+  mask: string[];
+  keep: string[];
+  types: (ClauseType | ClauseType[])[];
+  fallbackMisses: string[];
+  fallbackOvermasks: string[];
+};
 
 const contracts = import.meta.glob<string>('../../../samples/*.txt', { query: '?raw', import: 'default', eager: true });
 const expectations = import.meta.glob<Expected>('../../../samples/*.json', { import: 'default', eager: true });
@@ -51,6 +60,12 @@ describe.each(samples)('samples/$name', ({ name, text, expected }) => {
     expect([...expected.mask, ...expected.keep].filter((v) => !appearsIn(text)(v))).toEqual([]);
     expect(expected.fallbackMisses.filter((v) => !expected.mask.includes(v))).toEqual([]);
     expect(expected.fallbackOvermasks.filter((v) => !expected.keep.includes(v))).toEqual([]);
+  });
+
+  it('gives one valid expected type per clause', () => {
+    expect(expected.types).toHaveLength(toClauses(text).length);
+    const listed = expected.types.flat();
+    expect(listed.filter((t) => !(CLAUSE_TYPES as readonly string[]).includes(t))).toEqual([]);
   });
 
   it('masks everything except the known fallback misses, and keeps the terms', async () => {
