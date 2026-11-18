@@ -58,6 +58,10 @@ const LEGAL_WORDS = new Set([
   'schedule', 'appendix', 'non', 'disclosure', 'mutual', 'master', 'witness', 'whereof', 'now', 'therefore', 'recitals',
   'confidentiality', 'obligations', 'assignment', 'severability', 'waiver', 'amendment', 'counterparts', 'force', 'majeure',
   'independent', 'relationship', 'compensation', 'expenses', 'taxes', 'insurance', 'records', 'audit', 'remedies', 'survival',
+  // Roles and document types the on-device model tends to report as names.
+  'borrower', 'lender', 'guarantor', 'holder', 'debtor', 'creditor', 'loan', 'note', 'promissory', 'principal', 'prepayment', 'default',
+  'lease', 'rental', 'residential', 'commercial', 'premises', 'rent', 'security', 'deposit', 'offer', 'employment', 'letter',
+  'software', 'as', 'subscription', 'sales', 'purchase', 'order',
 ]);
 
 const ORG_SUFFIXES = ['Inc', 'LLC', 'L.L.C', 'Ltd', 'Limited', 'Corp', 'Corporation', 'Co', 'Company', 'LLP', 'LP', 'PLC', 'GmbH', 'AG', 'BV', 'B.V', 'N.V', 'S.A', 'SAS', 'Pty'];
@@ -111,7 +115,43 @@ export function stripOrgSuffix(value: string): string {
 
 export function isGeneric(value: string): boolean {
   const words = value.toLowerCase().split(/[^\p{L}\p{N}]+/u).filter(Boolean);
-  return words.length === 0 || words.every((w) => LEGAL_WORDS.has(w));
+  return words.length === 0 || words.every((w) => LEGAL_WORDS.has(w) || (w.endsWith('s') && LEGAL_WORDS.has(w.slice(0, -1))));
+}
+
+/** "Oregon" or "the United States": places that set the law of a contract and identify no one. */
+export function isJurisdiction(value: string): boolean {
+  return JURISDICTION.test(value.trim());
+}
+
+const PLACE_BEFORE = /\b(?:laws?|courts?|state|commonwealth|province|republic|district|county) of(?: the)?\s+$/i;
+const INCORPORATED_BEFORE = /\ban?\s+$/i;
+const INCORPORATED_AFTER = /^\s+(?:corporation|company|limited liability company|limited partnership|partnership|LLC)\b/i;
+
+/** Whether every mention of `value` is a place of law, as in "the laws of the Netherlands" or "a Delaware corporation". */
+export function isOnlyPlaceOfLaw(text: string, value: string): boolean {
+  const escaped = value.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\s+/g, '\\s+');
+  const mentions = [...text.matchAll(new RegExp(`(?<![\\p{L}\\p{N}])${escaped}(?![\\p{L}\\p{N}])`, 'giu'))];
+  return (
+    mentions.length > 0 &&
+    mentions.every((m) => {
+      const before = text.slice(0, m.index);
+      const after = text.slice(m.index + m[0].length);
+      return PLACE_BEFORE.test(before) || (INCORPORATED_BEFORE.test(before) && INCORPORATED_AFTER.test(after));
+    })
+  );
+}
+
+const HEADING_BEFORE =/(?:^|\n)[^\S\n]*\d+(?:\.\d+)*\.?[^\S\n]+$/;
+const HEADING_AFTER = /^[^\S\n]*[.:]/;
+
+/** Whether `value` is the title of a numbered section, as "Service Levels" is in "3. Service Levels. Provider will…". */
+export function isSectionHeading(text: string, value: string): boolean {
+  const escaped = value.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\s+/g, '\\s+');
+  return new RegExp(`(?:^|\\n)[^\\S\\n]*\\d+(?:\\.\\d+)*\\.?[^\\S\\n]+${escaped}[^\\S\\n]*[.:]`, 'i').test(text);
+}
+
+function isHeadingSpan(text: string, span: Span): boolean {
+  return HEADING_BEFORE.test(text.slice(0, span.start)) && HEADING_AFTER.test(text.slice(span.end));
 }
 
 function collect(text: string, kind: EntityKind, re: RegExp, group?: number): Span[] {
@@ -145,7 +185,7 @@ export function findNames(text: string, broad: boolean): Span[] {
   ];
   if (broad) {
     spans.push(
-      ...collect(text, 'NAME', CAPITALIZED_PHRASE).filter((s) => s.value !== s.value.toUpperCase()),
+      ...collect(text, 'NAME', CAPITALIZED_PHRASE).filter((s) => s.value !== s.value.toUpperCase() && !isHeadingSpan(text, s)),
     );
   }
   return spans

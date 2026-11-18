@@ -1,30 +1,41 @@
-import type { AiBridge, Clause, MaskResult } from '@clause-guard/core/types';
+import type { AiBridge, Clause, ClauseType, MaskResult } from '@clause-guard/core/types';
+import { isCurrent, seal, startRun, type Run } from './approval';
 import { leakCheck } from './leakCheck';
 import { dedupeEntities, findOccurrences, normalize, resolveOverlaps, toEntity, type Candidate, type Entity } from './merge';
-import { findEntities } from './onDevice';
+import { classify, findEntities } from './onDevice';
 import { PlaceholderRegistry } from './placeholders';
 import { findDefinedTerms, findNames, findPatterns, type Span } from './regex';
 import { saveVault } from './vault';
 
 /**
  * Masks every clause of one document and leak-checks the result.
- * On success the placeholder map is saved, encrypted, under `docId` for `unmask`.
+ * On success the placeholder map is saved, encrypted, under `docId` for `unmask`,
+ * and each clause carries its type when the on-device model could classify it.
+ * Use one `docId` per document: each call makes every earlier result and approval for it stale.
+ * The result is frozen; pass it to approve() unchanged.
  */
 export async function mask(docId: string, clauses: Clause[], bridge: AiBridge): Promise<MaskResult> {
+  // Before the first await, so an older batch can't be sent while this run is still masking, even if it fails.
+  const run = startRun(docId);
+  const ids = clauses.map((c) => c.id);
+  if (ids.some((id) => typeof id !== 'string' || !id.trim()) || new Set(ids).size !== ids.length) {
+    throw new TypeError('Every clause needs a unique, non-empty id, so each result maps back to one clause.');
+  }
+
   const useModel = (await bridge.onDeviceStatus()) === 'available';
   let needsReview = !useModel;
 
   // Names are collected across the whole contract first, so a name the model
   // spots in one clause is also masked in clauses where it missed it.
+  // The broad pattern pass runs even with the model, so a name the model misses is still masked.
   const found: Entity[] = [];
   for (const clause of clauses) {
-    found.push(...findNames(clause.text, !useModel).map(spanToEntity));
+    found.push(...findNames(clause.text, true).map(spanToEntity));
     if (!useModel) continue;
     try {
       found.push(...(await findEntities(bridge, clause.text)));
     } catch {
       needsReview = true;
-      found.push(...findNames(clause.text, true).map(spanToEntity));
     }
   }
   // A defined short form, as in Northwind Analytics, Inc. ("Northwind"), is masked like the full name.
@@ -50,10 +61,49 @@ export async function mask(docId: string, clauses: Clause[], bridge: AiBridge): 
   });
 
   const check = leakCheck(drafts, [...registry.values(), ...entities.flatMap((e) => e.variants)]);
-  if (!check.ok) return check;
+  if (!check.ok) return seal({ ok: false, docId, leaks: check.leaks }, run);
 
-  await saveVault(docId, registry.entries());
-  return { ok: true, clauses: check.clauses, ledger: registry.ledger(), needsReview };
+  const types = useModel ? await clauseTypes(bridge, clauses) : undefined;
+  await saveVaultInOrder(run, registry.entries());
+  return seal(
+    {
+      ok: true,
+      docId,
+      clauses: types ? check.clauses.map((clause, i) => ({ ...clause, type: types[i] })) : check.clauses,
+      ledger: registry.ledger(),
+      needsReview,
+    },
+    run,
+  );
+}
+
+const vaultWrites = new Map<string, Promise<void>>();
+
+/**
+ * Saves one run's vault after any earlier write for the same document, and only if no newer run has started.
+ * So when runs overlap, an older one finishing last can never overwrite the newest vault.
+ */
+function saveVaultInOrder(run: Run, entries: Record<string, string>): Promise<void> {
+  const previous = vaultWrites.get(run.docId) ?? Promise.resolve();
+  const write = previous
+    .catch(() => undefined)
+    .then(async () => {
+      if (isCurrent(run)) await saveVault(run.docId, entries);
+    });
+  vaultWrites.set(run.docId, write);
+  void write.finally(() => {
+    if (vaultWrites.get(run.docId) === write) vaultWrites.delete(run.docId);
+  }).catch(() => undefined);
+  return write;
+}
+
+/** Types help the cloud read each clause, but masking never depends on them, so a failed call just leaves them out. */
+async function clauseTypes(bridge: AiBridge, clauses: Clause[]): Promise<ClauseType[] | undefined> {
+  try {
+    return await classify(bridge, clauses);
+  } catch {
+    return undefined;
+  }
 }
 
 function spanToEntity(span: Span): Entity {
