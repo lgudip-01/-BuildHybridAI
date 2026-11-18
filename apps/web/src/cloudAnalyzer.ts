@@ -1,7 +1,7 @@
 import type { Analysis, AnalyzeResult, ApprovedBatch, ClauseFailure } from '@clause-guard/core/types';
 import {
   allowedPlaceholders, ANALYSIS_JSON_SCHEMA, AnalysisValidationError,
-  validateAnalysis, validateBatch,
+  validateAnalysis, validateBatch, applyCommercialRedlineGuard,
 } from '@clause-guard/core/analysis';
 import { getGenerativeModel, InferenceMode, InferenceSource, Schema, type AI } from 'firebase/ai';
 import { assertApproved } from './approvalGuard';
@@ -85,7 +85,9 @@ export async function analyzeApproved(ai: AI, batch: ApprovedBatch): Promise<Ana
         failed.push({ clauseId: clause.id, reason: 'invalid_response', detail: 'The model returned no usable text.' });
         continue;
       }
-      results.push(validateAnalysis(text, clause.id, allowed));
+      // Validate first: withheld drafts must not hide invented tokens or bad JSON.
+      const validated = validateAnalysis(text, clause.id, allowed);
+      results.push(applyCommercialRedlineGuard(validated, clause.text));
     } catch (error) {
       // Stale approval must abort the entire batch, including when a model call rejected.
       assertApproved(batch);
