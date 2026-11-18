@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { AI } from 'firebase/ai';
 import type { ApprovedBatch, CleanText, MaskedClause } from '@clause-guard/core/types';
-import { allowedPlaceholders, validateAnalysis, validateBatch, CLOUD_ANALYSIS_PROMPT, DEVICE_ANALYSIS_PROMPT } from '@clause-guard/core/analysis';
+import { allowedPlaceholders, validateAnalysis, validateBatch, CLOUD_ANALYSIS_PROMPT, DEVICE_ANALYSIS_PROMPT, ANALYSIS_REVIEW_RULES } from '@clause-guard/core/analysis';
 
 const mocks = vi.hoisted(() => ({
   approved: new WeakSet<object>(),
@@ -21,7 +21,7 @@ vi.mock('./analysisConfig', async original => {
 });
 import { WebBridge } from './webBridge';
 import { AnalysisUnavailableError } from './cloudAnalyzer';
-import { loadAnalysisConfig, DEFAULT_ANALYSIS_CONFIG } from './analysisConfig';
+import { loadAnalysisConfig, DEFAULT_ANALYSIS_CONFIG, DEFAULT_PAYLOAD, parseAnalysisConfig } from './analysisConfig';
 
 const ai = {} as AI;
 function batch(count = 2): ApprovedBatch {
@@ -44,6 +44,19 @@ beforeEach(() => {
 });
 
 describe('approved web analysis', () => {
+  it('sends current review constraints to both providers even with older remote prompts', async () => {
+    const remote = parseAnalysisConfig(JSON.stringify({ ...DEFAULT_PAYLOAD,
+      cloudPrompt: 'Previously published cloud review instructions. Return JSON and preserve placeholders.',
+      devicePrompt: 'Previously published preliminary offline scan instructions.',
+    }));
+    vi.mocked(loadAnalysisConfig).mockResolvedValue(remote);
+    mocks.generate.mockResolvedValueOnce(output());
+    await new WebBridge(ai).analyze(batch(1));
+    const params = mocks.factory.mock.calls[0]![1];
+    expect(params.inCloudParams.systemInstruction).toContain(ANALYSIS_REVIEW_RULES);
+    expect(params.onDeviceParams.createOptions.initialPrompts[0].content[0].value).toContain(ANALYSIS_REVIEW_RULES);
+    expect(mocks.generate).toHaveBeenCalledTimes(1);
+  });
   it('blocks an array or forged batch before any SDK/model request', async () => {
     const bridge = new WebBridge(ai);
     for (const value of [[], { docId: 'fake', clauses: [] }]) {
