@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { AI } from 'firebase/ai';
 import type { Analysis, ApprovedBatch, CleanText, MaskedClause } from '@clause-guard/core/types';
-import { allowedPlaceholders, validateAnalysis, validateBatch, CLOUD_ANALYSIS_PROMPT, DEVICE_ANALYSIS_PROMPT, ANALYSIS_REVIEW_RULES, applyCommercialRedlineGuard, REDLINE_REVIEW_NOTICE, EXPLANATION_GROUNDING_RULES, validateExplanationGrounding } from '@clause-guard/core/analysis';
+import { allowedPlaceholders, validateAnalysis, validateBatch, CLOUD_ANALYSIS_PROMPT, DEVICE_ANALYSIS_PROMPT, ANALYSIS_REVIEW_RULES, applyCommercialRedlineGuard, REDLINE_REVIEW_NOTICE, EXPLANATION_GROUNDING_RULES, validateExplanationGrounding, sourceQuotedGuaranteeReview, GUARANTEE_REVIEW_QUESTIONS, validateSourceQuotedGuaranteeReview } from '@clause-guard/core/analysis';
 
 const mocks = vi.hoisted(() => ({
   approved: new WeakSet<object>(),
@@ -44,6 +44,41 @@ beforeEach(() => {
 });
 
 describe('approved web analysis', () => {
+  it.each(['in_cloud', 'on_device'])('generates an accepted source-quoted guarantee review on %s in one call', async source => {
+    const clause = "5. Guarantor. [PARTY_A], of [ADDRESS_1], guarantees all of Borrower's obligations under this Note." as CleanText;
+    const explanation = sourceQuotedGuaranteeReview(clause)!;
+    const data: Analysis = { clauseId: 'c1', risk: 'medium', explanation, redline: '', questions: [GUARANTEE_REVIEW_QUESTIONS[0], GUARANTEE_REVIEW_QUESTIONS[1]] };
+    mocks.generate.mockResolvedValueOnce(output('c1', source, data));
+    const result = await new WebBridge(ai).analyze(batch(1, clause));
+    expect(result.results).toEqual([data]);
+    expect(result.failed).toEqual([]);
+    expect(mocks.generate).toHaveBeenCalledTimes(1);
+    const params = mocks.factory.mock.calls[0]![1];
+    const cloud = JSON.parse(JSON.stringify(params.inCloudParams.generationConfig.responseSchema));
+    const device = params.onDeviceParams.promptOptions.responseConstraint;
+    for (const schema of [cloud, device]) {
+      expect(schema.properties.explanation.enum).toEqual([explanation]);
+      expect(schema.properties.questions.items.enum).toEqual([...GUARANTEE_REVIEW_QUESTIONS]);
+    }
+    expect(params.inCloudParams.systemInstruction).toContain('exact source-based explanation');
+    expect(params.onDeviceParams.createOptions.initialPrompts[0].content[0].value).toContain('exact source-based explanation');
+    expect(JSON.parse(mocks.generate.mock.calls[0]![0])).toEqual({ id: 'c1', type: 'indemnity', text: clause });
+  });
+  it('still rejects an invented guarantee explanation if a provider ignores the bounded schema', async () => {
+    const clause = "[PARTY_A] guarantees all of Borrower's obligations under this Note.";
+    mocks.generate.mockResolvedValueOnce(output('c1', 'in_cloud', { ...answer(), explanation: 'The guarantee creates absolute liability.', questions: [] }));
+    const result = await new WebBridge(ai).analyze(batch(1, clause));
+    expect(result.results).toEqual([]);
+    expect(result.failed).toMatchObject([{ reason: 'invalid_response', detail: expect.stringContaining('guarantee terms') }]);
+    expect(mocks.generate).toHaveBeenCalledTimes(1);
+  });
+  it('does not silently substitute the template when a provider returns different free-form wording', async () => {
+    const clause = "[PARTY_A] guarantees all of Borrower's obligations under this Note.";
+    mocks.generate.mockResolvedValueOnce(output('c1', 'in_cloud', { ...answer(), explanation: 'A different explanation.', questions: [] }));
+    const result = await new WebBridge(ai).analyze(batch(1, clause));
+    expect(result.results).toEqual([]);
+    expect(result.failed).toMatchObject([{ reason: 'invalid_response', detail: expect.stringContaining('required source-based') }]);
+  });
   it('sends current review constraints to both providers even with older remote prompts', async () => {
     const remote = parseAnalysisConfig(JSON.stringify({ ...DEFAULT_PAYLOAD,
       cloudPrompt: 'Previously published cloud review instructions. Return JSON and preserve placeholders.',
@@ -254,6 +289,37 @@ describe('guarantee explanation grounding', () => {
   });
   it('does not purport to validate unrelated clause reasoning', () => {
     expect(() => validateExplanationGrounding({ ...answer(), explanation: 'Liability is uncapped.' }, 'A confidentiality breach is excluded from the cap.' as CleanText)).not.toThrow();
+  });
+});
+
+describe('bounded source-quoted guarantee format', () => {
+  const source = "[PARTY_A] guarantees all of Borrower’s obligations under this Note." as CleanText;
+  it('quotes only the approved supplied wording and frames unknown terms as review questions', () => {
+    const explanation = sourceQuotedGuaranteeReview(source)!;
+    expect(explanation).toContain(source);
+    expect(explanation).toContain('Source-based guarantee review');
+    expect(explanation).toContain('preliminary review priority');
+    expect(explanation.length).toBeLessThan(4000);
+    const analysis = { ...answer(), explanation, questions: [...GUARANTEE_REVIEW_QUESTIONS] };
+    expect(() => validateAnalysis(JSON.stringify(analysis), 'c1', new Set(['[PARTY_A]']))).not.toThrow();
+    expect(() => validateExplanationGrounding(analysis, source)).not.toThrow();
+    expect(() => validateSourceQuotedGuaranteeReview(analysis, explanation)).not.toThrow();
+  });
+  it.each([
+    'Provider promises 99.9% uptime.',
+    "[PARTY_A] unconditionally guarantees all of Borrower's obligations under this Note.",
+    "[PARTY_A] guarantees all of Borrower's obligations under this Note, except later amendments.",
+    "Subject to a cap, [PARTY_A] guarantees all of Borrower's obligations under this Note.",
+    'x'.repeat(2501) + " guarantees all of Borrower's obligations under this Note.",
+  ])('leaves unrelated, explicit, qualified or long clauses on the normal guarded path %#', clause => {
+    expect(sourceQuotedGuaranteeReview(clause as CleanText)).toBeUndefined();
+  });
+  it('rejects changes to the prescribed explanation, draft or questions', () => {
+    const explanation = sourceQuotedGuaranteeReview(source)!;
+    const good = { ...answer(), explanation, questions: [GUARANTEE_REVIEW_QUESTIONS[0]] };
+    for (const analysis of [{ ...good, explanation: explanation + ' Extra claim.' }, { ...good, redline: 'Rewritten guarantee.' }, { ...good, questions: ['Unapproved leading question?'] }]) {
+      expect(() => validateSourceQuotedGuaranteeReview(analysis, explanation)).toThrow(expect.objectContaining({ reason: 'invalid_response' }));
+    }
   });
 });
 
