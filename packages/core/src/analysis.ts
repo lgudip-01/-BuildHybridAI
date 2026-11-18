@@ -28,7 +28,18 @@ export const ANALYSIS_REVIEW_RULES = 'Review from a neutral perspective when the
   'If a revision depends on the represented party or an unagreed commercial choice, leave redline empty and ask a neutral question about that choice. ' +
   'Do not present a clause-level omission as an established omission from the entire agreement.';
 
-export const ANALYSIS_OUTPUT_RULES = ANALYSIS_REVIEW_RULES + ' Return only JSON: {clauseId, risk: low|medium|high, explanation, redline, questions: string[]}. ' +
+export const GROUNDING_POLICY_VERSION = 'guarantee-grounding-v1';
+export const EXPLANATION_GROUNDING_RULES = 'Ground explanations in what the supplied clause actually says. ' +
+  'Separate express wording from possible consequences and information missing from this excerpt. ' +
+  'For guarantee clauses, do not label obligations unconditional, absolute, uncapped or unlimited, or assert coverage of future obligations, ' +
+  'unless that wording is expressly established in the supplied text. Do not infer those terms merely from all obligations under this Note. ' +
+  'When no cap is stated, say no cap is stated in this excerpt; do not claim the whole agreement has no cap. ' +
+  'When conditions or future coverage are unspecified, say those points are unspecified in this excerpt and ask about them in questions. ' +
+  'Keep unsupported guarantee labels out of the explanation even as speculation; ask neutral questions instead. ' +
+  'Do not assert a personal or corporate guarantee classification based only on a masked identity. ' +
+  'Risk is a preliminary review priority, not proof of enforceability or of an unstated term.';
+
+export const ANALYSIS_OUTPUT_RULES = ANALYSIS_REVIEW_RULES + ' ' + EXPLANATION_GROUNDING_RULES + ' Return only JSON: {clauseId, risk: low|medium|high, explanation, redline, questions: string[]}. ' +
   'Echo the exact clause id as clauseId. Preserve every placeholder exactly, including brackets and case, ' +
   'in all fields and questions. Never invent a placeholder or rewrite [PARTY_A] as Party A. ' +
   'Square brackets are reserved exclusively for exact placeholders already present in the supplied clause. ' +
@@ -106,6 +117,40 @@ export class AnalysisValidationError extends Error {
       ? 'The answer introduced a placeholder that was not sent.'
       : 'The answer did not match the required response format.');
     this.name = 'AnalysisValidationError';
+  }
+}
+
+class ExplanationGroundingError extends AnalysisValidationError {
+  constructor() {
+    super('invalid_response');
+    this.name = 'ExplanationGroundingError';
+    this.message = 'The explanation used guarantee terms not established by this clause. Review the source wording before retrying.';
+  }
+}
+
+const GUARANTEE_WORDING = /\bguarant\w*\b/i;
+const GUARANTEE_LABELS = [
+  /\bunconditional(?:ly)?\b/i,
+  /\babsolute(?:ly)?\b/i,
+  /\buncapped\b/i,
+  /\bunlimited\b/i,
+  /\bfuture\s+(?:obligations|liabilities|debts)\b/i,
+  /\bwithout\s+(?:any\s+)?(?:limits?|limitations?|conditions?)\b/i,
+];
+// A keyword in a qualified/negated source is not affirmative evidence. Holding
+// these cases is intentionally conservative, including legitimate complex clauses.
+const SOURCE_QUALIFICATION = /\b(?:not|no|never|unless|except|excluding|conditional|subject\s+to|limited\s+to)\b/i;
+
+/** Narrow lexical guard for observed guarantee overclaims, not entailment verification.
+ * Questions may ask about unknown terms; they do not establish facts in an explanation.
+ * Call after validateAnalysis, so unsupported output cannot hide bad JSON/tokens.
+ */
+export function validateExplanationGrounding(analysis: Analysis, source: CleanText): void {
+  if (!GUARANTEE_WORDING.test(source) && !GUARANTEE_WORDING.test(analysis.explanation)) return;
+  for (const label of GUARANTEE_LABELS) {
+    if (label.test(analysis.explanation) && (!label.test(source) || SOURCE_QUALIFICATION.test(source))) {
+      throw new ExplanationGroundingError();
+    }
   }
 }
 
