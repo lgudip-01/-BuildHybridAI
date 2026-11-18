@@ -4,19 +4,22 @@ import { describe, expect, it } from 'vitest';
 import type { AiBridge, Analysis, Clause, OnDeviceStatus } from '@clause-guard/core/types';
 import { leakCheck } from './leakCheck';
 import { mask } from './mask';
-import { classify, findEntities } from './onDevice';
+import { classify, readClause } from './onDevice';
 import { unmask } from './unmask';
 
 type ModelEntity = { text: string; kind: string; party: boolean };
 
-// Stands in for the on-device model: reports each known entity that appears in the prompt.
-function fakeBridge(known: ModelEntity[], options: { status?: OnDeviceStatus; answer?: string } = {}): AiBridge {
+// Stands in for the on-device model: reports each known entity that appears in the prompt, and the clause type.
+function fakeBridge(
+  known: ModelEntity[],
+  options: { status?: OnDeviceStatus; answer?: string; type?: string } = {},
+): AiBridge {
   return {
     onDeviceStatus: async () => options.status ?? 'available',
     onDevice: async (prompt) => {
       if (options.answer !== undefined) return options.answer;
       if (prompt.startsWith('Classify')) return '{"type": "payment"}';
-      return JSON.stringify({ entities: known.filter((e) => prompt.includes(e.text)) });
+      return JSON.stringify({ type: options.type ?? 'payment', entities: known.filter((e) => prompt.includes(e.text)) });
     },
     analyze: async () => {
       throw new Error('not used');
@@ -95,22 +98,24 @@ describe('mask', () => {
     expect(sent).toContain('The landlord rents the unit to');
   });
 
-  it('labels each masked clause with the type the on-device model gives it', async () => {
-    const result = await mask('doc-7', clauses, fakeBridge(model));
-    if (!result.ok) throw new Error('blocked');
-    expect(result.clauses.map((c) => c.type)).toEqual(['payment', 'payment']);
-  });
-
-  it('still masks, without types, when classification fails', async () => {
+  it('labels each masked clause with the type the on-device model gives it, in one call per clause', async () => {
     const working = fakeBridge(model);
+    const prompts: string[] = [];
     const bridge: AiBridge = {
       ...working,
-      onDevice: async (prompt, schema) => {
-        if (prompt.startsWith('Classify')) throw new Error('model busy');
+      onDevice: (prompt, schema) => {
+        prompts.push(prompt);
         return working.onDevice(prompt, schema);
       },
     };
-    const result = await mask('doc-8', clauses, bridge);
+    const result = await mask('doc-7', clauses, bridge);
+    if (!result.ok) throw new Error('blocked');
+    expect(result.clauses.map((c) => c.type)).toEqual(['payment', 'payment']);
+    expect(prompts).toHaveLength(clauses.length);
+  });
+
+  it('still masks, without types, when the model gives no valid type', async () => {
+    const result = await mask('doc-8', clauses, fakeBridge(model, { type: 'banana' }));
     if (!result.ok) throw new Error('blocked');
 
     expect(result.needsReview).toBe(false);
@@ -180,7 +185,7 @@ describe('unmask', () => {
   });
 });
 
-describe('findEntities', () => {
+describe('readClause', () => {
   it('drops role words, section titles and bare places the model reports', async () => {
     const text = '3. Service Levels. The Tenants, Wei Zhang, rent 2210 Cedar Avenue under the laws of Oregon.';
     const bridge = fakeBridge([
@@ -190,7 +195,9 @@ describe('findEntities', () => {
       { text: 'Wei Zhang', kind: 'person', party: true },
       { text: '2210 Cedar Avenue', kind: 'address', party: false },
     ]);
-    expect((await findEntities(bridge, text)).map((e) => e.value)).toEqual(['Wei Zhang', '2210 Cedar Avenue']);
+    const reading = await readClause(bridge, { id: 'c1', index: 0, text });
+    expect(reading.entities.map((e) => e.value)).toEqual(['Wei Zhang', '2210 Cedar Avenue']);
+    expect(reading.type).toBe('payment');
   });
 
   it('drops places of law the model reports as organizations', async () => {
@@ -201,7 +208,7 @@ describe('findEntities', () => {
       { text: 'Netherlands', kind: 'organization', party: true },
       { text: 'Amsterdam', kind: 'organization', party: true },
     ]);
-    expect((await findEntities(bridge, text)).map((e) => e.value)).toEqual(['Halcyon Cloud']);
+    expect((await readClause(bridge, { id: 'c1', index: 0, text })).entities.map((e) => e.value)).toEqual(['Halcyon Cloud']);
   });
 });
 
