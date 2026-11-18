@@ -58,8 +58,15 @@ describe('approved web analysis', () => {
     expect(JSON.parse(mocks.generate.mock.calls[0]![0])).toEqual({ id: 'c1', type: 'indemnity', text: b.clauses[0]!.text });
     expect(mocks.generate.mock.calls.flat().join(' ')).not.toContain(b.docId);
     expect(mocks.factory.mock.calls.map(c => c[1].mode)).toEqual(['prefer_in_cloud', 'only_in_cloud']);
-    expect(mocks.factory.mock.calls[0]![1].inCloudParams.systemInstruction).toBe(CLOUD_ANALYSIS_PROMPT);
-    expect(mocks.factory.mock.calls[0]![1].onDeviceParams.createOptions.initialPrompts[0].content[0].value).toBe(DEVICE_ANALYSIS_PROMPT);
+    const cloudPrompt = mocks.factory.mock.calls[0]![1].inCloudParams.systemInstruction;
+    const devicePrompt = mocks.factory.mock.calls[0]![1].onDeviceParams.createOptions.initialPrompts[0].content[0].value;
+    expect(cloudPrompt).toContain(CLOUD_ANALYSIS_PROMPT);
+    expect(devicePrompt).toContain(DEVICE_ANALYSIS_PROMPT);
+    for (const prompt of [cloudPrompt, devicePrompt]) {
+      expect(prompt).toContain(JSON.stringify(['[AMOUNT_1]', '[PARTY_A]', '[PARTY_B]']));
+      expect(prompt).toContain('set redline to the empty string');
+      expect(prompt).not.toContain(b.docId);
+    }
   });
   it('reports SDK device fallback and keeps the rest of that batch local', async () => {
     mocks.generate.mockResolvedValueOnce(output('c1', 'on_device')).mockResolvedValueOnce(output('c2', 'on_device'));

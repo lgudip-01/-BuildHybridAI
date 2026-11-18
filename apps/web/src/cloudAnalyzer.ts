@@ -31,6 +31,13 @@ export async function analyzeApproved(ai: AI, batch: ApprovedBatch): Promise<Ana
   assertApproved(batch); // Remasking during Remote Config initialization cancels this batch.
   if (!config.enabled) throw new Error('Cloud analysis is temporarily disabled by configuration.');
   const allowed = allowedPlaceholders(batch);
+  // Derived only from approved masked text, never from the local replacement map.
+  const placeholderRules = '\nApplication placeholder constraint: the complete permitted token list is ' +
+    JSON.stringify([...allowed].sort()) + '. Tokens are opaque labels, not facts about another clause. ' +
+    'Copy tokens exactly and only for the same entity or value they already represent. ' +
+    'Never increment a token suffix or create a new contact token. ' +
+    'If a notice clause lacks a party\'s email or address, set redline to the empty string and ask for the missing contact details in questions. ' +
+    'Do not substitute another party\'s existing contact token. Before returning JSON, check every bracketed span against the permitted list.';
   const results: Analysis[] = [];
   const failed: ClauseFailure[] = [];
   let ranOn: 'cloud' | 'device' | undefined;
@@ -47,14 +54,14 @@ export async function analyzeApproved(ai: AI, batch: ApprovedBatch): Promise<Ana
         mode,
         inCloudParams: {
           model: config.model,
-          systemInstruction: config.cloudPrompt,
+          systemInstruction: config.cloudPrompt + placeholderRules,
           generationConfig: { responseMimeType: 'application/json', responseSchema: cloudSchema, maxOutputTokens: 2048 },
         },
         onDeviceParams: {
           createOptions: {
             expectedInputs: [{ type: 'text', languages: ['en'] }],
             expectedOutputs: [{ type: 'text', languages: ['en'] }],
-            initialPrompts: [{ role: 'system', content: [{ type: 'text', value: config.devicePrompt }] }],
+            initialPrompts: [{ role: 'system', content: [{ type: 'text', value: config.devicePrompt + placeholderRules }] }],
             signal,
           },
           promptOptions: { responseConstraint: ANALYSIS_JSON_SCHEMA },
