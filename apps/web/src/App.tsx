@@ -1,7 +1,6 @@
 // Test bench for the privacy engine against real Gemini Nano. The Web app role replaces this with the product UI.
-import type { Clause, ClauseType, EntityKind, LedgerEntry, MaskResult, OnDeviceStatus } from '@clause-guard/core/types';
+import type { Clause, EntityKind, LedgerEntry, MaskResult, OnDeviceStatus } from '@clause-guard/core/types';
 import { mask } from '@clause-guard/privacy-engine/mask';
-import { classify } from '@clause-guard/privacy-engine/onDevice';
 import { PLACEHOLDER } from '@clause-guard/privacy-engine/placeholders';
 import { Download, LoaderCircle, ShieldCheck, ShieldX, TriangleAlert } from 'lucide-react';
 import { useCallback, useEffect, useState, type KeyboardEvent } from 'react';
@@ -40,7 +39,7 @@ const KIND_LABEL: Record<EntityKind, string> = {
 // Splitting on a capture group keeps the placeholders at the odd indexes.
 const SPLIT_ON_PLACEHOLDER = new RegExp(`(${PLACEHOLDER.source})`);
 
-type Run = { result: MaskResult; ms: number; types?: ClauseType[] };
+type Run = { result: MaskResult; ms: number };
 
 const errorText = (error: unknown) => (error instanceof Error ? error.message : String(error));
 
@@ -100,8 +99,7 @@ export function App({ bridge }: { bridge: AiBridge & { downloadModel(onProgress:
       const started = performance.now();
       const result = await mask(crypto.randomUUID(), clauses, bridge);
       const ms = performance.now() - started;
-      const types = result.ok && !result.needsReview ? await classify(bridge, clauses) : undefined;
-      setRun({ result, ms, types });
+      setRun({ result, ms });
     } catch (e) {
       setRun(null);
       setError(errorText(e));
@@ -226,7 +224,7 @@ function Output(props: { run: Run | null; error: string | null; active: string |
     );
   }
 
-  const { result, ms, types } = run;
+  const { result, ms } = run;
 
   if (!result.ok) {
     return (
@@ -279,7 +277,7 @@ function Output(props: { run: Run | null; error: string | null; active: string |
           <li key={clause.id}>
             <div className="clause-head">
               <span className="clause-id">{clause.id}</span>
-              {types?.[i] && <span className="clause-type">{types[i].replace('_', ' ')}</span>}
+              {clause.type && <span className="clause-type">{clause.type.replace('_', ' ')}</span>}
             </div>
             <p className="clause-text">
               {clause.text.split(SPLIT_ON_PLACEHOLDER).map((part, j) =>
