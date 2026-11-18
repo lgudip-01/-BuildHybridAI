@@ -16,7 +16,19 @@ export const ANALYSIS_JSON_SCHEMA = {
   additionalProperties: false,
 } as const;
 
-export const ANALYSIS_OUTPUT_RULES = 'Return only JSON: {clauseId, risk: low|medium|high, explanation, redline, questions: string[]}. ' +
+// App-owned review constraints also accompany previously published Remote Config prompts.
+export const ANALYSIS_REVIEW_RULES = 'Review from a neutral perspective when the represented party is unknown. ' +
+  'Use the role words in the supplied clause, such as Borrower, Lender, Provider, or Customer. ' +
+  'Do not assign a role word to a placeholder unless this clause explicitly establishes that relationship. ' +
+  'A permitted token from another clause is not evidence of its role here. If an identity is unknown, keep the role word. ' +
+  'Read express mutual language such as each party or either party accurately; do not describe that obligation as one-sided or its mutuality as unspecified. ' +
+  'Keep redlines limited to changes directly supported by the explanation and supplied text. ' +
+  'Do not silently favor one side by adding exclusive remedies, unconditional guarantees, broader payment or performance duties, ' +
+  'fees payable instead of fees paid, or new termination rights. ' +
+  'If a revision depends on the represented party or an unagreed commercial choice, leave redline empty and ask a neutral question about that choice. ' +
+  'Do not present a clause-level omission as an established omission from the entire agreement.';
+
+export const ANALYSIS_OUTPUT_RULES = ANALYSIS_REVIEW_RULES + ' Return only JSON: {clauseId, risk: low|medium|high, explanation, redline, questions: string[]}. ' +
   'Echo the exact clause id as clauseId. Preserve every placeholder exactly, including brackets and case, ' +
   'in all fields and questions. Never invent a placeholder or rewrite [PARTY_A] as Party A. ' +
   'Square brackets are reserved exclusively for exact placeholders already present in the supplied clause. ' +
