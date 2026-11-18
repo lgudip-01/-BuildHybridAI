@@ -16,7 +16,7 @@
     "DE89 3704 0044 0532 0130 00",
     "47-3920185"
   ],
-  "keep": ["Client", "Contractor", "15 days", "14 days", "work made for hire"],
+  "keep": ["Client", "Contractor", "15 days", "14 days", "work made for hire", "Exhibit A"],
   "types": ["other", "other", "other", "payment", "payment", "ip", "termination", "other", "other", "other"],
   "fallbackMisses": [],
   "fallbackOvermasks": []
