@@ -1,7 +1,7 @@
 # Analysis Remote Config
 
-Implemented on cloud/approved-analysis (PR #10). Console publication is still
-pending; no Firebase Console settings were changed by this code contribution.
+Implemented on cloud/approved-analysis (PR #10). The project owner reports that all three parameters are published. A live client
+verification is still pending; no Firebase Console settings were changed by this code contribution.
 
 ## Publish in Firebase Console
 
@@ -62,8 +62,8 @@ Automated tests cover payload rejection, disabled flags with invalid payloads,
 fixed output rules, unsupported browsers, offline cache, request deduplication,
 and a hanging initialization deadline. Analyzer unit tests use the default config
 snapshot; real engine integration also mocks configuration transport, never the
-engine identity registry. Real Console fetch/activation still needs checking
-once approval.ts is available and the parameters are published.
+engine identity registry. The development-only check below verifies activated Console values without
+waiting for approval.ts; genuine engine analysis still needs separate checking.
 
 After the engine lands, check an approved synthetic batch with each flag state:
 analysis disabled must make no model call; fallback disabled must use cloud only;
@@ -71,3 +71,33 @@ remasking during config loading must reject before generation. Record those
 results without dumping App Check tokens or real contract content. Native bridges
 should parse the same versioned payload and retain the same hardcoded privacy
 rules; native Remote Config integration is a separate teammate task.
+
+## Verify published values without the engine
+
+Use a checkout containing PR #10's latest files. This does not update an older
+ZIP download automatically. From the repository root run:
+
+```sh
+npm run dev --workspace @clause-guard/web
+```
+
+Open the displayed localhost URL in Chrome, then open DevTools → Console.
+Paste this whole block once:
+
+```js
+var configCheck = await import('/src/remoteConfigSmokeTest.ts');
+console.log(await configCheck.runRemoteConfigSmokeTest());
+```
+
+Expected status: REMOTE_CONFIG_VALUES_VERIFIED, with all three parameterSources
+set to remote, the configured model/version, and both flags true for the initial
+setup. This check reads configuration only: no AI inference or contract text.
+Do not share the separate App Check debug-token line the SDK may print.
+
+The result includes lastFetchStatus and lastSuccessfulFetchAt. A remote value
+may be previously activated/cached; a pass does not prove the newest Console
+publication was fetched. The normal one-hour SDK fetch interval applies. If
+values are missing or invalid, the check fails instead of calling local defaults
+a successful verification. Reload before checking again; the loader uses one
+snapshot per page. This check does not test App Check enforcement, model
+availability, offline inference, or engine approval. Those checks remain separate.
