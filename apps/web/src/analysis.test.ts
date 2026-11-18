@@ -15,8 +15,13 @@ vi.mock('firebase/ai', async importOriginal => ({
   ...await importOriginal<typeof import('firebase/ai')>(),
   getGenerativeModel: mocks.factory,
 }));
+vi.mock('./analysisConfig', async original => {
+  const config = await original<typeof import('./analysisConfig')>();
+  return { ...config, loadAnalysisConfig: vi.fn(async () => config.DEFAULT_ANALYSIS_CONFIG) };
+});
 import { WebBridge } from './webBridge';
 import { AnalysisUnavailableError } from './cloudAnalyzer';
+import { loadAnalysisConfig, DEFAULT_ANALYSIS_CONFIG } from './analysisConfig';
 
 const ai = {} as AI;
 function batch(count = 2): ApprovedBatch {
@@ -34,6 +39,7 @@ function output(id = 'c1', source = 'in_cloud', data: unknown = answer(id)) {
 }
 beforeEach(() => {
   vi.clearAllMocks(); mocks.approved = new WeakSet();
+  vi.mocked(loadAnalysisConfig).mockResolvedValue(DEFAULT_ANALYSIS_CONFIG);
   mocks.generate.mockReset(); mocks.factory.mockImplementation(() => ({ generateContent: mocks.generate }));
 });
 
@@ -140,4 +146,22 @@ describe('response validation', () => {
       expect(() => validateBatch({ docId: 'test', clauses: clauses as MaskedClause[] })).toThrow();
     }
   });
+});
+
+it('blocks generation when Remote Config disables analysis', async () => {
+  vi.mocked(loadAnalysisConfig).mockResolvedValue({...DEFAULT_ANALYSIS_CONFIG,enabled:false});
+  await expect(new WebBridge(ai).analyze(batch(1))).rejects.toThrow('disabled');
+  expect(mocks.factory).not.toHaveBeenCalled();
+});
+it('can disable masked-analysis device fallback without changing masking mode', async () => {
+  vi.mocked(loadAnalysisConfig).mockResolvedValue({...DEFAULT_ANALYSIS_CONFIG,deviceFallbackEnabled:false});
+  mocks.generate.mockResolvedValue(output());
+  await new WebBridge(ai).analyze(batch(1));
+  expect(mocks.factory.mock.calls[0]![1].mode).toBe('only_in_cloud');
+});
+it('rechecks approval after waiting for configuration', async () => {
+  const b=batch(1);
+  vi.mocked(loadAnalysisConfig).mockImplementationOnce(async () => { mocks.approved.delete(b); return DEFAULT_ANALYSIS_CONFIG; });
+  await expect(new WebBridge(ai).analyze(b)).rejects.toMatchObject({code:'not_approved'});
+  expect(mocks.factory).not.toHaveBeenCalled();
 });

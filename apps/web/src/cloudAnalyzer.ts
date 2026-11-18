@@ -1,10 +1,11 @@
 import type { Analysis, AnalyzeResult, ApprovedBatch, ClauseFailure } from '@clause-guard/core/types';
 import {
-  allowedPlaceholders, ANALYSIS_JSON_SCHEMA, ANALYSIS_MODEL, AnalysisValidationError,
-  CLOUD_ANALYSIS_PROMPT, DEVICE_ANALYSIS_PROMPT, validateAnalysis, validateBatch,
+  allowedPlaceholders, ANALYSIS_JSON_SCHEMA, AnalysisValidationError,
+  validateAnalysis, validateBatch,
 } from '@clause-guard/core/analysis';
 import { getGenerativeModel, InferenceMode, InferenceSource, Schema, type AI } from 'firebase/ai';
 import { assertApproved } from './approvalGuard';
+import { loadAnalysisConfig } from './analysisConfig';
 
 const cloudSchema = Schema.object({ properties: {
   clauseId: Schema.string(),
@@ -26,6 +27,9 @@ export class AnalysisUnavailableError extends Error {
 export async function analyzeApproved(ai: AI, batch: ApprovedBatch): Promise<AnalyzeResult> {
   assertApproved(batch); // Must be first: never trust the TypeScript brand alone.
   validateBatch(batch);
+  const config = await loadAnalysisConfig(ai.app);
+  assertApproved(batch); // Remasking during Remote Config initialization cancels this batch.
+  if (!config.enabled) throw new Error('Cloud analysis is temporarily disabled by configuration.');
   const allowed = allowedPlaceholders(batch);
   const results: Analysis[] = [];
   const failed: ClauseFailure[] = [];
@@ -36,21 +40,21 @@ export async function analyzeApproved(ai: AI, batch: ApprovedBatch): Promise<Ana
     // Until a source responds, let the SDK prefer cloud and fall back locally.
     // After that, pin this batch to that source: no mixed-source badge or duplicate retries.
     const mode = ranOn === 'cloud' ? InferenceMode.ONLY_IN_CLOUD
-      : ranOn === 'device' ? InferenceMode.ONLY_ON_DEVICE : InferenceMode.PREFER_IN_CLOUD;
+      : ranOn === 'device' ? InferenceMode.ONLY_ON_DEVICE : config.deviceFallbackEnabled ? InferenceMode.PREFER_IN_CLOUD : InferenceMode.ONLY_IN_CLOUD;
     try {
       const signal = AbortSignal.timeout(60_000);
       const model = getGenerativeModel(ai, {
         mode,
         inCloudParams: {
-          model: ANALYSIS_MODEL,
-          systemInstruction: CLOUD_ANALYSIS_PROMPT,
+          model: config.model,
+          systemInstruction: config.cloudPrompt,
           generationConfig: { responseMimeType: 'application/json', responseSchema: cloudSchema, maxOutputTokens: 2048 },
         },
         onDeviceParams: {
           createOptions: {
             expectedInputs: [{ type: 'text', languages: ['en'] }],
             expectedOutputs: [{ type: 'text', languages: ['en'] }],
-            initialPrompts: [{ role: 'system', content: [{ type: 'text', value: DEVICE_ANALYSIS_PROMPT }] }],
+            initialPrompts: [{ role: 'system', content: [{ type: 'text', value: config.devicePrompt }] }],
             signal,
           },
           promptOptions: { responseConstraint: ANALYSIS_JSON_SCHEMA },

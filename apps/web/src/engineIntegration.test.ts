@@ -19,6 +19,10 @@ const sdk = vi.hoisted(() => ({ generate: vi.fn(), factory: vi.fn() }));
 vi.mock('firebase/ai', async original => ({
   ...await original<typeof import('firebase/ai')>(), getGenerativeModel: sdk.factory,
 }));
+vi.mock('./analysisConfig', async original => {
+  const config = await original<typeof import('./analysisConfig')>();
+  return { ...config, loadAnalysisConfig: async () => config.DEFAULT_ANALYSIS_CONFIG };
+});
 import { WebBridge } from './webBridge';
 
 const localOnly: AiBridge = {
