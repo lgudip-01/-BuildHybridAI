@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { AI } from 'firebase/ai';
-import type { ApprovedBatch, CleanText, MaskedClause } from '@clause-guard/core/types';
-import { allowedPlaceholders, validateAnalysis, validateBatch, CLOUD_ANALYSIS_PROMPT, DEVICE_ANALYSIS_PROMPT, ANALYSIS_REVIEW_RULES } from '@clause-guard/core/analysis';
+import type { Analysis, ApprovedBatch, CleanText, MaskedClause } from '@clause-guard/core/types';
+import { allowedPlaceholders, validateAnalysis, validateBatch, CLOUD_ANALYSIS_PROMPT, DEVICE_ANALYSIS_PROMPT, ANALYSIS_REVIEW_RULES, applyCommercialRedlineGuard, REDLINE_REVIEW_NOTICE } from '@clause-guard/core/analysis';
 
 const mocks = vi.hoisted(() => ({
   approved: new WeakSet<object>(),
@@ -31,8 +31,8 @@ function batch(count = 2): ApprovedBatch {
   })) };
   Object.freeze(value.clauses); Object.freeze(value); mocks.approved.add(value); return value;
 }
-function answer(id = 'c1') {
-  return { clauseId: id, risk: 'high', explanation: '[PARTY_A] bears broad risk.', redline: '[PARTY_A] covers its own negligence only.', questions: ["Can [PARTY_B] limit this duty?"] };
+function answer(id = 'c1'): Analysis {
+  return { clauseId: id, risk: 'high', explanation: '[PARTY_A] bears broad risk.', redline: '', questions: ["Can [PARTY_B] limit this duty?"] };
 }
 function output(id = 'c1', source = 'in_cloud', data: unknown = answer(id)) {
   return { response: { inferenceSource: source, text: () => JSON.stringify(data) } };
@@ -85,6 +85,15 @@ describe('approved web analysis', () => {
     mocks.generate.mockResolvedValueOnce(output('c1', 'on_device')).mockResolvedValueOnce(output('c2', 'on_device'));
     expect((await new WebBridge(ai).analyze(batch())).ranOn).toBe('device');
     expect(mocks.factory.mock.calls.map(c => c[1].mode)).toEqual(['prefer_in_cloud', 'only_on_device']);
+  });
+  it.each(['in_cloud', 'on_device'])('withholds a commercial rewrite from %s without another model call', async source => {
+    const data = { ...answer(), redline: '[PARTY_A] shall unconditionally indemnify [PARTY_B].' };
+    mocks.generate.mockResolvedValueOnce(output('c1', source, data));
+    const result = await new WebBridge(ai).analyze(batch(1));
+    expect(result.results[0]).toMatchObject({ redline: '', risk: data.risk, questions: data.questions });
+    expect(result.results[0]!.explanation).toContain(REDLINE_REVIEW_NOTICE);
+    expect(result.failed).toEqual([]);
+    expect(mocks.generate).toHaveBeenCalledTimes(1);
   });
   it('rejects unknown placeholders per clause while keeping other results', async () => {
     mocks.generate.mockResolvedValueOnce(output('c1', 'in_cloud', { ...answer(), questions: ['Ask [PARTY_C].'] })).mockResolvedValueOnce(output('c2'));
@@ -149,6 +158,48 @@ describe('approved web analysis', () => {
     await new WebBridge(ai).onDevice('synthetic raw local text');
     expect(mocks.factory.mock.calls[0]![1].mode).toBe('only_on_device');
     expect(mocks.factory.mock.calls[0]![1].inCloudParams).toBeUndefined();
+  });
+});
+
+describe('commercial rewrite review gate', () => {
+  it.each([
+    ['Provider will make the platform available 99.9% of each calendar month. Customer receives a service credit of 5% of the monthly fee.',
+      'Provider will make the platform available 99.9%, excluding scheduled maintenance. The credit is Customer’s sole and exclusive remedy.'],
+    ['Each party’s liability is capped at fees paid in the 12 months before the claim.',
+      'Each party’s liability is capped at fees paid or payable in the 12 months before the claim.'],
+    ['The initial Term is 36 months and renews for 12-month periods unless either party gives 90 days’ notice.',
+      'Either party may terminate for convenience on 90 days’ notice.'],
+    ['[PARTY_A] guarantees all Borrower obligations.',
+      '[PARTY_A] unconditionally guarantees prompt payment and performance.'],
+    ['This credit is not Customer’s sole and exclusive remedy.',
+      'This credit is Customer’s sole and exclusive remedy.'],
+    ['Lender may declare the balance due immediately after 10 days.',
+      'Lender may terminate the loan immediately.'],
+  ])('withholds an unapproved commercial edit %#', (source, redline) => {
+    const original = { ...answer(), redline };
+    const guarded = applyCommercialRedlineGuard(original, source as CleanText);
+    expect(guarded.redline).toBe('');
+    expect(guarded.explanation).toContain(REDLINE_REVIEW_NOTICE);
+    expect(guarded.explanation).toContain(original.explanation);
+    expect(guarded.questions).toEqual(original.questions);
+    expect(original.redline).toBe(redline);
+  });
+  it('keeps empty drafts, exact commercial wording and whitespace-only copies', () => {
+    const source = 'Each party’s liability is capped at fees paid.' as CleanText;
+    for (const redline of ['', source, '  Each party’s liability\nis capped at fees paid.  ']) {
+      const original = { ...answer(), redline };
+      expect(applyCommercialRedlineGuard(original, source)).toBe(original);
+    }
+  });
+  it('does not claim to verify unrelated drafts or repair reasoning errors', () => {
+    const original = { ...answer(), explanation: 'A role assumption may still be wrong.', redline: 'Send notices in writing.' };
+    expect(applyCommercialRedlineGuard(original, 'Send notices.' as CleanText)).toBe(original);
+  });
+  it('keeps the output valid when a maximum-length explanation ends near a token', () => {
+    const original = { ...answer(), explanation: 'x'.repeat(3790) + '[PARTY_A]' + 'y'.repeat(201), redline: '[PARTY_A] shall unconditionally indemnify [PARTY_B].' };
+    const guarded = applyCommercialRedlineGuard(original, '[PARTY_A] indemnifies [PARTY_B].' as CleanText);
+    expect(guarded.explanation.length).toBeLessThanOrEqual(4000);
+    expect(() => validateAnalysis(JSON.stringify(guarded), 'c1', new Set(['[PARTY_A]', '[PARTY_B]']))).not.toThrow();
   });
 });
 
