@@ -4,17 +4,9 @@ import type { AI } from 'firebase/ai';
 import type { AiBridge, ApprovedBatch, MaskResult } from '@clause-guard/core/types';
 import { mask } from '@clause-guard/privacy-engine/mask';
 import { unmask } from '@clause-guard/privacy-engine/unmask';
+import * as engine from '@clause-guard/privacy-engine/approval';
 
 type SuccessfulMask = Extract<MaskResult, { ok: true }> & { docId: string };
-type ApprovalModule = {
-  approve(result: Extract<MaskResult, { ok: true }>, options?: { reviewed?: boolean }): ApprovedBatch;
-  assertApproved(batch: ApprovedBatch): void;
-};
-// Same real module path as approvalGuard.ts. Never mock its identity registry.
-const modules = import.meta.glob<ApprovalModule>(
-  '../../../packages/privacy-engine/src/approval.ts', { eager: true },
-);
-const engine = Object.values(modules)[0];
 const sdk = vi.hoisted(() => ({ generate: vi.fn(), factory: vi.fn() }));
 vi.mock('firebase/ai', async original => ({
   ...await original<typeof import('firebase/ai')>(), getGenerativeModel: sdk.factory,
@@ -52,9 +44,7 @@ beforeEach(() => {
   sdk.generate.mockImplementation(async (prompt: string) => response(prompt));
 });
 
-// These are explicit skips, never substituted with fake approval. The dedicated
-// runner also exits BLOCKED before Vitest if the engine has not been published.
-describe.skipIf(!engine)('real privacy engine -> WebBridge integration (cloud SDK mocked)', () => {
+describe('real privacy engine -> WebBridge integration (cloud SDK mocked)', () => {
   it('uses genuine mask/approve/analyze/unmask, keeping raw fixture values out of requests', async () => {
     const result = await masked();
     expect(result.needsReview).toBe(true);
