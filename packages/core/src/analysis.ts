@@ -1,4 +1,4 @@
-import { CLAUSE_TYPES, type Analysis, type ApprovedBatch } from './types';
+import { CLAUSE_TYPES, type Analysis, type ApprovedBatch, type CleanText } from './types';
 
 // Versioned shared defaults. Remote Config distribution is a separate task.
 export const ANALYSIS_VERSION = 'clause-analysis-v1';
@@ -52,6 +52,23 @@ export const CLOUD_ANALYSIS_PROMPT = 'You help a founder or freelancer review an
 export const DEVICE_ANALYSIS_PROMPT = 'Offline preliminary red-flag scan only. Flag obvious broad indemnity, uncapped liability, ' +
   'IP transfer, restrictive covenants, payment ambiguity or one-sided termination in this masked clause. ' +
   'Say the scan is preliminary and limited; low risk is not contract approval. Leave redline empty if unsure. ' + ANALYSIS_OUTPUT_RULES;
+
+export const REDLINE_POLICY_VERSION = 'commercial-review-v1';
+export const REDLINE_REVIEW_NOTICE = 'Local drafting check: proposed replacement wording was withheld because changes to commercial terms require review. Confirm the represented party and intended changes before drafting a replacement.';
+// Conservative triage, not a legal/semantic verifier. Check BOTH versions so
+// removing an existing restriction/exception is held just like adding one.
+const COMMERCIAL_TERMS = /\b(?:fees?|payments?|interest|salary|bonus|equity|shares?|liabilit(?:y|ies)|indemni\w*|guarant\w*|remed(?:y|ies)|service\s+credits?|availab(?:ility|le)|downtime|maintenance|terminat\w*|renew\w*|non[-\s]?compet\w*|assign\w*|ownership)\b/i;
+
+/** Run after JSON/token validation, before local restoration. No extra model call. */
+export function applyCommercialRedlineGuard(analysis: Analysis, source: CleanText): Analysis {
+  const normalized = (text: string) => text.replace(/\s+/g, ' ').trim();
+  if (!analysis.redline.trim() || normalized(analysis.redline) === normalized(source) ||
+      !(COMMERCIAL_TERMS.test(source) || COMMERCIAL_TERMS.test(analysis.redline))) return analysis;
+  // Retain the response contract/size limit and never truncate inside a token.
+  const room = 4000 - REDLINE_REVIEW_NOTICE.length - 2;
+  const explanation = analysis.explanation.slice(0, room).replace(/\[[^\]]*$/, '').trimEnd();
+  return { ...analysis, redline: '', explanation: `${REDLINE_REVIEW_NOTICE}\n\n${explanation}` };
+}
 
 // Same placeholder grammar as privacy-engine/placeholders.ts, with alphabetic party suffixes.
 const PLACEHOLDER = /\[[A-Z]+_[A-Z0-9]+\]/g;
