@@ -66,6 +66,8 @@ Earlier live checks:
 
 ## Next work, in bounded increments
 
+Update after this handoff was first written: the minimal existing web bench has now been wired to review/approve/analyze/restore and result cards. See `apps/web/UI_REVIEW_FLOW.md` and `apps/web/src/reviewFlow.ts`. 116 targeted tests, TypeScript and the production build passed. Interactive verification was attempted but blocked because the cloud browser could not reach the local server. The next user check is ONE real public-sample clause through the actual UI, followed by edit clearing; then proceed to offline verification. The full product UI remains Sai's scope. Do not repeat this implementation merely because the original roadmap below described it as pending.
+
 The agreed next area is UI integration, then offline verification—not another open-ended prompt-tuning loop.
 
 1. Inspect current GitHub issues/PRs and UI code. Confirm the UI teammate's current integration; do not assume the earlier masking-only UI has gained cloud analysis. Read issues #8/#10 and current discussions; #22/#23 statuses must be rechecked. Identify the smallest UI integration change and implement/test that increment.
