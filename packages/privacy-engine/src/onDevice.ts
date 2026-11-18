@@ -1,6 +1,6 @@
 import { CLAUSE_TYPES, type AiBridge, type Clause, type ClauseType } from '@clause-guard/core/types';
 import { findOccurrences, toEntity, type Entity } from './merge';
-import { isGeneric, isJurisdiction, isOnlyPlaceOfLaw, isSectionHeading } from './regex';
+import { isGeneric, isJurisdiction, isOnlyPlaceOfLaw, isSectionHeading, stripReference } from './regex';
 
 // On-device context windows are small, so long clauses go in pieces.
 const MAX_CHUNK = 2000;
@@ -100,7 +100,7 @@ export async function classify(bridge: AiBridge, clauses: Clause[]): Promise<Cla
 
 function readEntity(item: unknown, text: string): Entity | undefined {
   if (!isRecord(item) || typeof item.text !== 'string') return undefined;
-  const value = item.text.trim();
+  const value = stripReference(text, item.text.trim());
   if (value.length < 2 || value.length > 120 || isGeneric(value)) return undefined;
   // The model can invent names. Keep only what is really in the text.
   if (findOccurrences(text, value).length === 0) return undefined;

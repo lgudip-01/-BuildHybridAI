@@ -93,6 +93,10 @@ const SIGNATURE_NAME = new RegExp(
   'dg',
 );
 const CAPITALIZED_PHRASE = new RegExp(`\\b${NAME_WORD}(?:${SP}(?:(?:of|and|&)${SP}|${PARTICLE})${NAME_WORD}){1,4}`, 'g');
+// A reference to part of the contract, such as "Exhibit A" or "Schedule 2". It names no one, the cloud needs it,
+// and the "A." in "Exhibit A. Adebayo will report…" ends a sentence; it is not a middle initial.
+const REFERENCE_WORDS = 'Exhibit|Schedule|Appendix|Annex|Attachment|Addendum|Rider|Section|Article|Clause|Part|Item|Form|Table|Paragraph';
+const REFERENCE = new RegExp(`\\b(?:${REFERENCE_WORDS})s?${SP}(?:[A-Z]{1,3}|\\d+(?:\\.\\d+)*)\\b\\.?`, 'g');
 // Capitalized phrases that are job titles or jurisdictions. They identify no one, and the cloud model needs them.
 const JOB_TITLE = new RegExp(
   '^(?:Head|VP|Director|Chief) of\\s|\\b(?:Officer|Counsel|Engineer|Director|Manager|President|Secretary|Treasurer|Analyst|Designer|Developer|Architect|Scientist|Accountant|Attorney)s?$',
@@ -150,6 +154,22 @@ export function isSectionHeading(text: string, value: string): boolean {
   return new RegExp(`(?:^|\\n)[^\\S\\n]*\\d+(?:\\.\\d+)*\\.?[^\\S\\n]+${escaped}[^\\S\\n]*[.:]`, 'i').test(text);
 }
 
+/**
+ * A name the model reports without any contract reference stuck to it: "Exhibit A. Adebayo" becomes "Adebayo",
+ * and so does "A. Adebayo" where every "A." it starts with is the label of an "Exhibit A" in `text`.
+ * A real middle initial, as in "Jane Q. Doe", is left alone.
+ */
+export function stripReference(text: string, value: string): string {
+  const leading = new RegExp(`^(?:${REFERENCE_WORDS})s?${SP}(?:[A-Z]{1,3}|\\d+(?:\\.\\d+)*)\\b\\.?${SP}`).exec(value);
+  if (leading) return value.slice(leading[0].length);
+  const initial = new RegExp(`^[A-Z]\\.${SP}`).exec(value);
+  if (!initial) return value;
+  const escaped = value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\s+/g, '\\s+');
+  const mentions = [...text.matchAll(new RegExp(`(?<![\\p{L}\\p{N}])${escaped}`, 'gu'))];
+  const afterReference = (index: number) => new RegExp(`\\b(?:${REFERENCE_WORDS})s?${SP}$`).test(text.slice(0, index));
+  return mentions.length > 0 && mentions.every((m) => afterReference(m.index)) ? value.slice(initial[0].length) : value;
+}
+
 function isHeadingSpan(text: string, span: Span): boolean {
   return HEADING_BEFORE.test(text.slice(0, span.start)) && HEADING_AFTER.test(text.slice(span.end));
 }
@@ -184,8 +204,12 @@ export function findNames(text: string, broad: boolean): Span[] {
     ...collect(text, 'ADDRESS', STREET_ADDRESS),
   ];
   if (broad) {
+    // References are blanked out first, with the same length, so a phrase can't run through one and positions still match.
+    const withoutReferences = text.replace(REFERENCE, (ref) => '\n'.repeat(ref.length));
     spans.push(
-      ...collect(text, 'NAME', CAPITALIZED_PHRASE).filter((s) => s.value !== s.value.toUpperCase() && !isHeadingSpan(text, s)),
+      ...collect(withoutReferences, 'NAME', CAPITALIZED_PHRASE)
+        .map((s) => ({ ...s, value: text.slice(s.start, s.end) }))
+        .filter((s) => s.value !== s.value.toUpperCase() && !isHeadingSpan(text, s)),
     );
   }
   return spans
