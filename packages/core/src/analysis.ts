@@ -141,6 +141,35 @@ const GUARANTEE_LABELS = [
 // these cases is intentionally conservative, including legitimate complex clauses.
 const SOURCE_QUALIFICATION = /\b(?:not|no|never|unless|except|excluding|conditional|subject\s+to|limited\s+to)\b/i;
 
+export const GUARANTEE_REVIEW_FORMAT_VERSION = 'source-quoted-guarantee-v1';
+export const GUARANTEE_REVIEW_QUESTIONS = [
+  'Which obligations are included in the Note or agreement?',
+  'Are any limits or conditions defined elsewhere?',
+  'How do later amendments affect the guarantee?',
+  'Which party’s interests should this review consider?',
+] as const;
+
+/** Bounded review format for a short, otherwise unspecified guarantee.
+ * This is an application-authored explanation, not free-form model reasoning.
+ * Complex/qualified guarantees keep the normal path and existing rejection guard.
+ */
+export function sourceQuotedGuaranteeReview(source: CleanText): string | undefined {
+  if (source.length > 2500 || SOURCE_QUALIFICATION.test(source) || GUARANTEE_LABELS.some(label => label.test(source)) ||
+      !/\bguarantees\s+all\s+(?:of\s+)?Borrower['’]s\s+obligations\s+under\s+this\s+(?:Note|Agreement)\.\s*$/i.test(source)) return;
+  return `Source-based guarantee review. The supplied clause states:\n${source}\n\n` +
+    'Review the obligations defined in the full Note or agreement and check for conditions, limits and amendment provisions elsewhere. ' +
+    'Do not assume those details from the phrase “all obligations.” The risk rating is a preliminary review priority, not a legal conclusion.';
+}
+
+export function validateSourceQuotedGuaranteeReview(analysis: Analysis, expected: string): void {
+  if (analysis.explanation !== expected || analysis.redline !== '' ||
+      analysis.questions.some(question => !(GUARANTEE_REVIEW_QUESTIONS as readonly string[]).includes(question))) {
+    const error = new AnalysisValidationError('invalid_response');
+    error.message = 'The model did not return the required source-based guarantee review format.';
+    throw error;
+  }
+}
+
 /** Narrow lexical guard for observed guarantee overclaims, not entailment verification.
  * Questions may ask about unknown terms; they do not establish facts in an explanation.
  * Call after validateAnalysis, so unsupported output cannot hide bad JSON/tokens.
