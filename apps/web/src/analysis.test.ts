@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { AI } from 'firebase/ai';
 import type { Analysis, ApprovedBatch, CleanText, MaskedClause } from '@clause-guard/core/types';
-import { allowedPlaceholders, validateAnalysis, validateBatch, CLOUD_ANALYSIS_PROMPT, DEVICE_ANALYSIS_PROMPT, ANALYSIS_REVIEW_RULES, applyCommercialRedlineGuard, REDLINE_REVIEW_NOTICE } from '@clause-guard/core/analysis';
+import { allowedPlaceholders, validateAnalysis, validateBatch, CLOUD_ANALYSIS_PROMPT, DEVICE_ANALYSIS_PROMPT, ANALYSIS_REVIEW_RULES, applyCommercialRedlineGuard, REDLINE_REVIEW_NOTICE, EXPLANATION_GROUNDING_RULES, validateExplanationGrounding } from '@clause-guard/core/analysis';
 
 const mocks = vi.hoisted(() => ({
   approved: new WeakSet<object>(),
@@ -24,10 +24,10 @@ import { AnalysisUnavailableError } from './cloudAnalyzer';
 import { loadAnalysisConfig, DEFAULT_ANALYSIS_CONFIG, DEFAULT_PAYLOAD, parseAnalysisConfig } from './analysisConfig';
 
 const ai = {} as AI;
-function batch(count = 2): ApprovedBatch {
+function batch(count = 2, source?: string): ApprovedBatch {
   const value = { docId: 'local-only-doc', clauses: Array.from({ length: count }, (_, i) => Object.freeze({
     id: `c${i + 1}`, type: 'indemnity' as const,
-    text: (`[PARTY_A] indemnifies [PARTY_B]. ${i ? '[AMOUNT_1]' : ''}`) as CleanText,
+    text: (source ?? `[PARTY_A] indemnifies [PARTY_B]. ${i ? '[AMOUNT_1]' : ''}`) as CleanText,
   })) };
   Object.freeze(value.clauses); Object.freeze(value); mocks.approved.add(value); return value;
 }
@@ -55,6 +55,8 @@ describe('approved web analysis', () => {
     const params = mocks.factory.mock.calls[0]![1];
     expect(params.inCloudParams.systemInstruction).toContain(ANALYSIS_REVIEW_RULES);
     expect(params.onDeviceParams.createOptions.initialPrompts[0].content[0].value).toContain(ANALYSIS_REVIEW_RULES);
+    expect(params.inCloudParams.systemInstruction).toContain(EXPLANATION_GROUNDING_RULES);
+    expect(params.onDeviceParams.createOptions.initialPrompts[0].content[0].value).toContain(EXPLANATION_GROUNDING_RULES);
     expect(mocks.generate).toHaveBeenCalledTimes(1);
   });
   it('blocks an array or forged batch before any SDK/model request', async () => {
@@ -63,6 +65,22 @@ describe('approved web analysis', () => {
       await expect(bridge.analyze(value as ApprovedBatch)).rejects.toMatchObject({ code: 'not_approved' });
     }
     expect(mocks.factory).not.toHaveBeenCalled(); expect(mocks.generate).not.toHaveBeenCalled();
+  });
+  it.each(['in_cloud', 'on_device'])('rejects the observed unsupported guarantee explanation from %s without retrying', async source => {
+    const b = batch(2, "[PARTY_A] guarantees all of [PARTY_B]'s obligations under this Note.");
+    const bad = { ...answer(), explanation: '[PARTY_A] unconditionally guarantees all obligations. Liability is absolute, uncapped and extends to all future obligations.' };
+    mocks.generate.mockResolvedValueOnce(output('c1', source, bad)).mockResolvedValueOnce(output('c2', source));
+    const result = await new WebBridge(ai).analyze(b);
+    expect(result.results).toEqual([answer('c2')]);
+    expect(result.failed).toEqual([{ clauseId: 'c1', reason: 'invalid_response', detail: 'The explanation used guarantee terms not established by this clause. Review the source wording before retrying.' }]);
+    expect(JSON.stringify(result)).not.toContain('all future obligations');
+    expect(mocks.generate).toHaveBeenCalledTimes(2);
+  });
+  it('checks unknown tokens before grounding, even when the explanation would also fail', async () => {
+    const b = batch(1, "[PARTY_A] guarantees Borrower's obligations.");
+    mocks.generate.mockResolvedValueOnce(output('c1', 'in_cloud', { ...answer(), explanation: '[PARTY_A] gives an absolute guarantee.', questions: ['Ask [PARTY_Z].'] }));
+    expect((await new WebBridge(ai).analyze(b)).failed[0]!.reason).toBe('unknown_placeholder');
+    expect(mocks.generate).toHaveBeenCalledTimes(1);
   });
   it('echoes docId, projects approved fields only, and pins cloud after hybrid execution', async () => {
     const b = batch(); mocks.generate.mockResolvedValueOnce(output('c1')).mockResolvedValueOnce(output('c2'));
@@ -200,6 +218,42 @@ describe('commercial rewrite review gate', () => {
     const guarded = applyCommercialRedlineGuard(original, '[PARTY_A] indemnifies [PARTY_B].' as CleanText);
     expect(guarded.explanation.length).toBeLessThanOrEqual(4000);
     expect(() => validateAnalysis(JSON.stringify(guarded), 'c1', new Set(['[PARTY_A]', '[PARTY_B]']))).not.toThrow();
+  });
+});
+
+describe('guarantee explanation grounding', () => {
+  const source = "[PARTY_A] guarantees all of Borrower's obligations under this Note." as CleanText;
+  it.each([
+    '[PARTY_A] unconditionally guarantees all obligations.',
+    'The guaranty creates absolute liability.',
+    'This guarantee is uncapped.',
+    'The guarantee creates unlimited liability.',
+    'The guaranty extends to all present and future obligations.',
+    'This guarantee applies without limitation.',
+    'The guaranty may be unconditional.',
+  ])('rejects an unsupported label in the explanation: %s', explanation => {
+    expect(() => validateExplanationGrounding({ ...answer(), explanation }, source))
+      .toThrow(expect.objectContaining({ reason: 'invalid_response' }));
+  });
+  it('allows source-scoped observations and neutral questions without inferring terms', () => {
+    const analysis = { ...answer(), explanation: 'This clause guarantees the Borrower’s obligations under the Note. No cap is stated in this excerpt; review other terms for limits and conditions.',
+      questions: ['Is the guarantee intended to be unconditional?', 'Are future obligations covered?'] };
+    expect(() => validateExplanationGrounding(analysis, source)).not.toThrow();
+    expect(analysis.questions).toHaveLength(2);
+  });
+  it('allows the same explicit affirmative labels when actually supplied', () => {
+    const explicit = '[PARTY_A] unconditionally guarantees all present and future obligations with absolute and unlimited liability, uncapped and without limitation.' as CleanText;
+    expect(() => validateExplanationGrounding({ ...answer(), explanation: explicit }, explicit)).not.toThrow();
+  });
+  it.each([
+    ['[PARTY_A] does not give an unconditional guarantee.', 'The guarantee is unconditional.'],
+    ['[PARTY_A] guarantees payment subject to conditions; it is not absolute.', 'The guarantee is absolute.'],
+    ['[PARTY_A] guarantees all future obligations except later amendments.', 'The guarantee covers all future obligations.'],
+  ])('does not treat a label in qualified source wording as affirmative proof: %s', (text, explanation) => {
+    expect(() => validateExplanationGrounding({ ...answer(), explanation }, text as CleanText)).toThrow();
+  });
+  it('does not purport to validate unrelated clause reasoning', () => {
+    expect(() => validateExplanationGrounding({ ...answer(), explanation: 'Liability is uncapped.' }, 'A confidentiality breach is excluded from the cap.' as CleanText)).not.toThrow();
   });
 });
 
