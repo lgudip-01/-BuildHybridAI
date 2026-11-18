@@ -64,3 +64,29 @@ console.log(sampleAnswer.promptCheck);
 This sends three clauses rather than ten. `promptCheck` reports whether the current review rules are present in the same cached configuration used by the bridge, plus model/config source and local policy revision. It does not prove what a previous browser request sent or whether a model followed the rules. This subset check also does not replace a whole-document role/context evaluation.
 
 Verification: 76 targeted tests passed across analysis, Remote Config, real engine integration, and the sample helper; web TypeScript check passed. The new sample tests use the real engine's pattern-only mask/approve/unmask path with mocked cloud responses, including stale-preview rejection. No live cloud call has yet been made for this guard.
+
+## Live guard confirmation and explanation grounding follow-up
+
+Dhruv subsequently reported SaaS c5/c7/c8 completed 3/3 with empty redlines and no failures. Those responses had no local drafting notice, so that run showed the model itself declined replacement wording; it did not exercise the local withholding branch. The following promissory-note c7/c8 run completed 2/2. C7 included the local drafting notice, confirming live withholding. It kept Lender as a role and asked about Mr. Mendoza's identity instead of labeling him the lender. C8 still asserted unconditional, absolute, uncapped liability and coverage of all future obligations. That remained a quality failure despite valid JSON and an empty draft.
+
+### Guarantee explanation policy (guarantee-grounding-v1)
+
+The shared output instructions now distinguish express wording, possible consequences and missing excerpt context. They instruct the model to describe absent caps/conditions as unspecified in this excerpt and put questions about unknown terms in the questions field. They forbid deriving guarantee classification or future coverage from masked identities or the phrase “all obligations under this Note.” Existing Remote Config prompts receive these application-owned rules in updated web code.
+
+After JSON/token validation and before redline triage or unmasking, `validateExplanationGrounding` checks guarantee explanations for these specific labels:
+
+- unconditional/unconditionally;
+- absolute/absolutely;
+- uncapped/unlimited;
+- future obligations/liabilities/debts;
+- without limits/limitations/conditions.
+
+If a label occurs in an explanation but not in the source clause, the entire clause answer is rejected as `invalid_response` with a fixed grounding-specific detail. A source containing negation or qualification (for example “not,” “except,” or “subject to”) is conservatively held too, even when it contains the same label. Unknown terms can still be asked about in questions. The rejected rationale and risk rating are not returned as successful analysis. There are no additional AI calls or automatic retries.
+
+This is a limited lexical check for the observed failure family, **not** a semantic/entailment verifier. It can reject legitimate complex wording and does not catch every paraphrase, unrelated error or incorrect role/risk inference. Positive keyword presence is not a guarantee of legal meaning. Native bridge owners must explicitly adopt equivalent post-validation enforcement; updating shared instructions alone does not enforce it on native platforms.
+
+The sample helper adds `groundingPolicy`, `cloudGroundingRulesPresent`, and `deviceGroundingRulesPresent` diagnostics. These report the current configuration and local policy, not proof of model compliance or of a historical network payload.
+
+Verification: 92 targeted tests passed, plus TypeScript and the production build. Regression coverage includes the observed c8 explanation, cloud and device response paths, neutral questions, source-scoped “no cap is stated in this excerpt,” explicit affirmative wording, qualified/negated sources, and validation ordering. No live cloud request was made for this correction.
+
+Next live check: prepare only `prepareSample('promissory-note', ['c8'])`, review the masked preview, then run it once. A grounded response or a visible grounding rejection provides useful evidence; do not repeatedly rerun until green. Broader document-context reasoning remains a separate task.
