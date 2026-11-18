@@ -1,7 +1,7 @@
 import type { Analysis, AnalyzeResult, ApprovedBatch, ClauseFailure } from '@clause-guard/core/types';
 import {
   allowedPlaceholders, ANALYSIS_JSON_SCHEMA, AnalysisValidationError,
-  validateAnalysis, validateBatch, applyCommercialRedlineGuard,
+  validateAnalysis, validateBatch, applyCommercialRedlineGuard, validateExplanationGrounding,
 } from '@clause-guard/core/analysis';
 import { getGenerativeModel, InferenceMode, InferenceSource, Schema, type AI } from 'firebase/ai';
 import { assertApproved } from './approvalGuard';
@@ -87,6 +87,9 @@ export async function analyzeApproved(ai: AI, batch: ApprovedBatch): Promise<Ana
       }
       // Validate first: withheld drafts must not hide invented tokens or bad JSON.
       const validated = validateAnalysis(text, clause.id, allowed);
+      // Reject the unsupported explanation/risk result rather than silently
+      // rewriting its rationale or presenting it as a successful analysis.
+      validateExplanationGrounding(validated, clause.text);
       results.push(applyCommercialRedlineGuard(validated, clause.text));
     } catch (error) {
       // Stale approval must abort the entire batch, including when a model call rejected.
