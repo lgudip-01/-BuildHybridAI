@@ -8,7 +8,7 @@
     "build": "tsc --noEmit && vite build",
     "typecheck": "tsc --noEmit",
     "test:firebase": "node --experimental-vm-modules checkFirebase.mjs",
-    "test:analysis": "vitest run src/analysis.test.ts src/approvalGuard.test.ts",
+    "test:analysis": "vitest run src/analysis.test.ts src/approvalGuard.test.ts src/analysisConfig.test.ts",
     "test:engine-integration": "node checkEngineIntegration.mjs"
   },
   "dependencies": {

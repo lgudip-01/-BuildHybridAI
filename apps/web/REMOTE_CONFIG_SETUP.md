@@ -1,0 +1,73 @@
+# Analysis Remote Config
+
+Implemented on cloud/approved-analysis (PR #10). Console publication is still
+pending; no Firebase Console settings were changed by this code contribution.
+
+## Publish in Firebase Console
+
+1. Open clause-guard-hackathon → Run → Remote Config (use Console search if needed).
+2. Add the following three parameters. If Remote Config already contains other
+   parameters, keep them; add these rather than replacing the whole template.
+3. For cg_analysis_config choose String. Open analysis.remote-defaults.json in
+   this folder and copy the entire file contents (including its outer braces)
+   into the default value. The file is ready to paste; no unescaping is needed.
+4. For cg_analysis_enabled and cg_device_fallback_enabled choose Boolean and
+   set their default values to true.
+5. Publish changes. Reload the development app to load a fresh configuration.
+
+| Key | Type | Default |
+| --- | --- | --- |
+| cg_analysis_config | String containing JSON | Version/model/cloudPrompt/devicePrompt in remoteconfig.template.json |
+| cg_analysis_enabled | Boolean | true |
+| cg_device_fallback_enabled | Boolean | true |
+
+The template is a catalog for web/Android/iOS teammates. Remote Config values
+are client-readable. Never place API secrets, debug tokens, contract text,
+questions, replacement maps, or user data in these parameters.
+
+## Behavior
+
+The web loader runs only after runtime approval passes. It initializes the SDK,
+reads previously activated values, and attempts fetch/activate with a 1.5-second
+SDK timeout and a 2.5-second overall wait. Unsupported browsers and initialization
+failures use local defaults. Offline fetch failures retain activated cached
+values when available. One immutable snapshot is used for a complete batch and
+one load is performed per app/page. Background work finishing after the deadline
+can populate SDK cache but cannot mutate the batch snapshot already returned.
+The SDK minimum fetch interval is one hour; new published changes are not promised
+to arrive instantly. The disabled flag is a best-effort client control, not an
+immediate server-side quota/security switch.
+
+A config payload must have exactly version, model, cloudPrompt and devicePrompt.
+The version must match the application's ANALYSIS_VERSION. Model identifiers
+must match the Gemini name format; this does not establish model availability
+or pricing. Prompts must contain 20–12000 characters. Invalid payloads use local
+settings. An explicit false feature flag remains false even if the payload is
+invalid. Unknown/malformed flag strings use enabled local defaults.
+
+The application appends fixed output-format instructions to modified prompts.
+Response schema, approval, leak-checking, placeholder validation, and raw-text
+ONLY_ON_DEVICE inference remain application-owned. Remote settings never disable
+those protections. Disabling device fallback chooses ONLY_IN_CLOUD for masked
+analysis. Chat remains unimplemented and has no Remote Config enable switch.
+
+## Verify
+
+```sh
+npm run test:analysis --workspace @clause-guard/web
+npm run build --workspace @clause-guard/web
+```
+
+Automated tests cover payload rejection, disabled flags with invalid payloads,
+fixed output rules, unsupported browsers, offline cache, request deduplication,
+and a hanging initialization deadline. Analyzer unit tests use the default config
+snapshot; real engine integration also mocks configuration transport, never the
+engine identity registry. Real Console fetch/activation still needs checking
+once approval.ts is available and the parameters are published.
+
+After the engine lands, check an approved synthetic batch with each flag state:
+analysis disabled must make no model call; fallback disabled must use cloud only;
+remasking during config loading must reject before generation. Record those
+results without dumping App Check tokens or real contract content. Native bridges
+should parse the same versioned payload and retain the same hardcoded privacy
+rules; native Remote Config integration is a separate teammate task.
