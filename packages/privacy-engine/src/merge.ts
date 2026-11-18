@@ -32,33 +32,70 @@ export function toEntity(kind: EntityKind, value: string, base: 'person' | 'org'
   return { kind, value: trimmed, variants: [...variants] };
 }
 
+// Kinds that may be a company. A shorter one that starts a longer one ("Coastal Ridge" in
+// "Coastal Ridge Credit Union") is the same company written short.
+const COMPANY_KINDS = new Set<EntityKind>(['ORG', 'PARTY', 'NAME']);
+
 /**
- * Merges entities that are the same name, so each gets one placeholder.
- * Longer names claim their variants first; a variant two names share
- * (the "Smith" in "John Smith" and "Jane Smith") stays with the first.
+ * Merges entities that are the same name, so each gets one placeholder. Longer names claim their variants
+ * first, and a company written short joins the one longer name it starts. A variant that two different
+ * names offer (the "Mendoza" in "Rafael Mendoza" and "Isabel Mendoza") belongs to neither: it gets a
+ * placeholder of its own, so the cloud is never told it is the wrong person.
  */
 export function dedupeEntities(entities: Entity[]): Entity[] {
+  const sorted = [...entities].sort((a, b) => b.value.length - a.value.length);
+  const shared = sharedVariants(sorted);
   const merged: Entity[] = [];
   const owner = new Map<string, Entity>();
   const claim = (target: Entity, variant: string) => {
     const key = normalize(variant);
-    if (owner.has(key)) return;
+    if (owner.has(key) || shared.has(key)) return;
     owner.set(key, target);
     target.variants.push(variant);
   };
+  const join = (target: Entity, entity: Entity) => {
+    if ((KIND_RANK[entity.kind] ?? 0) > (KIND_RANK[target.kind] ?? 0)) target.kind = entity.kind;
+    entity.variants.forEach((v) => claim(target, v));
+  };
 
-  for (const entity of [...entities].sort((a, b) => b.value.length - a.value.length)) {
-    const existing = owner.get(normalize(entity.value));
+  for (const entity of sorted) {
+    const key = normalize(entity.value);
+    if (shared.has(key)) continue;
+    const existing = owner.get(key) ?? companyItStarts(merged, entity);
     if (existing) {
-      if ((KIND_RANK[entity.kind] ?? 0) > (KIND_RANK[existing.kind] ?? 0)) existing.kind = entity.kind;
-      entity.variants.forEach((v) => claim(existing, v));
+      join(existing, entity);
       continue;
     }
     const fresh: Entity = { kind: entity.kind, value: entity.value, variants: [] };
     entity.variants.forEach((v) => claim(fresh, v));
     merged.push(fresh);
   }
+  for (const text of shared.values()) merged.push({ kind: 'NAME', value: text, variants: [text] });
   return merged;
+}
+
+/** Variants offered by two or more different names, by normalized form, with the text to mask them by. */
+function sharedVariants(entities: Entity[]): Map<string, string> {
+  const offers = new Map<string, { text: string; names: Set<string> }>();
+  for (const entity of entities) {
+    const name = normalize(stripOrgSuffix(entity.value.replace(TITLE, '')));
+    for (const variant of entity.variants) {
+      const key = normalize(variant);
+      if (key === name || key === normalize(entity.value)) continue;
+      const offer = offers.get(key) ?? { text: variant, names: new Set<string>() };
+      offer.names.add(name);
+      offers.set(key, offer);
+    }
+  }
+  return new Map([...offers].filter(([, offer]) => offer.names.size > 1).map(([key, offer]) => [key, offer.text]));
+}
+
+/** The one longer company name that `entity` starts, word for word, if there is exactly one. */
+function companyItStarts(merged: Entity[], entity: Entity): Entity | undefined {
+  if (!COMPANY_KINDS.has(entity.kind)) return undefined;
+  const prefix = `${normalize(entity.value)} `;
+  const longer = merged.filter((e) => COMPANY_KINDS.has(e.kind) && normalize(e.value).startsWith(prefix));
+  return longer.length === 1 ? longer[0] : undefined;
 }
 
 /**
