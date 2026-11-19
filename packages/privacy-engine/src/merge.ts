@@ -35,15 +35,22 @@ export function toEntity(kind: EntityKind, value: string, base: 'person' | 'org'
 // Kinds that may be a company. A shorter one that starts a longer one ("Coastal Ridge" in
 // "Coastal Ridge Credit Union") is the same company written short.
 const COMPANY_KINDS = new Set<EntityKind>(['ORG', 'PARTY', 'NAME']);
+// Kinds that may be a person.
+const PERSON_KINDS = new Set<EntityKind>(['PERSON', 'PARTY', 'NAME']);
+const COORDINATION = /\s+(?:and|&)\s+/i;
 
 /**
  * Merges entities that are the same name, so each gets one placeholder. Longer names claim their variants
- * first, and a company written short joins the one longer name it starts. A variant that two different
- * names offer (the "Mendoza" in "Rafael Mendoza" and "Isabel Mendoza") belongs to neither: it gets a
- * placeholder of its own, so the cloud is never told it is the wrong person.
+ * first, a company written short joins the one longer name it starts, and a titled surname ("Ms. O'Connell")
+ * joins the one full name it ends. A variant that two different names offer (the "Mendoza" in "Rafael Mendoza"
+ * and "Isabel Mendoza") belongs to neither: it gets a placeholder of its own, so the cloud is never told it is
+ * the wrong person. Names joined by "and" ("Wei Zhang and Lucia Fernandez") are dropped when each part is a
+ * name of its own, so every person keeps their own placeholder and the "and" stays readable.
  */
 export function dedupeEntities(entities: Entity[]): Entity[] {
-  const sorted = [...entities].sort((a, b) => b.value.length - a.value.length);
+  const sorted = [...entities]
+    .filter((entity) => !isListOfOthers(entity, entities))
+    .sort((a, b) => b.value.length - a.value.length);
   const shared = sharedVariants(sorted);
   const merged: Entity[] = [];
   const owner = new Map<string, Entity>();
@@ -61,7 +68,7 @@ export function dedupeEntities(entities: Entity[]): Entity[] {
   for (const entity of sorted) {
     const key = normalize(entity.value);
     if (shared.has(key)) continue;
-    const existing = owner.get(key) ?? companyItStarts(merged, entity);
+    const existing = owner.get(key) ?? companyItStarts(merged, entity) ?? personItEnds(merged, entity);
     if (existing) {
       join(existing, entity);
       continue;
@@ -94,8 +101,33 @@ function sharedVariants(entities: Entity[]): Map<string, string> {
 function companyItStarts(merged: Entity[], entity: Entity): Entity | undefined {
   if (!COMPANY_KINDS.has(entity.kind)) return undefined;
   const prefix = `${normalize(entity.value)} `;
-  const longer = merged.filter((e) => COMPANY_KINDS.has(e.kind) && normalize(e.value).startsWith(prefix));
+  const longer = merged.filter((e) => {
+    const name = normalize(e.value);
+    // "Wei Zhang" doesn't start "Wei Zhang and Lucia Fernandez" the way "Coastal Ridge" starts its full name.
+    return COMPANY_KINDS.has(e.kind) && name.startsWith(prefix) && !/^(?:and|&) /.test(name.slice(prefix.length));
+  });
   return longer.length === 1 ? longer[0] : undefined;
+}
+
+/** For a titled surname such as "Ms. O'Connell", the one full person name ending in that surname, if exactly one. */
+function personItEnds(merged: Entity[], entity: Entity): Entity | undefined {
+  const title = TITLE.exec(entity.value);
+  if (!title) return undefined;
+  const surname = normalize(entity.value.slice(title[0].length));
+  if (!surname || surname.includes(' ')) return undefined;
+  const people = merged.filter((e) => {
+    const words = e.value.replace(TITLE, '').trim().split(/\s+/);
+    return PERSON_KINDS.has(e.kind) && !COORDINATION.test(e.value) && words.length > 1 && normalize(words.at(-1)!) === surname;
+  });
+  return people.length === 1 ? people[0] : undefined;
+}
+
+/** Whether `entity` is names joined by "and", each of which is also a name of its own elsewhere. */
+function isListOfOthers(entity: Entity, entities: Entity[]): boolean {
+  const parts = entity.value.split(COORDINATION);
+  if (parts.length < 2) return false;
+  const others = new Set(entities.filter((e) => e !== entity).flatMap((e) => [e.value, ...e.variants].map(normalize)));
+  return parts.every((part) => others.has(normalize(part)));
 }
 
 /**

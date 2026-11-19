@@ -137,6 +137,53 @@ describe('mask', () => {
     ]);
   });
 
+  describe('co-tenants named together and apart (#22)', () => {
+    const texts = [
+      'This Lease is made on January 15, 2026 between Margaret O\'Connell ("Landlord") and Wei Zhang and Lucia Fernandez ("Tenants").',
+      '5. Maintenance. Tenants must report needed repairs promptly. Ms. O\'Connell can be reached at (503) 555-0187.',
+      'Landlord: Margaret O\'Connell\nTenant: Wei Zhang\nTenant: Lucia Fernandez',
+    ];
+    const contract = texts.map((text, index) => ({ id: `c${index + 1}`, index, text }));
+
+    async function expectEachPersonOwnPlaceholder(docId: string, bridge: AiBridge) {
+      const result = await mask(docId, contract, bridge);
+      if (!result.ok) throw new Error(JSON.stringify(result.leaks));
+      const [preamble, maintenance, signatures] = result.clauses.map((c) => c.text);
+      const [landlord, wei, lucia] = signatures!.match(/\[[A-Z]+_[A-Z0-9]+\]/g)!;
+
+      expect(new Set([landlord, wei, lucia]).size).toBe(3);
+      expect(preamble).toContain(`between ${landlord} ("Landlord") and ${wei} and ${lucia} ("Tenants").`);
+      expect(maintenance).toContain(`${landlord} can be reached`);
+
+      // Restoring the preamble gives back each tenant exactly once.
+      const [restored] = await unmask(docId, [
+        { clauseId: 'c1', risk: 'low', explanation: preamble!, redline: '', questions: [] },
+      ]);
+      expect(restored!.explanation).toBe(texts[0]);
+    }
+
+    it('without the model', async () => {
+      await expectEachPersonOwnPlaceholder('doc-15', fakeBridge([], { status: 'unavailable' }));
+    });
+
+    it('with the model reporting each person', async () => {
+      const people = [
+        { text: "Margaret O'Connell", kind: 'person', party: true },
+        { text: 'Wei Zhang', kind: 'person', party: true },
+        { text: 'Lucia Fernandez', kind: 'person', party: true },
+        { text: "Ms. O'Connell", kind: 'person', party: true },
+      ];
+      await expectEachPersonOwnPlaceholder('doc-16', fakeBridge(people));
+    });
+
+    it('keeps a company name that contains "and" whole', async () => {
+      const text = 'Payments go to Barnes and Noble Booksellers LLC ("Supplier") and to Wei Zhang.';
+      const result = await mask('doc-17', [{ id: 'c1', index: 0, text }], fakeBridge([], { status: 'unavailable' }));
+      if (!result.ok) throw new Error(JSON.stringify(result.leaks));
+      expect(result.clauses[0]!.text).toMatch(/^Payments go to \[[A-Z]+_[A-Z0-9]+\] \("Supplier"\) and to \[[A-Z]+_[A-Z0-9]+\]\.$/);
+    });
+  });
+
   describe('"Exhibit A. Adebayo" (#20)', () => {
     const texts = [
       'This agreement is between Larkspur Media Group Ltd ("Client") and Okonkwo Adebayo ("Contractor").',
