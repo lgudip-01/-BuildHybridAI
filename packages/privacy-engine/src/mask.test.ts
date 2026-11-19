@@ -137,6 +137,28 @@ describe('mask', () => {
     ]);
   });
 
+  it('leaves "Your" alone when the model reports it as a name, and still masks real names (#23)', async () => {
+    const texts = [
+      'Quillfeather Software Corp. is pleased to offer you the position, reporting to Dr. Anika Bose. Your start date is April 6, 2026.',
+      '1. Compensation. Your base salary is $148,000 per year.',
+      '5. At-Will Employment. Your employment is at will. You may resign at any time.',
+    ];
+    const model = [
+      { text: 'Your', kind: 'person', party: true },
+      { text: 'You', kind: 'person', party: true },
+      { text: 'Quillfeather Software Corp.', kind: 'organization', party: true },
+      { text: 'Dr. Anika Bose', kind: 'person', party: true },
+    ];
+    const result = await mask('doc-14', texts.map((text, index) => ({ id: `c${index + 1}`, index, text })), fakeBridge(model));
+    if (!result.ok) throw new Error(JSON.stringify(result.leaks));
+
+    const [first, second, third] = result.clauses.map((c) => c.text);
+    expect(first).toContain('Your start date is [DATE_1].');
+    expect(second).toContain('Your base salary is');
+    expect(third).toContain('Your employment is at will. You may resign');
+    expect(first).not.toMatch(/Quillfeather|Anika|Bose/);
+  });
+
   describe('"Exhibit A. Adebayo" (#20)', () => {
     const texts = [
       'This agreement is between Larkspur Media Group Ltd ("Client") and Okonkwo Adebayo ("Contractor").',
