@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Clause Guard — local App Check diagnostic</title>
+  </head>
+  <body>
+    <main>
+      <h1>Local App Check diagnostic</h1>
+      <p>This development tool verifies attestation only. It sends no contract or model prompt and displays no credentials.</p>
+      <button id="verify" disabled>Verify App Check</button>
+      <p id="status" role="status">Development access required.</p>
+    </main>
+    <script type="module">
+      // This page is not an input to the production Vite build. Fail closed if
+      // somebody explicitly includes it in a production build in the future.
+      if (import.meta.env.DEV && ['localhost', '127.0.0.1', '[::1]'].includes(location.hostname)) {
+        const { verifyAppCheck } = await import('/src/firebase.ts');
+        const button = document.querySelector('#verify');
+        const status = document.querySelector('#status');
+        button.disabled = false;
+        status.textContent = 'Ready. No inference will run.';
+        button.addEventListener('click', async () => {
+          button.disabled = true;
+          status.textContent = 'Verifying App Check…';
+          try {
+            await verifyAppCheck();
+            status.textContent = 'APP_CHECK_VERIFIED — token acquisition passed. No inference was requested.';
+          } catch {
+            status.textContent = 'APP_CHECK_FAILED — check the development browser registration and Firebase configuration. No inference was requested.';
+          } finally {
+            button.disabled = false;
+          }
+        });
+      }
+    </script>
+  </body>
+</html>
