@@ -2,7 +2,7 @@ import type { EntityKind } from '@clause-guard/core/types';
 import { isGeneric, stripOrgSuffix, type Span } from './regex';
 
 /** A name or address, plus the other ways it is written in the contract ("Acme Corp" → "Acme"). */
-export type Entity = { kind: EntityKind; value: string; variants: string[] };
+export type Entity = { kind: EntityKind; value: string; variants: string[]; base?: 'person' | 'org' | 'other' };
 
 export type Candidate = Span & { key: string; source: 'pattern' | 'entity' };
 
@@ -29,28 +29,54 @@ export function toEntity(kind: EntityKind, value: string, base: 'person' | 'org'
     if (words.length > 1 && first && first.length >= 3 && !first.endsWith('.')) variants.add(first);
     if (words.length > 1 && last && last.length >= 3) variants.add(last);
   }
-  return { kind, value: trimmed, variants: [...variants] };
+  return { kind, value: trimmed, variants: [...variants], base };
+}
+
+/** Split a coordinated span only when each name also has independent evidence.
+ * Otherwise keep the group opaque, without personal aliases, and ask for review.
+ * Explicit organizations (including their short forms) are never split.
+ */
+export function separateCoordinatedNames(entities: Entity[]): { entities: Entity[]; needsReview: boolean; ambiguousOrganizations: string[] } {
+  const isOrganization = (e: Entity) => e.base === 'org' || stripOrgSuffix(e.value) !== e.value;
+  const organizations = new Set(entities.filter(isOrganization)
+    .flatMap(e => [normalize(e.value), normalize(stripOrgSuffix(e.value))]));
+  const independent = new Set(entities.filter(e => !isOrganization(e) && !/\s+(?:and|&)\s+/i.test(e.value))
+    .map(e => normalize(e.value.replace(TITLE, ''))));
+  // A business literally named for the same independently named people has
+  // ambiguous short forms. Block that mapping instead of silently expanding a
+  // person's name to the company name during restoration.
+  const ambiguousOrganizations = entities.filter(isOrganization).filter(entity => {
+    const parts = stripOrgSuffix(entity.value).split(/\s+(?:and|&)\s+/i);
+    return parts.length > 1 && parts.every(part => independent.has(normalize(part.replace(TITLE, ''))));
+  }).map(entity => entity.value);
+  let needsReview = false;
+  const separated = entities.flatMap(entity => {
+    const parts = entity.value.split(/\s+(?:and|&)\s+/i);
+    if (parts.length === 1 || isOrganization(entity) || organizations.has(normalize(entity.value))) return [entity];
+    if (parts.every(part => independent.has(normalize(part.replace(TITLE, ''))))) {
+      return parts.map(part => toEntity(entity.kind, part, 'person'));
+    }
+    // Do not guess whether an uncorroborated phrase is people or a business.
+    needsReview = true;
+    return [{ ...entity, variants: [entity.value] }];
+  });
+  return { entities: separated, needsReview, ambiguousOrganizations };
 }
 
 // Kinds that may be a company. A shorter one that starts a longer one ("Coastal Ridge" in
 // "Coastal Ridge Credit Union") is the same company written short.
 const COMPANY_KINDS = new Set<EntityKind>(['ORG', 'PARTY', 'NAME']);
-// Kinds that may be a person.
-const PERSON_KINDS = new Set<EntityKind>(['PERSON', 'PARTY', 'NAME']);
-const COORDINATION = /\s+(?:and|&)\s+/i;
 
 /**
  * Merges entities that are the same name, so each gets one placeholder. Longer names claim their variants
- * first, a company written short joins the one longer name it starts, and a titled surname ("Ms. O'Connell")
- * joins the one full name it ends. A variant that two different names offer (the "Mendoza" in "Rafael Mendoza"
- * and "Isabel Mendoza") belongs to neither: it gets a placeholder of its own, so the cloud is never told it is
- * the wrong person. Names joined by "and" ("Wei Zhang and Lucia Fernandez") are dropped when each part is a
- * name of its own, so every person keeps their own placeholder and the "and" stays readable.
+ * first, and a company written short joins the one longer name it starts. A variant that two different
+ * names offer (the "Mendoza" in "Rafael Mendoza" and "Isabel Mendoza") belongs to neither: it gets a
+ * placeholder of its own, so the cloud is never told it is the wrong person.
  */
 export function dedupeEntities(entities: Entity[]): Entity[] {
-  const sorted = [...entities]
-    .filter((entity) => !isListOfOthers(entity, entities))
-    .sort((a, b) => b.value.length - a.value.length);
+  // Coordinated spans are normalized by separateCoordinatedNames() first;
+  // retaining explicit organization evidence avoids splitting legal company names.
+  const sorted = [...entities].sort((a, b) => b.value.length - a.value.length);
   const shared = sharedVariants(sorted);
   const merged: Entity[] = [];
   const owner = new Map<string, Entity>();
@@ -62,18 +88,23 @@ export function dedupeEntities(entities: Entity[]): Entity[] {
   };
   const join = (target: Entity, entity: Entity) => {
     if ((KIND_RANK[entity.kind] ?? 0) > (KIND_RANK[target.kind] ?? 0)) target.kind = entity.kind;
+    if (!target.base || target.base === 'other') target.base = entity.base;
     entity.variants.forEach((v) => claim(target, v));
   };
 
   for (const entity of sorted) {
     const key = normalize(entity.value);
     if (shared.has(key)) continue;
-    const existing = owner.get(key) ?? companyItStarts(merged, entity) ?? personItEnds(merged, entity);
+    // A titled person may use the unique surname variant already owned by a
+    // full person name. Shared surnames are excluded by sharedVariants().
+    const personAlias = entity.base === 'person' && TITLE.test(entity.value)
+      ? owner.get(normalize(entity.value.replace(TITLE, ''))) : undefined;
+    const existing = owner.get(key) ?? personAlias ?? companyItStarts(merged, entity) ?? personItEnds(merged, entity);
     if (existing) {
       join(existing, entity);
       continue;
     }
-    const fresh: Entity = { kind: entity.kind, value: entity.value, variants: [] };
+    const fresh: Entity = { kind: entity.kind, value: entity.value, variants: [], base: entity.base };
     entity.variants.forEach((v) => claim(fresh, v));
     merged.push(fresh);
   }
@@ -101,33 +132,28 @@ function sharedVariants(entities: Entity[]): Map<string, string> {
 function companyItStarts(merged: Entity[], entity: Entity): Entity | undefined {
   if (!COMPANY_KINDS.has(entity.kind)) return undefined;
   const prefix = `${normalize(entity.value)} `;
-  const longer = merged.filter((e) => {
-    const name = normalize(e.value);
-    // "Wei Zhang" doesn't start "Wei Zhang and Lucia Fernandez" the way "Coastal Ridge" starts its full name.
-    return COMPANY_KINDS.has(e.kind) && name.startsWith(prefix) && !/^(?:and|&) /.test(name.slice(prefix.length));
-  });
+  const longer = merged.filter((e) => COMPANY_KINDS.has(e.kind) &&
+    // An opaque coordinated group must never become one individual's identity.
+    (!/\s+(?:and|&)\s+/i.test(e.value) || e.base === 'org') && normalize(e.value).startsWith(prefix));
   return longer.length === 1 ? longer[0] : undefined;
 }
 
-/** For a titled surname such as "Ms. O'Connell", the one full person name ending in that surname, if exactly one. */
+/** Pattern-only names lack person aliases. Match a titled surname to exactly
+ * one full candidate, as in Likhil's merged PR #27, excluding known businesses.
+ * Shared surnames and coordinated groups never select one person by guessing.
+ */
 function personItEnds(merged: Entity[], entity: Entity): Entity | undefined {
   const title = TITLE.exec(entity.value);
-  if (!title) return undefined;
+  if (!title || entity.base === 'org') return;
   const surname = normalize(entity.value.slice(title[0].length));
-  if (!surname || surname.includes(' ')) return undefined;
-  const people = merged.filter((e) => {
-    const words = e.value.replace(TITLE, '').trim().split(/\s+/);
-    return PERSON_KINDS.has(e.kind) && !COORDINATION.test(e.value) && words.length > 1 && normalize(words.at(-1)!) === surname;
+  if (!surname || surname.includes(' ')) return;
+  const people = merged.filter(candidate => {
+    if (!['PERSON', 'PARTY', 'NAME'].includes(candidate.kind) || candidate.base === 'org' ||
+        stripOrgSuffix(candidate.value) !== candidate.value || /\s+(?:and|&)\s+/i.test(candidate.value)) return false;
+    const words = candidate.value.replace(TITLE, '').trim().split(/\s+/);
+    return words.length > 1 && normalize(words.at(-1)!) === surname;
   });
   return people.length === 1 ? people[0] : undefined;
-}
-
-/** Whether `entity` is names joined by "and", each of which is also a name of its own elsewhere. */
-function isListOfOthers(entity: Entity, entities: Entity[]): boolean {
-  const parts = entity.value.split(COORDINATION);
-  if (parts.length < 2) return false;
-  const others = new Set(entities.filter((e) => e !== entity).flatMap((e) => [e.value, ...e.variants].map(normalize)));
-  return parts.every((part) => others.has(normalize(part)));
 }
 
 /**

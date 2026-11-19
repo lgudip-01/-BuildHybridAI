@@ -50,6 +50,140 @@ const model: ModelEntity[] = [
 const SENSITIVE = ['Acme', 'Dana', 'Reyes', 'January 1, 2026', '$12,500', 'dana@reyes.dev'];
 
 describe('mask', () => {
+  it('preserves the full pronoun set from merged PR #26 without excluding compound organization names', async () => {
+    const pronouns = ['I', 'Me', 'My', 'Mine', 'We', 'Us', 'Our', 'Ours', 'You', 'Your', 'Yours',
+      'He', 'Him', 'His', 'She', 'Her', 'Hers', 'They', 'Them', 'Their', 'Theirs', 'It', 'Its', 'Yourself', 'Yourselves'];
+    const texts = pronouns.map(word => `${word} may review this agreement.`);
+    texts.push('Us Foods LLC pays Dr. Anika Bose.');
+    const result = await mask('merged-pronouns', texts.map((text, index) => ({id:`c${index + 1}`, index, text})),
+      fakeBridge([...pronouns.map(text => ({text, kind:'person', party:true})),
+        {text:'Us Foods LLC', kind:'organization', party:true}, {text:'Dr. Anika Bose', kind:'person', party:true}]));
+    if (!result.ok) throw new Error(JSON.stringify(result.leaks));
+    expect(result.clauses.slice(0, pronouns.length).map(c => c.text)).toEqual(texts.slice(0, pronouns.length));
+    expect(result.clauses.at(-1)!.text).not.toMatch(/Foods|Anika|Bose/);
+  });
+
+  describe('coordinated tenants (#22)', () => {
+    // Same fixture/acceptance as Likhil's merged PR #27; retain our additional
+    // explicit-organization and ambiguous-collision checks below.
+    it.each(['patterns', 'model'] as const)('matches merged #27 preamble, alias and signature behavior with %s', async source => {
+      const texts = [
+        'This Lease is made on January 15, 2026 between Margaret O\'Connell ("Landlord") and Wei Zhang and Lucia Fernandez ("Tenants").',
+        "5. Maintenance. Tenants must report needed repairs promptly. Ms. O'Connell can be reached at (503) 555-0187.",
+        "Landlord: Margaret O'Connell\nTenant: Wei Zhang\nTenant: Lucia Fernandez",
+      ];
+      const docId = `merged-coordinated-${source}`;
+      const result = await mask(docId, texts.map((text, index) => ({id:`c${index + 1}`, index, text})), fakeBridge([
+        {text:"Margaret O'Connell", kind:'person', party:true}, {text:'Wei Zhang', kind:'person', party:true},
+        {text:'Lucia Fernandez', kind:'person', party:true}, {text:"Ms. O'Connell", kind:'person', party:true},
+      ], {status:source === 'patterns' ? 'unavailable' : 'available'}));
+      if (!result.ok) throw new Error(JSON.stringify(result.leaks));
+      const [landlord, wei, lucia] = result.clauses[2]!.text.match(/\[[A-Z]+_[A-Z0-9]+\]/g)!;
+      expect(new Set([landlord, wei, lucia]).size).toBe(3);
+      expect(result.clauses[0]!.text).toContain(`between ${landlord} ("Landlord") and ${wei} and ${lucia} ("Tenants").`);
+      expect(result.clauses[1]!.text).toContain(`${landlord} can be reached`);
+      const restored = await unmask(docId, result.clauses.map(c => ({clauseId:c.id, risk:'low', explanation:c.text, redline:'', questions:[]})));
+      expect(restored[0]!.explanation).toBe(texts[0]);
+      expect(restored[2]!.explanation).toBe(texts[2]);
+    });
+    const texts = [
+      'This Lease is between Margaret O\'Connell ("Landlord") and Wei Zhang and Lucia Fernandez ("Tenants").',
+      "Landlord: Margaret O'Connell\nTenant: Wei Zhang\nTenant: Lucia Fernandez",
+    ];
+    it.each(['patterns', 'model'] as const)('keeps individual identities across preamble/signatures with %s', async source => {
+      const docId = `coordinated-${source}`;
+      const result = await mask(docId, texts.map((text, index) => ({ id: `c${index + 1}`, index, text })),
+        fakeBridge([
+          { text: "Margaret O'Connell", kind: 'person', party: true },
+          { text: 'Wei Zhang and Lucia Fernandez', kind: 'person', party: true },
+          { text: 'Wei Zhang', kind: 'person', party: true },
+          { text: 'Lucia Fernandez', kind: 'person', party: true },
+        ], { status: source === 'patterns' ? 'unavailable' : 'available' }));
+      if (!result.ok) throw new Error(JSON.stringify(result.leaks));
+      const tokens = result.clauses[1]!.text.match(/\[[A-Z]+_[A-Z0-9]+\]/g)!;
+      expect(new Set(tokens).size).toBe(3);
+      expect(result.clauses[0]!.text).toBe(`This Lease is between ${tokens[0]} ("Landlord") and ${tokens[1]} and ${tokens[2]} ("Tenants").`);
+      const restored = await unmask(docId, result.clauses.map(clause => ({
+        clauseId: clause.id, risk: 'low', explanation: clause.text, redline: '', questions: [],
+      })));
+      expect(restored.map(answer => answer.explanation)).toEqual(texts);
+    });
+    it('keeps an organization containing and intact alongside separate people', async () => {
+      const texts = ['Baker and McKenzie LLP employs Wei Zhang and Lucia Fernandez.',
+        'Name: Wei Zhang\nName: Lucia Fernandez'];
+      const result = await mask('coordinated-organization', texts.map((text, index) => ({ id: `c${index + 1}`, index, text })),
+        fakeBridge([{ text: 'Baker and McKenzie LLP', kind: 'organization', party: true }]));
+      if (!result.ok) throw new Error(JSON.stringify(result.leaks));
+      expect(result.clauses[0]!.text).toMatch(/^\[[A-Z]+_[A-Z0-9]+\] employs /);
+      const restored = await unmask('coordinated-organization', result.clauses.map(clause => ({
+        clauseId: clause.id, risk: 'low', explanation: clause.text, redline: '', questions: [],
+      })));
+      expect(restored.map(answer => answer.explanation)).toEqual(texts);
+    });
+    it.each(['patterns', 'model'] as const)('blocks ambiguous organization/person names with %s', async source => {
+      const texts = ['Wei Zhang and Lucia Fernandez LLC employs Wei Zhang and Lucia Fernandez.',
+        'Name: Wei Zhang\nName: Lucia Fernandez'];
+      const result = await mask(`organization-collision-${source}`, texts.map((text, index) => ({ id: `c${index + 1}`, index, text })),
+        fakeBridge([{ text: 'Wei Zhang and Lucia Fernandez LLC', kind: 'organization', party: true }],
+          { status: source === 'patterns' ? 'unavailable' : 'available' }));
+      expect(result.ok).toBe(false);
+      if (result.ok) throw new Error('Ambiguous identities must not be approved.');
+      expect(result.leaks).toContainEqual(expect.objectContaining({ clauseId: 'c1', reason: expect.stringContaining('Ambiguous organization') }));
+    });
+    it('requires review for an uncorroborated coordinated span instead of guessing identities', async () => {
+      const result = await mask('coordinated-ambiguous', [{ id: 'c1', index: 0,
+        text: 'Wei Zhang and Lucia Fernandez agree.' }], fakeBridge([
+          { text: 'Wei Zhang and Lucia Fernandez', kind: 'person', party: true },
+        ]));
+      if (!result.ok) throw new Error(JSON.stringify(result.leaks));
+      expect(result.needsReview).toBe(true);
+      expect(result.clauses[0]!.text).not.toMatch(/Wei|Zhang|Lucia|Fernandez/);
+    });
+    it('reuses a unique full-person identity for the titled surname reported by the model', async () => {
+      const texts = ["Margaret O'Connell agrees.", "Ms. O'Connell handles repairs."];
+      const result = await mask('landlord-title-alias', texts.map((text, index) => ({ id: `c${index + 1}`, index, text })),
+        fakeBridge([
+          { text: "Margaret O'Connell", kind: 'person', party: true },
+          { text: "Ms. O'Connell", kind: 'person', party: false },
+        ]));
+      if (!result.ok) throw new Error(JSON.stringify(result.leaks));
+      const landlord = result.clauses[0]!.text.match(/\[[A-Z]+_[A-Z0-9]+\]/)![0];
+      expect(result.clauses[1]!.text).toBe(`${landlord} handles repairs.`);
+    });
+  });
+
+  it('keeps offer-letter pronouns when the model incorrectly reports Your as a party (#23)', async () => {
+    const texts = [
+      'Dear Samuel Osei, your manager is Dr. Anika Bose.',
+      'Your start date is April 6, 2026.',
+      'Your base salary is $148,000 per year.',
+      'Your employment is at will.',
+      'Yuri Petrov will contact Samuel Osei.',
+    ];
+    const result = await mask('offer-pronoun-regression',
+      texts.map((text, index) => ({ id: `c${index + 1}`, index, text })), fakeBridge([
+        { text: 'Your', kind: 'person', party: true },
+        { text: 'Samuel Osei', kind: 'person', party: true },
+        { text: 'Dr. Anika Bose', kind: 'person', party: false },
+        { text: 'Yuri Petrov', kind: 'person', party: false },
+      ]));
+    if (!result.ok) throw new Error(JSON.stringify(result.leaks));
+    const masked = result.clauses.map(clause => clause.text);
+    expect(masked.slice(1, 4)).toEqual([
+      'Your start date is [DATE_1].',
+      'Your base salary is [AMOUNT_1] per year.',
+      'Your employment is at will.',
+    ]);
+    expect(masked[0]).toContain('your manager');
+    for (const name of ['Samuel', 'Osei', 'Anika', 'Bose', 'Yuri', 'Petrov']) {
+      expect(masked.join(' ')).not.toContain(name);
+    }
+    const restored = await unmask('offer-pronoun-regression', result.clauses.map(clause => ({
+      clauseId: clause.id, risk: 'low', explanation: clause.text, redline: '', questions: [],
+    })));
+    expect(restored.slice(1, 4).map(answer => answer.explanation)).toEqual(texts.slice(1, 4));
+  });
+
   it('masks every sensitive detail with placeholders that stay the same across clauses', async () => {
     const result = await mask('doc-1', clauses, fakeBridge(model));
     if (!result.ok) throw new Error(JSON.stringify(result.leaks));
@@ -92,7 +226,8 @@ describe('mask', () => {
     const result = await mask('doc-9', texts.map((text, index) => ({ id: `c${index + 1}`, index, text })), fakeBridge([]));
     if (!result.ok) throw new Error(JSON.stringify(result.leaks));
 
-    expect(result.needsReview).toBe(false);
+    // An uncorroborated coordinated span is held for review rather than guessed.
+    expect(result.needsReview).toBe(true);
     const sent = result.clauses.map((c) => c.text).join(' ');
     for (const name of ['Wei Zhang', 'Lucia Fernandez', 'Coastal Ridge']) expect(sent).not.toContain(name);
     expect(sent).toContain('The landlord rents the unit to');
