@@ -137,6 +137,36 @@ describe('mask', () => {
     ]);
   });
 
+  describe('"Exhibit A. Adebayo" (#20)', () => {
+    const texts = [
+      'This agreement is between Larkspur Media Group Ltd ("Client") and Okonkwo Adebayo ("Contractor").',
+      '1. Services. Contractor will build the app as described in Exhibit A. Adebayo will report to Hannah Kowalczyk, Head of Product.',
+      'CONTRACTOR\nBy: Okonkwo Adebayo',
+    ];
+    const contract = texts.map((text, index) => ({ id: `c${index + 1}`, index, text }));
+
+    const expectKeptReference = (result: Awaited<ReturnType<typeof mask>>) => {
+      if (!result.ok) throw new Error(JSON.stringify(result.leaks));
+      const contractor = result.clauses[2]!.text.replace('CONTRACTOR\nBy: ', '');
+      expect(result.clauses[1]!.text).toMatch(/^1\. Services\. Contractor will build the app as described in Exhibit A\. /);
+      expect(result.clauses[1]!.text).toContain(`Exhibit A. ${contractor} will report to`);
+      expect(result.clauses[0]!.text).toContain(`and ${contractor} ("Contractor")`);
+    };
+
+    it('keeps the reference and the sentence end, and gives Adebayo the contractor placeholder, without the model', async () => {
+      expectKeptReference(await mask('doc-12', contract, fakeBridge([], { status: 'unavailable' })));
+    });
+
+    it('does the same when the model reports the reference as part of the name', async () => {
+      const model = [
+        { text: 'Okonkwo Adebayo', kind: 'person', party: true },
+        { text: 'Exhibit A. Adebayo', kind: 'person', party: false },
+        { text: 'A. Adebayo', kind: 'person', party: false },
+      ];
+      expectKeptReference(await mask('doc-13', contract, fakeBridge(model)));
+    });
+  });
+
   describe('co-tenants named together and apart (#22)', () => {
     const texts = [
       'This Lease is made on January 15, 2026 between Margaret O\'Connell ("Landlord") and Wei Zhang and Lucia Fernandez ("Tenants").',
@@ -181,36 +211,6 @@ describe('mask', () => {
       const result = await mask('doc-17', [{ id: 'c1', index: 0, text }], fakeBridge([], { status: 'unavailable' }));
       if (!result.ok) throw new Error(JSON.stringify(result.leaks));
       expect(result.clauses[0]!.text).toMatch(/^Payments go to \[[A-Z]+_[A-Z0-9]+\] \("Supplier"\) and to \[[A-Z]+_[A-Z0-9]+\]\.$/);
-    });
-  });
-
-  describe('"Exhibit A. Adebayo" (#20)', () => {
-    const texts = [
-      'This agreement is between Larkspur Media Group Ltd ("Client") and Okonkwo Adebayo ("Contractor").',
-      '1. Services. Contractor will build the app as described in Exhibit A. Adebayo will report to Hannah Kowalczyk, Head of Product.',
-      'CONTRACTOR\nBy: Okonkwo Adebayo',
-    ];
-    const contract = texts.map((text, index) => ({ id: `c${index + 1}`, index, text }));
-
-    const expectKeptReference = (result: Awaited<ReturnType<typeof mask>>) => {
-      if (!result.ok) throw new Error(JSON.stringify(result.leaks));
-      const contractor = result.clauses[2]!.text.replace('CONTRACTOR\nBy: ', '');
-      expect(result.clauses[1]!.text).toMatch(/^1\. Services\. Contractor will build the app as described in Exhibit A\. /);
-      expect(result.clauses[1]!.text).toContain(`Exhibit A. ${contractor} will report to`);
-      expect(result.clauses[0]!.text).toContain(`and ${contractor} ("Contractor")`);
-    };
-
-    it('keeps the reference and the sentence end, and gives Adebayo the contractor placeholder, without the model', async () => {
-      expectKeptReference(await mask('doc-12', contract, fakeBridge([], { status: 'unavailable' })));
-    });
-
-    it('does the same when the model reports the reference as part of the name', async () => {
-      const model = [
-        { text: 'Okonkwo Adebayo', kind: 'person', party: true },
-        { text: 'Exhibit A. Adebayo', kind: 'person', party: false },
-        { text: 'A. Adebayo', kind: 'person', party: false },
-      ];
-      expectKeptReference(await mask('doc-13', contract, fakeBridge(model)));
     });
   });
 
