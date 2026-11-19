@@ -76,6 +76,6 @@ export interface AiBridge {
   onDeviceStatus(): Promise<OnDeviceStatus>;
   // ONLY_ON_DEVICE. The only call allowed to see raw contract text.
   onDevice(prompt: string, schema?: object): Promise<string>;
-  // PREFER_IN_CLOUD. Accepts leak-checked text only.
-  analyze(clauses: MaskedClause[]): Promise<{ results: Analysis[]; ranOn: 'cloud' | 'device' }>;
+  // PREFER_IN_CLOUD. Requires the privacy engine's runtime approval guard.
+  analyze(batch: ApprovedBatch): Promise<AnalyzeResult>;
 }
