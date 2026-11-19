@@ -62,6 +62,9 @@ const LEGAL_WORDS = new Set([
   'borrower', 'lender', 'guarantor', 'holder', 'debtor', 'creditor', 'loan', 'note', 'promissory', 'principal', 'prepayment', 'default',
   'lease', 'rental', 'residential', 'commercial', 'premises', 'rent', 'security', 'deposit', 'offer', 'employment', 'letter',
   'software', 'as', 'subscription', 'sales', 'purchase', 'order',
+  // Pronouns. Capitalized at the start of a sentence ("Your start date is…"), the model can report them as a name.
+  'i', 'me', 'my', 'mine', 'we', 'us', 'our', 'ours', 'you', 'your', 'yours', 'he', 'him', 'his', 'she', 'her', 'hers',
+  'they', 'them', 'their', 'theirs', 'it', 'its',
 ]);
 
 const ORG_SUFFIXES = ['Inc', 'LLC', 'L.L.C', 'Ltd', 'Limited', 'Corp', 'Corporation', 'Co', 'Company', 'LLP', 'LP', 'PLC', 'GmbH', 'AG', 'BV', 'B.V', 'N.V', 'S.A', 'SAS', 'Pty'];
