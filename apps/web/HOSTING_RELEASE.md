@@ -180,3 +180,18 @@ This release restricts each isolated clause response to its own supplied tokens
 and applies commercial-review-v3 to changed rent/deposit drafts. Local acceptance
 found and recorded the underlying failures; this is a safeguard release, not full
 six-sample or hosted-content acceptance. main remains unchanged; PR #28 is draft.
+
+
+### November 20 engine-owner review correction
+
+Likhil identified a titled-person/company-short-name collision in PR #28. The
+correction prevents Mr. Jordan from restoring as Jordan Ltd.; pattern-only and
+model-reported entity regressions both failed before and pass after the fix.
+94 engine and 156 web tests pass, along with engine typecheck and production build.
+
+Cloud Billing was verified to have no linked account before Hosting-only deploy;
+no plan/API/provider/payment change occurred. Hosted DOM loads
+`/assets/index-DXRiOaHG.js`, SHA-256
+`024ae9f14a048f0bea4572458ec1d10c8af609fd15b16347c9aa0d7b3be60e96`.
+Mask contract is present; no hosted inference was run for this smoke check.
+This review fix does not close the full sample explanation-quality gate.
