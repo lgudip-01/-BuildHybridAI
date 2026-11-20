@@ -584,3 +584,89 @@ billing linkage, API activation or deployment was needed.
 
 Next task: complete remaining fixed-sample cloud acceptance, then a complete
 hosted review. Gate A stays active; import/native/chat/polish do not advance yet.
+
+
+## Full-sample acceptance / clause reference isolation — November 20
+
+Checklist and uncertainties:
+- [x] Inspect clean local source and latest main/integration refs; no new source
+  changes or review instructions in #7/#8/#28 affect this increment.
+- [x] Recheck no linked Cloud Billing account and official model free-tier pricing.
+- [x] Expose fixed full samples in the development-only diagnostic; no automatic loop.
+- [x] Inspect complete lease masking: ten clauses, twelve tokens, distinct tenants,
+  stable landlord alias; all required sensitive expectations absent.
+- [x] Approve one full lease batch after focused explanation-policy checks passed.
+- [x] Record all ten fetches HTTP 200; distinguish content rejection from outages.
+- [x] Pause other sample sends after identifying an accepted cross-clause reference.
+- [x] Reproduce unsafe acceptance with regressions before changing validation.
+- [x] Restrict prompt/validation references to each supplied clause; preserve real
+  batch approval, source pinning, per-clause failures and no retries.
+- [x] Pass 154 web tests, core typecheck and web production build.
+- [x] Run one reviewed c5/c6 cloud verification: 2/2 validated; correct five-day
+  grace period and local amounts; no cross-clause reference.
+- [x] Publish application source/evidence and verify those paths match fetched
+  5a79f1b (excluding this tracker update).
+- [ ] Complete the broader sample acceptance gate; do not advance into later scope.
+
+The full lease returned 7/10 structurally validated in cloud. c2/c4/c7 were
+withheld for unsupported indemnity wording; no 500/timeout/quota failure occurred.
+This is NOT a lease quality pass: accepted c5 used the security-deposit token
+[AMOUNT_3] as a rent grace period, restoring the deposit amount as a day count.
+Accepted c9 also referenced two party tokens absent from its governing-law source.
+Prompt instructions forbade these inferences, but validation allowed every token
+in the complete batch even though each request sent only its own clause.
+
+Correction: derive the prompt allowlist and response allowlist from the current
+approved clause. Never copy/filter a batch to manufacture approval; the original
+batch, stale checks and sequential transport remain. The shared batch-token helper
+is preserved for callers that actually handle a complete batch. A separate typed
+clause-token helper is used for isolated clause analysis. Tokens still require
+exact brackets/case and all grounding/commercial checks remain active.
+
+Six new cloud/device regressions cover cross-clause tokens in all output fields;
+all failed before the fix, then passed. The existing allowlist regression was
+updated to require clause-local prompt tokens; existing projection/source tests
+remain. This prevents the observed cross-clause substitution, not arbitrary
+semantic misuse of a token that does occur in the same clause. Earlier 7/10 is
+pre-correction evidence and must not be presented as seven accurate reviews.
+No further full batch was sent merely to obtain a cleaner answer.
+
+Pricing checked: https://firebase.google.com/docs/ai-logic/pricing and
+https://aistudio.google.com/docs/pricing#gemini-3.5-flash-lite . No billing/model/
+provider setting changed. Full samples are manual options only; later samples
+remain unrun in this increment pending the current defect/acceptance gate.
+
+
+Post-correction bounded c5/c6 check: 2/2 cloud validated, no failures. The rent
+explanation correctly stated five days and restored rent/late fee independently;
+the deposit explanation restored only its own amount and 21-day return period.
+This is one observation, not a fresh full lease pass. It exposed another narrow
+guard gap: a changed deposit draft added an itemized-statement duty, but the
+commercial keyword triage did not cover rent/deposit terms. Two replay regressions
+for deposit/rent changes failed before the fix and passed afterward. Commercial
+review v3 now withholds changed rent/deposit drafts; unchanged wording still passes.
+No further model call was used to test deterministic post-processing.
+
+All 156 web tests, core typecheck and web production build pass. The developer
+sample selections remain excluded from production output. Integration instructions
+now specify clause-local reference constraints for each isolated analysis request.
+Remaining lease quality holds (c2/c4/c7 indemnity wording) are not resolved by this
+reference correction; other full samples are not advanced past that acceptance gap.
+
+
+Correction release checklist:
+- [x] Preserve source and approval/source/grounding guards.
+- [x] Recheck actual no-billing state and Hosting stop-at-quota behavior.
+- [x] Verify core typecheck, 156 web tests and nine Firebase setup checks.
+- [x] Deploy only existing Hosting target; predeploy build passes.
+- [x] Verify live page loads /assets/index-BBgqxcwS.js and Mask contract control.
+- [x] Publish application source/evidence and verify those paths match fetched
+  5a79f1b (excluding this tracker update).
+
+Production entry SHA-256:
+8f97c9ded40826db97b6c642b810c859ec21444b06459b0fe76123121c629bdb.
+No hosted inference was repeated during release verification. This increment
+fixes demonstrated reference/draft guard gaps, but does not complete full sample
+acceptance. Next: inspect the still-withheld lease explanations (c2/c4/c7) and
+resolve their content failures before advancing the remaining full sample checks.
+No legal analysis correctness is inferred from passing schema/token validation.
