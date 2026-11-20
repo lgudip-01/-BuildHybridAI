@@ -144,3 +144,20 @@ the indemnity guard; the earlier hosted observations apply to the prior bundle.
 Repository-reconciliation deployment: `projects/clause-guard-hackathon/sites/clause-guard-hackathon/versions/4e84e3275adb01c8`, released
 `2026-11-19T17:04:06.180Z`. Entry `index-C1aSSzYT.js`, SHA-256
 `bd563204a650369e4809921a69687d4673e5793aeeb03d543e5e79bf9595756e`.
+
+
+### November 19 explanation policy v2 release
+
+Verified Cloud Billing still has no linked billing account immediately before
+this deployment. Official Spark Hosting quota behavior was rechecked; no plan,
+API, provider or billing setting changed. Nine Firebase checks and 149 web tests
+pass, and the CLI predeploy typecheck/build passed. The official CLI deployed
+only Hosting successfully.
+
+Hosted page loads `/assets/index-DuUYRCob.js`, matching the local production entry.
+SHA-256: `38bec44fcc459e5e8d56687fe25739d9105b8fe77a59e483ec1b57f6c50b0603`.
+The public demo loads with Nano-ready status. Both development-only diagnostic
+pages are excluded from the production build. No hosted inference was run during
+this smoke check; bounded local cloud acceptance and its limits are recorded in
+DEMO_READINESS.md. This checkpoint supersedes earlier uncommitted-source statements:
+source is published through draft PR #28; main remains unchanged.

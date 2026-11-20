@@ -302,3 +302,12 @@ This closes focused premises/maintenance acceptance only. Full sample reliabilit
 remaining fixture cases and successful offline-content acceptance stay open.
 149 web tests, core typecheck and production build pass. Both diagnostic pages
 and the sample diagnostic module are excluded from the production build.
+
+
+Focused follow-up, same explanation policy: offer c3/c4/c8 3/3 cloud validated,
+all Your forms retained in masking, salary restored correctly, mutual at-will
+wording recognized, empty drafts. Freelance signature c9 1/1 cloud validated,
+both identities restored, no invented title blank and empty draft. Each was one
+separately previewed and approved batch. Neither is a full-sample reliability pass.
+Updated hosted build loads index-DuUYRCob.js; page/Nano-ready status verified,
+without another hosted model call. Full hosted and offline-content gates stay open.
