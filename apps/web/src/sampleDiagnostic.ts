@@ -4,6 +4,7 @@ import { AnalysisUnavailableError } from './cloudAnalyzer';
 const PRESETS = {
   lease: { sample:'lease', ids:['c3', 'c7'] },
   leaseRent: { sample:'lease', ids:['c5', 'c6'] },
+  leaseHeld: { sample:'lease', ids:['c2', 'c4', 'c7'] },
   offer: { sample:'offer-letter', ids:['c3', 'c4', 'c8'] },
   freelance: { sample:'freelance', ids:['c9'] },
   guarantee: { sample:'promissory-note', ids:['c8'] },
@@ -27,6 +28,7 @@ export function mountSampleDiagnostic(root: HTMLElement): void {
     <select id="preset">
       <option value="lease">Lease: premises and maintenance (c3, c7)</option>
       <option value="leaseRent">Lease: rent and deposit reference isolation (c5, c6)</option>
+      <option value="leaseHeld">Lease: withheld preamble, term and maintenance (c2, c4, c7)</option>
       <option value="offer">Offer: introduction, compensation and at-will (c3, c4, c8)</option>
       <option value="freelance">Freelance: company signature (c9)</option>
       <option value="guarantee">Promissory note: source-quoted guarantee (c8)</option>
