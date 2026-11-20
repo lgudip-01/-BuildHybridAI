@@ -515,7 +515,7 @@ or Remote Config server value changed; no production deployment occurred.
   correct salary restoration, empty drafts; mutual at-will wording recognized.
 - [x] Add only freelance c9 to the fixed local diagnostic selection.
 - [x] Inspect freelance c9 masking and run one approved check: 1/1 cloud; no invented blank.
-- [ ] Record/publish result without generalizing it to all sample clauses.
+- [x] Record/publish result without generalizing it to all sample clauses (3a2722e).
 
 The preceding source increment was fetched and matched local tree exactly:
 150031f992e23a8be21065ab6a06c86f1926e107. Browser-published history was merged
@@ -534,10 +534,52 @@ signature-title blank did not recur in this run. This is not full-sample accepta
 - [x] Verify nine Firebase setup checks and 149 web tests; build passes.
 - [x] Deploy only existing Hosting target clause-guard-hackathon.
 - [x] Verify hosted page loads /assets/index-DuUYRCob.js, matching local build.
-- [ ] Publish final evidence and verify fetched source equality.
+- [x] Publish final evidence and verify fetched source equality (3a2722e).
 
 The demo is https://clause-guard-hackathon.web.app . No new hosted inference was
 performed in this deployment smoke check. The local bounded lease/offer/freelance
 cloud evidence does not replace full hosted or successful offline acceptance.
 The development diagnostics are excluded. No environment file, payment, billing,
 model change or App Check weakening was involved.
+
+
+## Offline content acceptance increment — November 19
+
+Checklist:
+- [x] Inspect current source, clean working tree and published integration branch.
+- [x] Fetch main/integration; main remains ea30d63 and remote source matches local.
+- [x] Prepare only fixed public promissory-note c8 through real local masking.
+- [x] Inspect exact masked preview: name/address replaced; two approved tokens;
+  needsReview false; no original fixture name/address in the preview.
+- [x] Set this tab's DevTools Network throttling to Offline and verify selection.
+- [x] Explicitly approve one analysis attempt; no automatic/manual rerun.
+- [x] Verify cloud fetch ERR_INTERNET_DISCONNECTED and 0 bytes transferred.
+- [x] Verify SDK-confirmed device result, 1/1 validated and local restoration.
+- [x] Inspect returned content and preserve the existing strict validation rules.
+- [x] Restore No throttling and close DevTools after recording evidence.
+- [ ] Publish this acceptance evidence and verify fetched source equality.
+
+Result: SAMPLE_ROUNDTRIP_COMPLETED, ranOn device, totalClauses 1, succeeded 1,
+failed empty. The source-quoted guarantee explanation restored Isabel Mendoza and
+509 Juniper Court, Sacramento, CA 95818 correctly from the local replacement map.
+Risk was medium, explicitly described as a preliminary review priority rather
+than a legal conclusion; redline empty. Four application-approved neutral questions
+covered obligations, limits/conditions, amendments and represented party.
+
+The explanation was the existing application-authored source-quoted guarantee
+format, enforced by the model response schema and equality validator. This proves
+one successful offline model/schema/local-restoration roundtrip. It is not evidence
+of unconstrained local-model legal reasoning or general offline content quality.
+Remote Config source was remote (loaded before Offline); explanation-grounding-v2
+and source-quoted-guarantee-v1 were present. The app was loaded/model available
+before Offline: cold-start installation/download and an offline page reload were
+not tested. Previous free-form offline 0/1 remains an observed limitation.
+
+Native Chrome required a brief human pause to stabilize focus; no analysis ran
+until Offline was visibly selected on the correct diagnostic tab. Network was
+restored to No throttling and DevTools closed. The successful diagnostic result
+was left open for review. No source correction, validator weakening, cloud retry,
+billing linkage, API activation or deployment was needed.
+
+Next task: complete remaining fixed-sample cloud acceptance, then a complete
+hosted review. Gate A stays active; import/native/chat/polish do not advance yet.
