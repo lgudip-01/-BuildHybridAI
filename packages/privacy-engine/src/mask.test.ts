@@ -139,6 +139,23 @@ describe('mask', () => {
       expect(result.needsReview).toBe(true);
       expect(result.clauses[0]!.text).not.toMatch(/Wei|Zhang|Lucia|Fernandez/);
     });
+    it.each(['patterns', 'model'] as const)('does not resolve a titled person to a company short name with %s', async source => {
+      const texts = ['Jordan Ltd. supplies parts.', 'Signed by Mr. Jordan for himself.'];
+      const docId = `company-title-alias-${source}`;
+      const result = await mask(docId, texts.map((text, index) => ({id:`c${index + 1}`, index, text})),
+        fakeBridge([
+          {text:'Jordan Ltd.', kind:'organization', party:false},
+          {text:'Mr. Jordan', kind:'person', party:false},
+        ], {status:source === 'patterns' ? 'unavailable' : 'available'}));
+      if (!result.ok) throw new Error(JSON.stringify(result.leaks));
+      expect(result.clauses.map(clause => clause.text)).toEqual([
+        '[ORG_1] supplies parts.', 'Signed by [PERSON_1] for himself.',
+      ]);
+      const restored = await unmask(docId, result.clauses.map(clause => ({
+        clauseId:clause.id, risk:'low', explanation:clause.text, redline:'', questions:[],
+      })));
+      expect(restored.map(clause => clause.explanation)).toEqual(texts);
+    });
     it('reuses a unique full-person identity for the titled surname reported by the model', async () => {
       const texts = ["Margaret O'Connell agrees.", "Ms. O'Connell handles repairs."];
       const result = await mask('landlord-title-alias', texts.map((text, index) => ({ id: `c${index + 1}`, index, text })),

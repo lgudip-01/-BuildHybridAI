@@ -8,6 +8,7 @@ export type Candidate = Span & { key: string; source: 'pattern' | 'entity' };
 
 const KIND_RANK: Partial<Record<EntityKind, number>> = { PARTY: 3, PERSON: 2, ORG: 2, ADDRESS: 2, NAME: 1 };
 const TITLE = /^(?:Mr|Mrs|Ms|Mx|Dr|Prof)\.?\s+/;
+const COORDINATION = /\s+(?:and|&)\s+/i;
 
 export function normalize(value: string): string {
   return value.toLowerCase().replace(/\s+/g, ' ').trim();
@@ -40,18 +41,18 @@ export function separateCoordinatedNames(entities: Entity[]): { entities: Entity
   const isOrganization = (e: Entity) => e.base === 'org' || stripOrgSuffix(e.value) !== e.value;
   const organizations = new Set(entities.filter(isOrganization)
     .flatMap(e => [normalize(e.value), normalize(stripOrgSuffix(e.value))]));
-  const independent = new Set(entities.filter(e => !isOrganization(e) && !/\s+(?:and|&)\s+/i.test(e.value))
+  const independent = new Set(entities.filter(e => !isOrganization(e) && !COORDINATION.test(e.value))
     .map(e => normalize(e.value.replace(TITLE, ''))));
   // A business literally named for the same independently named people has
   // ambiguous short forms. Block that mapping instead of silently expanding a
   // person's name to the company name during restoration.
   const ambiguousOrganizations = entities.filter(isOrganization).filter(entity => {
-    const parts = stripOrgSuffix(entity.value).split(/\s+(?:and|&)\s+/i);
+    const parts = stripOrgSuffix(entity.value).split(COORDINATION);
     return parts.length > 1 && parts.every(part => independent.has(normalize(part.replace(TITLE, ''))));
   }).map(entity => entity.value);
   let needsReview = false;
   const separated = entities.flatMap(entity => {
-    const parts = entity.value.split(/\s+(?:and|&)\s+/i);
+    const parts = entity.value.split(COORDINATION);
     if (parts.length === 1 || isOrganization(entity) || organizations.has(normalize(entity.value))) return [entity];
     if (parts.every(part => independent.has(normalize(part.replace(TITLE, ''))))) {
       return parts.map(part => toEntity(entity.kind, part, 'person'));
@@ -97,8 +98,10 @@ export function dedupeEntities(entities: Entity[]): Entity[] {
     if (shared.has(key)) continue;
     // A titled person may use the unique surname variant already owned by a
     // full person name. Shared surnames are excluded by sharedVariants().
-    const personAlias = entity.base === 'person' && TITLE.test(entity.value)
+    const surnameOwner = entity.base === 'person' && TITLE.test(entity.value)
       ? owner.get(normalize(entity.value.replace(TITLE, ''))) : undefined;
+    const personAlias = surnameOwner && surnameOwner.base !== 'org' && stripOrgSuffix(surnameOwner.value) === surnameOwner.value
+      ? surnameOwner : undefined;
     const existing = owner.get(key) ?? personAlias ?? companyItStarts(merged, entity) ?? personItEnds(merged, entity);
     if (existing) {
       join(existing, entity);
@@ -134,12 +137,12 @@ function companyItStarts(merged: Entity[], entity: Entity): Entity | undefined {
   const prefix = `${normalize(entity.value)} `;
   const longer = merged.filter((e) => COMPANY_KINDS.has(e.kind) &&
     // An opaque coordinated group must never become one individual's identity.
-    (!/\s+(?:and|&)\s+/i.test(e.value) || e.base === 'org') && normalize(e.value).startsWith(prefix));
+    (!COORDINATION.test(e.value) || e.base === 'org') && normalize(e.value).startsWith(prefix));
   return longer.length === 1 ? longer[0] : undefined;
 }
 
 /** Pattern-only names lack person aliases. Match a titled surname to exactly
- * one full candidate, as in Likhil's merged PR #27, excluding known businesses.
+ * one full candidate, excluding known businesses.
  * Shared surnames and coordinated groups never select one person by guessing.
  */
 function personItEnds(merged: Entity[], entity: Entity): Entity | undefined {
@@ -149,7 +152,7 @@ function personItEnds(merged: Entity[], entity: Entity): Entity | undefined {
   if (!surname || surname.includes(' ')) return;
   const people = merged.filter(candidate => {
     if (!['PERSON', 'PARTY', 'NAME'].includes(candidate.kind) || candidate.base === 'org' ||
-        stripOrgSuffix(candidate.value) !== candidate.value || /\s+(?:and|&)\s+/i.test(candidate.value)) return false;
+        stripOrgSuffix(candidate.value) !== candidate.value || COORDINATION.test(candidate.value)) return false;
     const words = candidate.value.replace(TITLE, '').trim().split(/\s+/);
     return words.length > 1 && normalize(words.at(-1)!) === surname;
   });
