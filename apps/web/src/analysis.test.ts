@@ -349,12 +349,22 @@ describe('bounded source-quoted guarantee format', () => {
 
 describe('response validation', () => {
   const allowed = new Set(['[PARTY_A]', '[PARTY_B]', '[PARTY_AA]']);
+  it.each([
+    ['PRIVATE_OUTPUT_SENTINEL', 'not valid JSON'],
+    [JSON.stringify({...answer(), clauseId:'PRIVATE_OUTPUT_SENTINEL'}), 'different clause'],
+    [JSON.stringify({...answer(), explanation:'Party A PRIVATE_OUTPUT_SENTINEL'}), 'without brackets'],
+  ])('reports a fixed useful validation reason without echoing rejected output %#', (text, detail) => {
+    let error: unknown;
+    try { validateAnalysis(text, 'c1', allowed); } catch (caught) { error = caught; }
+    expect(error).toMatchObject({reason:'invalid_response', message:expect.stringContaining(detail)});
+    expect((error as Error).message).not.toContain('PRIVATE_OUTPUT_SENTINEL');
+  });
   it.each(['explanation', 'redline', 'questions'] as const)('allows ordinary lowercase words that resemble tokens in %s', key => {
     const text = 'Any party a court finds responsible pays on the date 1 year after signing.';
     const obj = {...answer(), [key]:key === 'questions' ? [text] : text};
     expect(() => validateAnalysis(JSON.stringify(obj), 'c1', new Set([...allowed, '[DATE_1]']))).not.toThrow();
   });
-  it.each(['PARTY A', 'Party A', 'PARTY_A', 'party_a', 'party-a', 'DATE 1', 'Date 1', 'date_1', 'date-1', '[party_a]'])('still rejects recognizable rewritten token %s', token => {
+  it.each(['PARTY A', 'Party A', 'PARTY_A', 'party_a', 'party-a', 'party _ a', 'DATE 1', 'Date 1', 'date_1', 'date-1', 'date - 1', '[party_a]'])('still rejects recognizable rewritten token %s', token => {
     expect(() => validateAnalysis(JSON.stringify({...answer(), explanation:`Check ${token}.`}), 'c1', new Set([...allowed, '[DATE_1]']))).toThrow();
   });
   it.each([
