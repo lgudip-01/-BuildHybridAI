@@ -284,3 +284,21 @@ identity retest, not full analyzer acceptance or universal legal reasoning.
 The local test tab remains open at the c2 restored answer; normal networking was
 restored after the separate offline test. Provider and validation failures remain
 visible as Needs review cards, without invented risk or replacement wording.
+
+
+### November 19 bounded c3/c7 follow-up
+
+A local-only manual diagnostic (`/sample-diagnostic.html` in Vite development)
+selects fixed public fixtures before engine masking. Each run requires inspecting
+the masked clauses and a separate approval click; no automatic retries, rejected
+output logging, or production diagnostic entry is included.
+
+First focused lease run: cloud 0/2; both explanations rejected for indemnity
+wording absent from their source. Shared instructions were aligned with that
+existing strict guard. One fresh post-change run: **cloud 2/2**, no failures,
+correct local restoration, empty redlines. Explanation policy:
+`explanation-grounding-v2`; Remote Config source; same approved free-tier model.
+This closes focused premises/maintenance acceptance only. Full sample reliability,
+remaining fixture cases and successful offline-content acceptance stay open.
+149 web tests, core typecheck and production build pass. Both diagnostic pages
+and the sample diagnostic module are excluded from the production build.
