@@ -311,3 +311,26 @@ both identities restored, no invented title blank and empty draft. Each was one
 separately previewed and approved batch. Neither is a full-sample reliability pass.
 Updated hosted build loads index-DuUYRCob.js; page/Nano-ready status verified,
 without another hosted model call. Full hosted and offline-content gates stay open.
+
+
+### November 19 — successful bounded offline roundtrip
+
+Actual Chrome check on localhost, using only public promissory-note c8:
+masked name/address preview inspected; DevTools Network visibly set to Offline;
+one explicit approval. Cloud generateContent failed with
+`net::ERR_INTERNET_DISCONNECTED`, 0 B transferred. SDK confirmed **device**, with
+**1/1 validated**, no failures, correct local name/address restoration and empty
+redline. Returned medium risk was qualified as preliminary review priority; all
+four questions matched the existing allowed guarantee-review questions.
+
+This used the existing application-authored source-quoted guarantee format
+(`source-quoted-guarantee-v1`), enforced through response schema and validation.
+It closes the bounded successful offline content/restoration check, not general
+free-form offline quality or offline cold-start/download/install. The page/model
+were ready and Remote Config loaded before network isolation. Earlier free-form
+offline 0/1 remains valid evidence and is not overwritten. No code change or
+weakened validation was needed. Normal No throttling was restored afterward and
+DevTools closed. No new cloud execution, billing change or deployment occurred.
+
+Remaining gate A work: broader fixed-sample cloud acceptance, complete hosted
+review and safe source promotion/reconciliation of overlapping PRs.
