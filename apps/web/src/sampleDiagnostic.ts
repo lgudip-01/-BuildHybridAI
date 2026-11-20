@@ -3,9 +3,16 @@ import { AnalysisUnavailableError } from './cloudAnalyzer';
 
 const PRESETS = {
   lease: { sample:'lease', ids:['c3', 'c7'] },
+  leaseRent: { sample:'lease', ids:['c5', 'c6'] },
   offer: { sample:'offer-letter', ids:['c3', 'c4', 'c8'] },
   freelance: { sample:'freelance', ids:['c9'] },
   guarantee: { sample:'promissory-note', ids:['c8'] },
+  leaseFull: { sample:'lease', ids:undefined },
+  offerFull: { sample:'offer-letter', ids:undefined },
+  freelanceFull: { sample:'freelance', ids:undefined },
+  noteFull: { sample:'promissory-note', ids:undefined },
+  saasFull: { sample:'saas', ids:undefined },
+  ndaFull: { sample:'nda', ids:undefined },
 } as const;
 
 /** Local, manual diagnostics for fixed public fixtures. No logging or persistence. */
@@ -19,9 +26,16 @@ export function mountSampleDiagnostic(root: HTMLElement): void {
     <label for="preset">Public sample selection</label>
     <select id="preset">
       <option value="lease">Lease: premises and maintenance (c3, c7)</option>
+      <option value="leaseRent">Lease: rent and deposit reference isolation (c5, c6)</option>
       <option value="offer">Offer: introduction, compensation and at-will (c3, c4, c8)</option>
       <option value="freelance">Freelance: company signature (c9)</option>
       <option value="guarantee">Promissory note: source-quoted guarantee (c8)</option>
+      <option value="leaseFull">Full public lease</option>
+      <option value="offerFull">Full public offer letter</option>
+      <option value="freelanceFull">Full public freelance agreement</option>
+      <option value="noteFull">Full public promissory note</option>
+      <option value="saasFull">Full public SaaS agreement</option>
+      <option value="ndaFull">Full public NDA</option>
     </select>
     <button id="mask">Mask selected public sample</button>
     <button id="analyze" disabled>Approve masked sample &amp; analyze</button>

@@ -139,7 +139,7 @@ describe('approved web analysis', () => {
     expect(cloudPrompt).toContain(CLOUD_ANALYSIS_PROMPT);
     expect(devicePrompt).toContain(DEVICE_ANALYSIS_PROMPT);
     for (const prompt of [cloudPrompt, devicePrompt]) {
-      expect(prompt).toContain(JSON.stringify(['[AMOUNT_1]', '[PARTY_A]', '[PARTY_B]']));
+      expect(prompt).toContain(JSON.stringify(['[PARTY_A]', '[PARTY_B]']));
       expect(prompt).toContain('set redline to the empty string');
       expect(prompt).not.toContain(b.docId);
     }
@@ -164,10 +164,31 @@ describe('approved web analysis', () => {
     expect(result.results.map(r => r.clauseId)).toEqual(['c2']);
     expect(result.failed).toEqual([{ clauseId: 'c1', reason: 'unknown_placeholder', detail: expect.any(String) }]);
   });
-  it('uses the complete batch allowlist including a token from another clause', async () => {
-    mocks.generate.mockResolvedValueOnce(output('c1', 'in_cloud', { ...answer(), explanation: 'Clarify [AMOUNT_1].' })).mockResolvedValueOnce(output('c2'));
-    expect((await new WebBridge(ai).analyze(batch())).failed).toEqual([]);
-  });
+  it.each(['in_cloud', 'on_device'].flatMap(source =>
+    (['explanation', 'redline', 'questions'] as const).map(field => ({source, field}))))(
+    'rejects another clause’s approved token in $field on $source without retry', async ({source, field}) => {
+      // Mirrors the live lease defect: a deposit token was used as a rent grace period.
+      const data = {...answer(), [field]:field === 'questions' ? ['Clarify [AMOUNT_1].'] : 'Late after [AMOUNT_1] days.'};
+      const validSecond = {...answer('c2'), explanation:'Clarify [AMOUNT_1].'};
+      mocks.generate.mockResolvedValueOnce(output('c1', source, data)).mockResolvedValueOnce(output('c2', source, validSecond));
+      const result = await new WebBridge(ai).analyze(batch());
+      expect(result.results).toEqual([validSecond]);
+      expect(result.failed).toMatchObject([{clauseId:'c1', reason:'unknown_placeholder'}]);
+      expect(mocks.generate).toHaveBeenCalledTimes(2);
+      expect(mocks.factory.mock.calls.map(call => call[1].mode)).toEqual([
+        'prefer_in_cloud', source === 'in_cloud' ? 'only_in_cloud' : 'only_on_device',
+      ]);
+      for (const params of mocks.factory.mock.calls.map(call => call[1])) {
+        const prompts = [params.inCloudParams.systemInstruction,
+          params.onDeviceParams.createOptions.initialPrompts[0].content[0].value];
+        for (const prompt of prompts) expect(prompt).toContain('only the supplied clause');
+      }
+      for (const prompt of [mocks.factory.mock.calls[0]![1].inCloudParams.systemInstruction,
+        mocks.factory.mock.calls[0]![1].onDeviceParams.createOptions.initialPrompts[0].content[0].value]) {
+        expect(prompt).not.toContain('[AMOUNT_1]');
+      }
+      expect(mocks.factory.mock.calls[1]![1].inCloudParams.systemInstruction).toContain('[AMOUNT_1]');
+    });
   it.each(['[NUM]', '[years/months]', '[EMAIL_2]', '[ADDRESS_2]'])('rejects observed NDA drafting blank %s', async token => {
     mocks.generate.mockResolvedValueOnce(output('c1', 'in_cloud', { ...answer(), redline: `Supply ${token}.` }));
     const result = await new WebBridge(ai).analyze(batch(1));
@@ -240,6 +261,10 @@ describe('commercial rewrite review gate', () => {
       'This credit is Customer’s sole and exclusive remedy.'],
     ['Lender may declare the balance due immediately after 10 days.',
       'Lender may terminate the loan immediately.'],
+    ['Tenants will provide a security deposit of [AMOUNT_3]. The deposit is returned within 21 days, less lawful deductions.',
+      'Tenants will provide a security deposit of [AMOUNT_3]. The deposit is returned within 21 days, less lawful deductions, accompanied by an itemized statement.'],
+    ['Monthly rent is [AMOUNT_1], due on the first day of each month.',
+      'Monthly rent is [AMOUNT_1], due on the fifteenth day of each month.'],
   ])('withholds an unapproved commercial edit %#', (source, redline) => {
     const original = { ...answer(), redline };
     const guarded = applyCommercialRedlineGuard(original, source as CleanText);

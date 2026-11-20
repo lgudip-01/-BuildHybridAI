@@ -1,6 +1,6 @@
 import type { Analysis, AnalyzeResult, ApprovedBatch, ClauseFailure } from '@clause-guard/core/types';
 import {
-  allowedPlaceholders, ANALYSIS_JSON_SCHEMA, AnalysisValidationError,
+  clausePlaceholders, ANALYSIS_JSON_SCHEMA, AnalysisValidationError,
   validateAnalysis, validateBatch, applyCommercialRedlineGuard, validateExplanationGrounding,
   sourceQuotedGuaranteeReview, validateSourceQuotedGuaranteeReview, GUARANTEE_REVIEW_QUESTIONS,
 } from '@clause-guard/core/analysis';
@@ -32,20 +32,20 @@ export async function analyzeApproved(ai: AI, batch: ApprovedBatch): Promise<Ana
   const config = await loadAnalysisConfig(ai.app);
   assertApproved(batch); // Remasking during Remote Config initialization cancels this batch.
   if (!config.enabled) throw new Error('Cloud analysis is temporarily disabled by configuration.');
-  const allowed = allowedPlaceholders(batch);
-  // Derived only from approved masked text, never from the local replacement map.
-  const placeholderRules = '\nApplication placeholder constraint: the complete permitted token list is ' +
-    JSON.stringify([...allowed].sort()) + '. Tokens are opaque labels, not facts about another clause. ' +
-    'Copy tokens exactly and only for the same entity or value they already represent. ' +
-    'Never increment a token suffix or create a new contact token. ' +
-    'If a notice clause lacks a party\'s email or address, set redline to the empty string and ask for the missing contact details in questions. ' +
-    'Do not substitute another party\'s existing contact token. Before returning JSON, check every bracketed span against the permitted list.';
   const results: Analysis[] = [];
   const failed: ClauseFailure[] = [];
   let ranOn: 'cloud' | 'device' | undefined;
 
   for (const clause of batch.clauses) {
     assertApproved(batch); // Invalidate queued sends after a remask.
+    const allowed = clausePlaceholders(clause);
+    // Derived only from this approved masked clause, never the local replacement map.
+    const placeholderRules = '\nApplication placeholder constraint: for only the supplied clause, the complete permitted token list is ' +
+      JSON.stringify([...allowed].sort()) + '. Tokens are opaque labels, not facts about another clause. ' +
+      'Copy tokens exactly and only for the same entity or value they already represent. ' +
+      'Never increment a token suffix or create a new contact token. ' +
+      'If a notice clause lacks a party\'s email or address, set redline to the empty string and ask for the missing contact details in questions. ' +
+      'Do not substitute another party\'s existing contact token. Before returning JSON, check every bracketed span against the permitted list.';
     // Until a source responds, let the SDK prefer cloud and fall back locally.
     // After that, pin this batch to that source: no mixed-source badge or duplicate retries.
     const mode = ranOn === 'cloud' ? InferenceMode.ONLY_IN_CLOUD
