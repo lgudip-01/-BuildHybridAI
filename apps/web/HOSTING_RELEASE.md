@@ -161,3 +161,22 @@ pages are excluded from the production build. No hosted inference was run during
 this smoke check; bounded local cloud acceptance and its limits are recorded in
 DEMO_READINESS.md. This checkpoint supersedes earlier uncommitted-source statements:
 source is published through draft PR #28; main remains unchanged.
+
+
+### November 20 clause reference and rent/deposit guard release
+
+Current Cloud Billing again showed no linked billing account before deployment;
+Spark Hosting stop-at-quota behavior was rechecked in official documentation.
+No payment/billing/provider/API configuration changed. Official CLI Hosting-only
+deployment succeeded with its typecheck/build predeploy check.
+
+Entry: `/assets/index-BBgqxcwS.js`.
+SHA-256: `8f97c9ded40826db97b6c642b810c859ec21444b06459b0fe76123121c629bdb`.
+Hosted DOM loads that exact entry and the Mask contract control. No hosted model
+call was performed in this smoke check. Core typecheck, 156 web tests and nine
+Firebase setup checks pass; development diagnostics are excluded from production.
+
+This release restricts each isolated clause response to its own supplied tokens
+and applies commercial-review-v3 to changed rent/deposit drafts. Local acceptance
+found and recorded the underlying failures; this is a safeguard release, not full
+six-sample or hosted-content acceptance. main remains unchanged; PR #28 is draft.

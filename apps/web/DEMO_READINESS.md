@@ -334,3 +334,26 @@ DevTools closed. No new cloud execution, billing change or deployment occurred.
 
 Remaining gate A work: broader fixed-sample cloud acceptance, complete hosted
 review and safe source promotion/reconciliation of overlapping PRs.
+
+
+### November 20 — full lease exposed reference and draft guard gaps
+
+One approved full lease batch, after current no-billing/pricing checks: ten HTTP
+200 fetches, cloud 7/10 structurally validated. c2/c4/c7 were rejected for indemnity
+wording not present in their source. The seven results are not a quality pass:
+c5 wrongly used the deposit amount token as a day count, and c9 referenced party
+tokens not present in its own governing-law clause. No provider outage occurred.
+
+The analyzer now sends/accepts only the current clause's tokens, preserving genuine
+whole-batch approval and stale/source checks. Six cloud/device regressions across
+all output fields failed before correction and passed afterward. One fresh
+reviewed c5/c6 batch returned 2/2 cloud validated, with correct five-day grace
+period, independent local amounts and no cross-clause references. This limited
+result does not close full lease quality or other sample acceptance.
+
+The deposit answer also proposed an added itemization duty. Deterministic
+commercial review v3 now includes rent/deposit wording and withholds such changed
+drafts, with two replay regressions that failed before the fix. Existing neutral
+questions/results remain; no extra cloud call was used for this post-processing.
+156 web tests, core typecheck and production build pass. Full samples are manual
+local diagnostic selections, not an automatic six-sample retry loop.

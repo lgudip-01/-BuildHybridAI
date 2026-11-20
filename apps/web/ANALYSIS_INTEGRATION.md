@@ -73,8 +73,10 @@ required. No separate preflight token exchange prevents offline fallback.
 
 Only clause id, optional type, and masked text are projected into generation
 requests. The analyzer never imports the vault or sends docId, ledger, or raw
-contract input. The allowlist spans the whole batch, including alphabetic party
-labels. All response fields are checked; an invented bracketed placeholder
+contract input. Each isolated request's prompt and response allowlist contains
+only placeholders present in that supplied clause, including alphabetic party
+labels. A token approved elsewhere in the batch cannot be introduced here.
+All response fields are checked; an invented or out-of-clause bracketed placeholder
 fails the clause. Known placeholders rewritten as unbracketed "Party A" also
 fail response validation. No claim is made that this detects every possible
 semantic rewrite or every sensitive detail a masking model could miss.
