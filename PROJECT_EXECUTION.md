@@ -430,9 +430,9 @@ Publication increment:
 - [x] Run merged-tree checks: 92 engine tests, 144 web tests, nine Firebase checks,
   core/engine typechecks and web production build pass.
 - [x] Verify only `.env.example` is tracked; real local environments stay ignored.
-- [ ] Push the isolated integration branch and verify its remote SHA.
-- [ ] Open/update one reviewable draft integration PR; preserve main and other PRs.
-- [ ] Tag teammates with specific hardware/current-work requests.
+- [x] Publish the isolated integration branch and verify its remote source tree.
+- [x] Open draft integration PR #28; preserve main and other PRs.
+- [x] Tag teammates with specific hardware/current-work requests in #17, #18 and #19.
 
 The merge conflict in merge.ts was reconciled using the already tested explicit
 organization evidence/normalization path rather than applying a second generic
@@ -445,3 +445,63 @@ Roadmap gate A remains active: inspect recorded invalid c3/c7 replies, separate
 provider 500/timeouts from answer failures, and verify bounded remaining sample
 and offline-content acceptance. Do not mark A complete or move into chat/polish
 merely because source publication succeeds. Later B–G gates remain incomplete.
+
+
+## Core diagnostic increment — November 19
+
+Checklist and uncertainties:
+- [x] Preserve local history and use the existing draft integration branch.
+- [x] Add fixed validation reasons without returning rejected model output.
+- [x] Reject mixed-delimiter token rewrites; preserve ordinary lowercase prose.
+- [x] Add a local-only manual diagnostic for fixed public fixtures, requiring a
+  fresh masked preview and explicit approval for each attempt.
+- [x] Verify 149 web tests, core typecheck and production build; both diagnostic
+  HTML pages and the sample diagnostic module are absent from production output.
+- [x] Recheck actual Cloud Billing: no linked billing account. Recheck official
+  Firebase AI Logic and Gemini pricing for standard gemini-3.5-flash-lite text.
+- [x] Run one bounded lease c3/c7 check; record failure instead of weakening checks.
+- [x] Align shared prompt instructions with the existing indemnity rejection guard.
+- [x] Record the single post-change c3/c7 acceptance result: 2/2 cloud validated.
+- [ ] Publish this increment and verify the remote source tree.
+- [ ] Complete remaining core sample and successful offline-content acceptance.
+
+Draft source review: https://github.com/lgudip-01/-BuildHybridAI/pull/28
+The initial 49-file integration was published through signed-in GitHub UI because
+native Git lacks credentials and connector writes return 403. The fetched remote
+source tree matched local exactly: 694fe27ceebfdc80fd7db765e463d11dd59082a4.
+Remote history was merged locally without resetting the preserved branch.
+Concrete teammate requests were posted in #17 (Likhil hardware, Aarush native
+work), #19 (Sai UI/extension work), and #18 (Varun handle/import work). No guessed
+handle or assignment was used.
+
+The earlier c3/c7 response bodies were lost with their ephemeral browser tab and
+cannot be inspected retrospectively. A new bounded two-clause run confirmed cloud
+execution and rejected both explanations for indemnity wording absent from the
+source. This is new evidence, not recovery of the older replies. Fixed failure
+messages expose the validator category without logging or showing rejected text.
+No risk, draft or restored result was presented for these rejected answers.
+The source guard remains conservative, including speculative/negative references;
+we have not established the exact wording of either rejected answer.
+
+The prompt omitted this exact validator constraint. Explanation policy v2 now
+explicitly omits indemnity commentary unless the clause itself uses the wording,
+including speculative/negative commentary; missing provisions belong in questions.
+This changes instructions only and preserves the rejection guard. One fresh,
+reviewed post-change check is authorized as validation of this concrete change;
+there is no automatic retry loop or broad six-sample rerun.
+
+Pricing references checked for this increment:
+https://firebase.google.com/docs/ai-logic/pricing
+https://aistudio.google.com/docs/pricing#gemini-3.5-flash-lite
+
+Gate A remains active. Source publication does not complete cloud quality,
+offline content acceptance, native release, or later roadmap gates.
+
+Post-change result: c3 and c7 both validated in cloud (2/2), no failures,
+with local restoration and empty redlines. c3 described the premises and asked
+about term/rent missing from the excerpt. c7 described repair reporting and asked
+about maintenance allocation and a physical contact address. This is a bounded
+single-run observation; c7 identity restored the titled surname from its selected
+source, not proof of full-document alias consistency. Remote Config remained the
+source, with app-owned explanation-grounding-v2 instructions present. No model
+or Remote Config server value changed; no production deployment occurred.
