@@ -462,7 +462,7 @@ Checklist and uncertainties:
 - [x] Run one bounded lease c3/c7 check; record failure instead of weakening checks.
 - [x] Align shared prompt instructions with the existing indemnity rejection guard.
 - [x] Record the single post-change c3/c7 acceptance result: 2/2 cloud validated.
-- [ ] Publish this increment and verify the remote source tree.
+- [x] Publish this increment and verify the remote source tree (41985b0).
 - [ ] Complete remaining core sample and successful offline-content acceptance.
 
 Draft source review: https://github.com/lgudip-01/-BuildHybridAI/pull/28
@@ -505,3 +505,39 @@ single-run observation; c7 identity restored the titled surname from its selecte
 source, not proof of full-document alias consistency. Remote Config remained the
 source, with app-owned explanation-grounding-v2 instructions present. No model
 or Remote Config server value changed; no production deployment occurred.
+
+
+### Focused offer/freelance follow-up
+
+- [x] Inspect offer c3/c4/c8 masked preview: four approved tokens, no review block;
+  all Your forms and 15% remain unchanged.
+- [x] Run one explicitly approved three-clause cloud batch: 3/3 validated,
+  correct salary restoration, empty drafts; mutual at-will wording recognized.
+- [x] Add only freelance c9 to the fixed local diagnostic selection.
+- [x] Inspect freelance c9 masking and run one approved check: 1/1 cloud; no invented blank.
+- [ ] Record/publish result without generalizing it to all sample clauses.
+
+The preceding source increment was fetched and matched local tree exactly:
+150031f992e23a8be21065ab6a06c86f1926e107. Browser-published history was merged
+locally without a source change or reset. PR #28 comment 7029342105 records it.
+Offer results are one bounded cloud observation, not full eleven-clause acceptance.
+
+Freelance c9: one cloud result validated, both public fixture identities restored,
+empty redline, question about signing authority/capacity. The earlier invented
+signature-title blank did not recur in this run. This is not full-sample acceptance.
+
+### Demo deployment checkpoint
+
+- [x] Recheck Cloud Billing immediately before deployment: no billing account.
+- [x] Verify Spark Hosting pricing: storage deployments stop at 10 GB and sites
+  stop after the no-cost transfer limit/grace period; no Blaze/upgrade authorized.
+- [x] Verify nine Firebase setup checks and 149 web tests; build passes.
+- [x] Deploy only existing Hosting target clause-guard-hackathon.
+- [x] Verify hosted page loads /assets/index-DuUYRCob.js, matching local build.
+- [ ] Publish final evidence and verify fetched source equality.
+
+The demo is https://clause-guard-hackathon.web.app . No new hosted inference was
+performed in this deployment smoke check. The local bounded lease/offer/freelance
+cloud evidence does not replace full hosted or successful offline acceptance.
+The development diagnostics are excluded. No environment file, payment, billing,
+model change or App Check weakening was involved.
