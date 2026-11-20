@@ -28,9 +28,12 @@ export const ANALYSIS_REVIEW_RULES = 'Review from a neutral perspective when the
   'If a revision depends on the represented party or an unagreed commercial choice, leave redline empty and ask a neutral question about that choice. ' +
   'Do not present a clause-level omission as an established omission from the entire agreement.';
 
-export const GROUNDING_POLICY_VERSION = 'guarantee-grounding-v1';
+export const GROUNDING_POLICY_VERSION = 'explanation-grounding-v2';
 export const EXPLANATION_GROUNDING_RULES = 'Ground explanations in what the supplied clause actually says. ' +
   'Separate express wording from possible consequences and information missing from this excerpt. ' +
+  'Use indemnity or indemnification wording in the explanation only when the supplied clause expressly uses that wording. ' +
+  'Otherwise omit that topic from the explanation entirely, including speculative or negative statements about it. ' +
+  'A premises description, repair reporting duty or waiver alone does not establish an indemnity. Ask about missing provisions in questions instead. ' +
   'For guarantee clauses, do not label obligations unconditional, absolute, uncapped or unlimited, or assert coverage of future obligations, ' +
   'unless that wording is expressly established in the supplied text. Do not infer those terms merely from all obligations under this Note. ' +
   'When no cap is stated, say no cap is stated in this excerpt; do not claim the whole agreement has no cap. ' +
@@ -193,15 +196,20 @@ export function validateExplanationGrounding(analysis: Analysis, source: CleanTe
 }
 
 export function validateAnalysis(text: string, clauseId: string, allowed: ReadonlySet<string>): Analysis {
-  const invalid = () => { throw new AnalysisValidationError('invalid_response'); };
+  const invalid = (detail?: string): never => {
+    const error = new AnalysisValidationError('invalid_response');
+    if (detail) error.message = detail; // Fixed application text only; never rejected model output.
+    throw error;
+  };
   if (typeof text !== 'string' || text.length > 20000) return invalid();
   let value: unknown;
-  try { value = JSON.parse(text); } catch { return invalid(); }
+  try { value = JSON.parse(text); } catch { return invalid('The model answer was not valid JSON.'); }
   if (!value || typeof value !== 'object' || Array.isArray(value)) return invalid();
   const obj = value as Record<string, unknown>;
   const keys = ANALYSIS_JSON_SCHEMA.required;
-  if (Object.keys(obj).length !== keys.length || !keys.every(k => Object.hasOwn(obj, k)) ||
-      obj.clauseId !== clauseId || typeof obj.risk !== 'string' || !['low', 'medium', 'high'].includes(obj.risk) ||
+  if (Object.keys(obj).length !== keys.length || !keys.every(k => Object.hasOwn(obj, k))) return invalid();
+  if (obj.clauseId !== clauseId) return invalid('The model answer referenced a different clause.');
+  if (typeof obj.risk !== 'string' || !['low', 'medium', 'high'].includes(obj.risk) ||
       typeof obj.explanation !== 'string' || !obj.explanation.trim() || obj.explanation.length > 4000 ||
       typeof obj.redline !== 'string' || obj.redline.length > 4000 ||
       !Array.isArray(obj.questions) || obj.questions.length > 5 ||
@@ -218,10 +226,10 @@ export function validateAnalysis(text: string, clauseId: string, allowed: Readon
       // This is a lexical check, not proof that arbitrary prose preserves identity.
       const [kind, suffix] = placeholder.slice(1, -1).split('_') as [string, string];
       const boundary = (pattern: string) => `(?<![\\w\\[])${pattern}(?![\\w\\]])`;
-      const tokenSyntax = new RegExp(boundary(`${kind}[_-]+${suffix}`), 'i');
+      const tokenSyntax = new RegExp(boundary(`${kind}[ _-]*[_-][ _-]*${suffix}`), 'i');
       const titleKind = kind[0]! + kind.slice(1).toLowerCase();
       const spacedLabel = new RegExp(boundary(`(?:${kind}|${titleKind}) +${suffix}`));
-      if (tokenSyntax.test(field) || spacedLabel.test(field)) return invalid();
+      if (tokenSyntax.test(field) || spacedLabel.test(field)) return invalid('The model answer rewrote an approved reference without brackets.');
     }
   }
   return obj as Analysis;
