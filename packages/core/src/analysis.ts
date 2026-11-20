@@ -1,4 +1,4 @@
-import { CLAUSE_TYPES, type Analysis, type ApprovedBatch, type CleanText } from './types';
+import { CLAUSE_TYPES, type Analysis, type ApprovedBatch, type CleanText, type MaskedClause } from './types';
 
 // Versioned shared defaults. Remote Config distribution is a separate task.
 export const ANALYSIS_VERSION = 'clause-analysis-v1';
@@ -67,11 +67,11 @@ export const DEVICE_ANALYSIS_PROMPT = 'Offline preliminary red-flag scan only. F
   'IP transfer, restrictive covenants, payment ambiguity or one-sided termination in this masked clause. ' +
   'Say the scan is preliminary and limited; low risk is not contract approval. Leave redline empty if unsure. ' + ANALYSIS_OUTPUT_RULES;
 
-export const REDLINE_POLICY_VERSION = 'commercial-review-v2';
+export const REDLINE_POLICY_VERSION = 'commercial-review-v3';
 export const REDLINE_REVIEW_NOTICE = 'Local drafting check: proposed replacement wording was withheld because changes to commercial terms require review. Confirm the represented party and intended changes before drafting a replacement.';
 // Conservative triage, not a legal/semantic verifier. Check BOTH versions so
 // removing an existing restriction/exception is held just like adding one.
-const COMMERCIAL_TERMS = /\b(?:fees?|payments?|interest|salary|bonus|equity|shares?|liabilit(?:y|ies)|joint(?:ly)?[\s-]+and[\s-]+several(?:ly)?|indemni\w*|guarant\w*|remed(?:y|ies)|service\s+credits?|availab(?:ility|le)|downtime|maintenance|terminat\w*|renew\w*|non[-\s]?compet\w*|assign\w*|ownership)\b/i;
+const COMMERCIAL_TERMS = /\b(?:fees?|payments?|rent|deposits?|interest|salary|bonus|equity|shares?|liabilit(?:y|ies)|joint(?:ly)?[\s-]+and[\s-]+several(?:ly)?|indemni\w*|guarant\w*|remed(?:y|ies)|service\s+credits?|availab(?:ility|le)|downtime|maintenance|terminat\w*|renew\w*|non[-\s]?compet\w*|assign\w*|ownership)\b/i;
 
 /** Run after JSON/token validation, before local restoration. No extra model call. */
 export function applyCommercialRedlineGuard(analysis: Analysis, source: CleanText): Analysis {
@@ -112,6 +112,11 @@ export function validateBatch(batch: ApprovedBatch): void {
 
 export function allowedPlaceholders(batch: ApprovedBatch): Set<string> {
   return new Set(batch.clauses.flatMap(c => c.text.match(PLACEHOLDER) ?? []));
+}
+
+/** An isolated clause response cannot introduce references from unsent clauses. */
+export function clausePlaceholders(clause: MaskedClause): Set<string> {
+  return new Set(clause.text.match(PLACEHOLDER) ?? []);
 }
 
 export class AnalysisValidationError extends Error {
