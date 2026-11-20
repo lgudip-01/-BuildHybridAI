@@ -557,7 +557,8 @@ Checklist:
 - [x] Verify SDK-confirmed device result, 1/1 validated and local restoration.
 - [x] Inspect returned content and preserve the existing strict validation rules.
 - [x] Restore No throttling and close DevTools after recording evidence.
-- [ ] Publish this acceptance evidence and verify fetched source equality.
+- [x] Publish acceptance evidence and verify fetched source equality at 22c9e53
+  (tree 8c1b7b35a4d67dbab57490e88656b184d4989c49).
 
 Result: SAMPLE_ROUNDTRIP_COMPLETED, ranOn device, totalClauses 1, succeeded 1,
 failed empty. The source-quoted guarantee explanation restored Isabel Mendoza and
