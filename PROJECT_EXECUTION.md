@@ -670,3 +670,69 @@ fixes demonstrated reference/draft guard gaps, but does not complete full sample
 acceptance. Next: inspect the still-withheld lease explanations (c2/c4/c7) and
 resolve their content failures before advancing the remaining full sample checks.
 No legal analysis correctness is inferred from passing schema/token validation.
+
+
+## Likhil review follow-up — November 20
+
+Review read first: https://github.com/lgudip-01/-BuildHybridAI/pull/28#issuecomment-7031577403
+User authorized acting on the review after inspection. The comment is teammate
+review evidence; it does not override user constraints or independently grant
+permission for paid services, security changes or unrelated work.
+
+Adjusted priority: correct the demonstrated company/person restoration regression
+before further cloud acceptance. Clause-reference restriction is approved by the
+engine owner, with the conservative cross-clause notice trade-off acknowledged.
+
+Checklist:
+- [x] Inspect latest refs, working tree, review and actual engine alias path.
+- [x] Reproduce Jordan Ltd./Mr. Jordan identity corruption before correction.
+- [x] Apply surname-owner organization/suffix checks without changing approval.
+- [x] Restore one shared COORDINATION regex and describe personItEnds behavior.
+- [x] Verify pattern-only and model-reported paths and exact local restoration.
+- [x] Pass 94 engine + 156 web tests (250 total), engine typecheck and web build.
+- [x] Verify older PR work/discussions before housekeeping; preserve branches.
+- [x] Close superseded #6/#10/#24 with links to #28 and the review rationale.
+- [x] Publish engine correction/release evidence and verify those paths against
+  fetched 646d161 (excluding this tracker update).
+- [x] Update no-billing hosted demo; verify entry /assets/index-DXRiOaHG.js.
+- [x] Inspect retained lease request log; it is empty after reloads. Keep the
+  explanation-quality gate open and prepare a bounded follow-up.
+
+Both Jordan regressions failed before the fix (Signed by [ORG_1]) and passed
+afterward (Signed by [PERSON_1]), restoring the original titled person rather
+than the company. Existing unique full-person surname/landlord-alias cases still
+pass. Two paths account for 250 tests rather than the reviewer's single added
+case/249. No raw model calls were required to establish this engine correction.
+
+PRs #6/#10/#24 are closed as superseded, not merged. Their branch heads are
+retained, and both historical heads are ancestors in the preserved local Git
+history. The browser-published integration has equivalent/newer source, not
+identical historical commit ancestry. All extant files from those PRs are present.
+The filename architecture/index.html is a deletion in #10 itself, not missing
+unique work. No branch deletion, reset, force push or main merge occurred.
+
+
+Release: current Cloud Billing showed no linked account immediately before
+Hosting-only deployment; official no-billing Hosting quota behavior was rechecked.
+Deployed entry /assets/index-DXRiOaHG.js, SHA-256
+024ae9f14a048f0bea4572458ec1d10c8af609fd15b16347c9aa0d7b3be60e96.
+Hosted DOM loads that entry and Mask contract. No hosted model call was made.
+The batch-token helper is retained to avoid unnecessary shared API removal; the
+production isolated-clause transport uses only clausePlaceholders as approved.
+
+Retained lease diagnostic was inspected without submitting again: its request log
+is empty after page reloads, so the older raw response bodies cannot be recovered.
+No claim is made about the exact rejected wording. Added a manual fixed selection
+for c2/c4/c7, selected before masking/approval, for one bounded follow-up after
+publication. No automatic request, logging of rejected output or validator
+relaxation was introduced. The engine-owner fix does not itself resolve the
+separate explanation-quality gate.
+
+
+### Next bounded lease check under current clause-local validation
+
+- [ ] Reconfirm no-billing/model pricing prerequisites before inference.
+- [ ] Prepare and inspect only c2/c4/c7 with genuine engine masking/approval.
+- [ ] Send one explicitly approved batch; no full-sample loop or retries.
+- [ ] Record source, failures and local restoration without weakening validation.
+- [ ] Publish the observed result and preserve broader acceptance limits.
