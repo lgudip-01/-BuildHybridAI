@@ -28,9 +28,18 @@ export const ANALYSIS_REVIEW_RULES = 'Review from a neutral perspective when the
   'If a revision depends on the represented party or an unagreed commercial choice, leave redline empty and ask a neutral question about that choice. ' +
   'Do not present a clause-level omission as an established omission from the entire agreement.';
 
-export const GROUNDING_POLICY_VERSION = 'explanation-grounding-v2';
+export const GROUNDING_POLICY_VERSION = 'explanation-grounding-v3';
 export const EXPLANATION_GROUNDING_RULES = 'Ground explanations in what the supplied clause actually says. ' +
   'Separate express wording from possible consequences and information missing from this excerpt. ' +
+  'Recognize express timing thresholds even when the source does not name them as a grace period. ' +
+  'Do not describe a late-payment grace period as absent or unspecified when the clause states how many days late trigger a fee. ' +
+  'State that threshold accurately; ask only about genuine remaining uncertainties such as payment method or exceptions. ' +
+  'Do not call an expressly stated geographic scope undefined just because a narrower scope might be preferable; ask about narrowing it instead. ' +
+  'At-will or at-any-time termination wording alone does not establish that notice requirements are waived. ' +
+  'If no notice wording is supplied, say the excerpt does not specify a notice procedure and ask about other provisions. ' +
+  'Describe the actual liability cap, basis and express exceptions. A list of imagined additional carve-outs is not evidence of ambiguity; put desired changes in questions only. ' +
+  'A signature or acceptance block identifies intended signatories and capacities; its text alone does not prove signing, execution, authority or binding effect. ' +
+  'Do not describe an unsigned form as executed. Preserve conditions such as ownership transferring only upon payment in full; state the payment condition without inferring the pre-payment owner or the legal effect of work-made-for-hire status. Ask about interim rights if unspecified. ' +
   'Use indemnity or indemnification wording in the explanation only when the supplied clause expressly uses that wording. ' +
   'Otherwise omit that topic from the explanation entirely, including speculative or negative statements about it. ' +
   'A premises description, repair reporting duty or waiver alone does not establish an indemnity. Ask about missing provisions in questions instead. ' +
@@ -189,36 +198,53 @@ export function validateSourceQuotedGuaranteeReview(analysis: Analysis, expected
   }
 }
 
-export const LEASE_TERM_REVIEW_FORMAT_VERSION = 'source-quoted-lease-term-v1';
-export const LEASE_TERM_REVIEW_QUESTIONS = [
-  'Do these start and end dates match the intended lease term?',
-  'What early-termination or renewal provisions appear elsewhere in the lease?',
-] as const;
-
-/** Only the simple masked start/end-date form; conditions and other duties stay free-form.
- * This is visibly application-authored review guidance, not model legal reasoning.
- */
-export function sourceQuotedLeaseTermReview(source: CleanText): string | undefined {
-  if (source.length > 1500 || !/^(?:\d+\.\s*)?Term\.\s+The lease starts on \[DATE_\d+\] and ends on \[DATE_\d+\]\.\s*$/.test(source)) return;
-  return `Source-based lease-term review. The supplied clause states:\n${source}\n\n` +
-    'Confirm the intended start and end dates. Review early-termination and renewal provisions elsewhere in the lease; ' +
-    'this excerpt alone does not establish them. The risk rating is a preliminary review priority, not approval of the lease.';
-}
-
-export function validateSourceQuotedLeaseTermReview(analysis: Analysis, expected: string): void {
-  if (analysis.explanation !== expected || analysis.redline !== '' ||
-      analysis.questions.some(question => !(LEASE_TERM_REVIEW_QUESTIONS as readonly string[]).includes(question))) {
-    const error = new AnalysisValidationError('invalid_response');
-    error.message = 'The model did not return the required source-based lease-term review format.';
-    throw error;
-  }
-}
-
 /** Narrow lexical guards for observed overclaims, not entailment verification.
  * Questions may ask about unknown terms; they do not establish facts in an explanation.
  * Call after validateAnalysis, so unsupported output cannot hide bad JSON/tokens.
  */
 export function validateExplanationGrounding(analysis: Analysis, source: CleanText): void {
+  // Preserve both source phrases without adjudicating their legal interaction.
+  // Work-for-hire plus a payment condition does not alone prove an interim owner.
+  const conditionalWorkForHire = /\bwork (?:made )?for hire\b/i.test(source) && /\bupon payment in full\b/i.test(source);
+  const assertsInterimCreatorOwnership = /\b(?:rights?|ownership|work product)\b[^.!?\n]{0,120}\b(?:remain|retain|belong)\w*\b[^.!?\n]{0,80}\b(?:creator|contractor)\b[^.!?\n]{0,50}\b(?:until|before)\b/i.test(analysis.explanation);
+  if (conditionalWorkForHire && assertsInterimCreatorOwnership) {
+    const error = new AnalysisValidationError('invalid_response');
+    error.message = 'The explanation inferred pre-payment ownership not established by this excerpt. Review the source wording.';
+    throw error;
+  }
+  // A short signature form is not evidence that the document was executed.
+  // This detects observed assertion forms only; it is not signature verification.
+  const signatureForm = /(?:^|\n)(?:By:|For\s+\[|Landlord:|Tenant:|Borrower:|Guarantor:|Accepted:)/i.test(source) &&
+    !/[.!?]/.test(source) && !/\b(?:signed|executed|verified)\b/i.test(source);
+  if (signatureForm && /\b(?:establish(?:es|ing) (?:the )?execution|show(?:s|ing)? execution|execution by|executed by|executing through|executes the agreement|(?:has|have) been (?:signed|executed))\b/i.test(analysis.explanation)) {
+    const error = new AnalysisValidationError('invalid_response');
+    error.message = 'The explanation treated a signature block as proof of execution. Review the signing status.';
+    throw error;
+  }
+  // Observed scope/notice overclaims only; these are conservative lexical
+  // checks, not a general geographic or employment-law entailment checker.
+  if (/\bwithin (?:the )?United States\b/i.test(source) &&
+      /\bgeographic(?:al)? (?:scope|area)[^.!?\n]{0,100}\b(?:undefined|unspecified|not defined)\b/i.test(analysis.explanation)) {
+    const error = new AnalysisValidationError('invalid_response');
+    error.message = 'The explanation overlooked the stated geographic scope. Review the source wording.';
+    throw error;
+  }
+  if (!/\bnotice\b/i.test(source) && /\bwithout\s+(?:(?:cause\s+or|any)\s+)?(?:advance\s+)?notice(?:\s+requirements?)?\b|\bno\s+(?:advance\s+)?notice\s+(?:is\s+)?(?:required|necessary)\b/i.test(analysis.explanation)) {
+    const error = new AnalysisValidationError('invalid_response');
+    error.message = 'The explanation inferred a waived notice requirement without source wording. Review the source.';
+    throw error;
+  }
+  // Narrow triage for the observed contradiction, not interpretation of whether
+  // the timing is legally a grace period. Numeric amounts/unrelated deadlines
+  // are not timing evidence. Questions remain separate from factual assertions.
+  const explicitLateTiming = /\bmore than \d+ days? late (?:incurs?|triggers?|results? in) (?:a |an |the )?late fee\b/i.test(source) &&
+    !/\b(?:no|not|never|unless|except)\b/i.test(source);
+  const missingGracePeriod = /\b(?:no|lacks?|missing|unspecified|does not (?:specify|state|provide))\s+(?:(?:a|any|the)\s+)?grace period\b|\bgrace period\s+(?:is|remains)\s+(?:not (?:specified|stated)|unspecified|missing|absent)\b/i.test(analysis.explanation);
+  if (explicitLateTiming && missingGracePeriod) {
+    const error = new AnalysisValidationError('invalid_response');
+    error.message = 'The explanation overlooked an explicit late-payment timing threshold. Review the source wording.';
+    throw error;
+  }
   // A waiver alone does not establish an indemnity. Conservatively withhold
   // explanations using that legal label without express source wording, even
   // when the model hedges it as a possibility. This can withhold valid nuanced
