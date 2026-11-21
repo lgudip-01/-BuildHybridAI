@@ -843,3 +843,44 @@ This replaces the earlier assumption that completing the held-clause focused
 checks would establish full-lease readiness. Later sample/hosted acceptance and
 import/native/chat/polish gates remain pending. No main merge, paid service or
 deployment occurred in this increment.
+
+
+## User-requested improvement from 6/10 to 10/10 — November 20
+
+The user explicitly requested 10/10. This increment replaces the previous
+focused-before-full sequence with a single new full-lease check after a concrete
+prompt correction and passing automated checks. It does not repeat unchanged
+requests or relax a failed acceptance requirement.
+
+- [x] Verify current refs, PR discussion, clean starting tree and source equality.
+- [x] Reproduce v1 prompt retention on both providers and flag states: four new
+  regressions fail before correction.
+- [x] Retire v1 prompts via versioned source-first defaults while retaining remote
+  false flags, approved free-tier model, schema and runtime guards.
+- [x] Synchronize local Remote Config templates; document source defaults until
+  v2 is published/activated. No server configuration publication performed.
+- [x] Pass 178 web tests, core typecheck, production build and nine Firebase checks.
+- [x] Recheck current no-billing project and standard model pricing before send.
+- [x] Reload manually, inspect a fresh full masked lease and record requests
+  before approving exactly one new batch.
+- [x] Observe cloud 10/10, no failures; inspect all restored content. All drafts
+  empty; identities, amounts, contacts and timing correctly restored.
+- [x] Record rent grace-period phrasing as a quality caveat, not perfect reasoning.
+- [x] Publish code/evidence and verify fetched tree equality: application, local
+  templates and release evidence match 559820d, excluding this tracker update.
+- [x] Deploy Hosting-only on the verified no-billing target and inspect live entry:
+  /assets/index-dQaypz2E.js. No hosted inference in this smoke check.
+
+The earlier 6/10 failure remains historical evidence. This closes the narrow
+full-lease runtime-validation target for this run; it does not close broader
+Gate A. Next: remaining fixed samples and complete hosted review, with the rent
+wording caveat retained for general content-quality refinement. No import/native/
+chat/polish gate is advanced by this result.
+
+
+Publication checkpoint for v2: no working changes were discarded, and the
+upstream report-only main update remains untouched. The tracked source/evidence
+tree matches fetched 559820d except this tracker completion. The old failed-run
+checkboxes above are historical; the user's newer 10/10 request and v2 sequence
+supersede their planned focused/publish-before-full ordering. Broader Gate A
+remains open. No additional model send followed the successful full-lease run.
