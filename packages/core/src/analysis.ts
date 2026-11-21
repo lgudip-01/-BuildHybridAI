@@ -178,6 +178,31 @@ export function validateSourceQuotedGuaranteeReview(analysis: Analysis, expected
   }
 }
 
+export const LEASE_TERM_REVIEW_FORMAT_VERSION = 'source-quoted-lease-term-v1';
+export const LEASE_TERM_REVIEW_QUESTIONS = [
+  'Do these start and end dates match the intended lease term?',
+  'What early-termination or renewal provisions appear elsewhere in the lease?',
+] as const;
+
+/** Only the simple masked start/end-date form; conditions and other duties stay free-form.
+ * This is visibly application-authored review guidance, not model legal reasoning.
+ */
+export function sourceQuotedLeaseTermReview(source: CleanText): string | undefined {
+  if (source.length > 1500 || !/^(?:\d+\.\s*)?Term\.\s+The lease starts on \[DATE_\d+\] and ends on \[DATE_\d+\]\.\s*$/.test(source)) return;
+  return `Source-based lease-term review. The supplied clause states:\n${source}\n\n` +
+    'Confirm the intended start and end dates. Review early-termination and renewal provisions elsewhere in the lease; ' +
+    'this excerpt alone does not establish them. The risk rating is a preliminary review priority, not approval of the lease.';
+}
+
+export function validateSourceQuotedLeaseTermReview(analysis: Analysis, expected: string): void {
+  if (analysis.explanation !== expected || analysis.redline !== '' ||
+      analysis.questions.some(question => !(LEASE_TERM_REVIEW_QUESTIONS as readonly string[]).includes(question))) {
+    const error = new AnalysisValidationError('invalid_response');
+    error.message = 'The model did not return the required source-based lease-term review format.';
+    throw error;
+  }
+}
+
 /** Narrow lexical guards for observed overclaims, not entailment verification.
  * Questions may ask about unknown terms; they do not establish facts in an explanation.
  * Call after validateAnalysis, so unsupported output cannot hide bad JSON/tokens.
