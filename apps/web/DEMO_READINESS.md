@@ -385,3 +385,52 @@ Stop an existing task-owned 5173 server first. Open localhost:5173, and manually
 reload after every source/config change before masking/reviewing a new version.
 Use normal `dev` for hot-reload development. Diagnostics remain out of production.
 Preparation errors reveal only fixed categories, never raw spans or SDK replies.
+
+
+## November 20 full-lease acceptance after bounded term correction
+
+One fresh full public lease was masked through the genuine on-device engine,
+reviewed, then explicitly approved once on the local acceptance server (HMR off).
+The preview contained ten clauses, separate landlord/two-tenant identities,
+masked dates/address/amounts/contacts and needsReview false. Fixture values did
+not survive the diagnostic's local checks. The exact approved batch was used.
+Current Cloud Billing showed no linked billing account before inference; official
+Gemini Developer API pricing still lists standard gemini-3.5-flash-lite input and
+output as free. No plan, provider, model, API or payment configuration changed.
+
+Result: SAMPLE_PARTIAL, cloud 6/10; no model_error failures. Configuration source
+remote, clause-analysis-v1, commercial-review-v3, explanation-grounding-v2 and
+source-quoted-lease-term-v1. No automatic or manual repeat of this batch occurred.
+
+| Clause | Observed result | Content review |
+| --- | --- | --- |
+| c1 title | Validated, low | Recognizes a header without operative obligations; empty draft. |
+| c2 parties | Validated, medium | Correct landlord and both distinct tenants/date restored; joint/several liability asked as unknown in this excerpt; empty draft. |
+| c3 premises | Withheld | invalid_response: indemnity wording absent from the source clause. No accepted review. |
+| c4 term | Validated, low | Clearly labeled source-based date quotation, both dates restored, two fixed neutral questions and empty draft. |
+| c5 rent | Withheld | Same fixed indemnity-guard reason. The rent/grace-period review did not pass this run. |
+| c6 deposit | Validated, low | Written deposit amount and 21-day return period restored/preserved; itemization, custody and interest asked as questions; empty draft. |
+| c7 maintenance | Validated, medium | Landlord name, phone/email restored; reporting time/method and repair costs treated as unknown; empty draft. |
+| c8 pets | Withheld | Same fixed indemnity-guard reason. No accepted review. |
+| c9 law | Withheld | Same fixed indemnity-guard reason. No accepted review. |
+| c10 signatures | Validated, low | Correct landlord and both tenant identities restored; asks about separate operative terms; empty draft. |
+
+Inspected the diagnostic tab in DevTools after the run: its request table was
+empty (recording showed the perform-a-request prompt). Closed DevTools without
+reloading or resending. The four rejected raw response bodies are unavailable. The
+fixed validator category proves prohibited wording was present, but does not
+establish whether each explanation asserted or negated it. Do not assume all
+four matched the earlier c4 negated-checklist response. Accepted content was
+inspected locally against the public fixture; validation alone is not a legal
+accuracy certification.
+
+Full-lease acceptance FAILED and Gate A remains open. Earlier focused passes do
+not override these failures. No rejection was relaxed, invalid response replaced,
+new fallback format added, hosted inference performed or deployment needed.
+The default cloud prompt contains a generic risk-topic list while app-owned
+grounding instructions require absent indemnity topics to be omitted. Checklist
+echoing is a plausible prompt-design concern, not a verified explanation of
+these four individual replies. Next: define a general source-grounded prompt correction using the available
+masked c4 checklist replay and current rejection evidence, with
+replay tests, preserving the strict validator; do not add a template per sample
+clause or repeat full batches just to obtain a pass.
