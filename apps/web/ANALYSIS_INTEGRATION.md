@@ -159,3 +159,28 @@ is never silently replaced. Other wording, added duties/qualifiers or unmasked
 dates stay on the normal guarded path. This bounded format does not verify date
 chronology, legal meaning, the full agreement, or the correctness of a risk rating.
 Native adapters need equivalent schema/validation wiring before claiming support.
+
+
+## Source-first analysis policy v2
+
+The generic risk-topic checklist in v1 could be echoed even when a clause did
+not establish those topics. v2 asks for the clause's actual function, operative
+duties/conditions, supported concerns and material questions. It explicitly
+forbids narrating a risk checklist, including negative claims about absent risks.
+It applies to every contract clause; no new sample-specific template was added.
+The existing bounded date/guarantee formats and all runtime guards remain intact.
+
+The version change intentionally retires v1 Remote Config prompts instead of
+appending contradictory instructions. The current application defaults are used
+for a v1 payload, with independently read false kill switches retained. The
+diagnostic truthfully reports defaults / clause-analysis-v2. Remote settings
+are not modified by this migration. Local paste-ready/template files now match
+v2; remote verification will fail honestly until v2 is published and activated.
+
+Four new configuration/provider regressions failed before correction and pass
+afterward. They cover true/false flags through retirement and preservation of
+a source-supported high-risk indemnity on cloud/device. Existing negated
+checklist and unsupported-indemnity responses still fail, with no retries or
+silent rewriting. 178 web tests, core typecheck, production build and nine
+Firebase checks pass. One post-correction full public lease completed cloud
+10/10; see DEMO_READINESS.md for actual content observations and limits.

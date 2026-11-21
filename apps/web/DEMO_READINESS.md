@@ -434,3 +434,58 @@ these four individual replies. Next: define a general source-grounded prompt cor
 masked c4 checklist replay and current rejection evidence, with
 replay tests, preserving the strict validator; do not add a template per sample
 clause or repeat full batches just to obtain a pass.
+
+
+## November 20 source-first v2: full public lease 10/10
+
+Changed the prompt policy after the recorded 6/10 failure, not the validator.
+Removed the generic risk-category checklist from shared defaults, introduced
+source-first prompts for cloud/device, and advanced ANALYSIS_VERSION to
+clause-analysis-v2. A cached/published v1 prompt is now retired to application
+defaults; independently read false kill switches remain effective. Local Remote
+Config templates are synchronized but no server prompt publication occurred.
+
+178 web tests, core typecheck/production build and nine Firebase checks pass.
+Four new migration/provider regressions failed before correction, then passed.
+Source-supported high-risk indemnity still passes cloud/device; unsupported
+indemnity and the captured negated checklist remain rejected. No approval,
+projection, token validation, source pinning or runtime grounding guard changed.
+
+Verified actual Cloud Billing again: no linked account. Official standard
+gemini-3.5-flash-lite input/output pricing remains free. Reused the running
+localhost-only acceptance server; a redundant start attempt found port 5173
+already occupied by that process and did not replace it. Reloaded manually to
+load changed code, selected the full public lease, and inspected the fresh
+engine-masked preview: all ten clauses, distinct party identities and all fixture
+values masked, needsReview false. Opened DevTools Network recording BEFORE
+approval, with no throttling. One newly approved post-correction batch returned:
+SAMPLE_ROUNDTRIP_COMPLETED, actual cloud, 10/10, failed empty. No retry loop.
+Config source defaults, version clause-analysis-v2; commercial-review-v3,
+explanation-grounding-v2 and source-quoted-lease-term-v1 remain reported.
+
+| Clause | Review observation |
+| --- | --- |
+| c1 title | Header only; low, no invented operative terms. |
+| c2 parties | Correct landlord/two separate tenants and date restored; asks for contact context. |
+| c3 premises | Complete apartment address restored; distinguishes this excerpt from surrounding lease provisions. |
+| c4 term | Existing labeled source-based format, correct dates and two neutral allowed questions. |
+| c5 rent | Correct $2,150 rent, $75 fee, first-of-month due date and more-than-five-days-late trigger. Wording caveat below. |
+| c6 deposit | Correct written amount and 21-day return; deduction/itemization/custody raised as questions. |
+| c7 maintenance | Correct landlord phone/email restored; repair response/cost details treated as unspecified in supplied wording. |
+| c8 pets | Written-consent restriction recognized; asks about exceptions/request procedure without inventing them. |
+| c9 law | Oregon retained; no absent-party tokens introduced; venue raised as a question. |
+| c10 signatures | Correct landlord and two tenant identities; joint/several status remains a question. |
+
+All ten redlines are empty. No unsupported indemnity narrative appears. The
+rent explanation acknowledges the five-day trigger but also says it lacks grace
+period details, then asks whether that trigger serves as the grace period. That
+wording is imprecise and remains a content-quality caveat; it is not a wrong
+amount/day count or a replacement draft. This checkpoint is 10/10 runtime
+validation with inspected content, not a certification that every sentence is
+ideal, legally accurate, or complete. Risk ratings are preliminary.
+
+This is one local cloud run on the fixed public lease, not all-six-sample,
+general offline, native-device or hosted-content acceptance. The date clause
+still uses the previously labeled application-authored format; the new general
+policy did not add further fixed answers. Earlier 6/10 and inconclusive runs
+remain in this ledger. Gate A still requires remaining samples and hosted review.

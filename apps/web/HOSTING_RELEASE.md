@@ -220,3 +220,27 @@ Focused local acceptance passed c2/c7 in a 2/3 batch and c4 in a separate stable
 1/1 run. An intervening page-reset attempt is explicitly inconclusive. These are
 not a full-lease or all-six-sample pass; see DEMO_READINESS.md for limitations.
 PR #28 remains draft and main is unchanged.
+
+
+### November 20 source-first v2 release
+
+Actual Cloud Billing showed no linked account immediately before deployment.
+Official Hosting no-billing storage/transfer hard-stop behavior was rechecked;
+no upgrade, billing linkage or paid service was enabled. Official CLI Hosting-only
+deploy completed successfully with its predeploy production typecheck/build.
+
+Hosted DOM loads `/assets/index-dQaypz2E.js`, matching the tested local entry.
+SHA-256: `60bb68091ee71dac9bfad0f175c5cd06e3d47939f460c6d516a5a724b240e55b`.
+Mask contract and Nano-ready status are visible. Development diagnostics are
+excluded from dist. No hosted inference was performed for this smoke check.
+
+178 web tests, core typecheck/build and nine Firebase setup checks pass. One
+new approved full public lease run in local Chrome returned actual cloud 10/10,
+no failures, under source-first clause-analysis-v2 defaults. Existing validation
+was retained. See DEMO_READINESS.md for content review and the rent-wording caveat.
+
+Cached/server v1 Remote Config prompts are intentionally retired to the app's
+v2 defaults; independent false flags remain effective. The client reports
+defaults honestly. Local v2 templates are published with source, but no server
+Remote Config setting was changed and no v2 remote-verification pass is claimed.
+This release remains in draft PR #28; main is not merged.

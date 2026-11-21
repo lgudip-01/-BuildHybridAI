@@ -1,7 +1,12 @@
 # Analysis Remote Config
 
-Implemented on cloud/approved-analysis (PR #10). The project owner reports that all three parameters are published. A live client
-verification is still pending; no Firebase Console settings were changed by this code contribution.
+Current policy: `clause-analysis-v2` (November 20). The v1 generic risk-topic
+checklist is retired. Published/cached v1 payloads use current application
+default prompts; independently read remote false flags still disable analysis
+or device fallback. The client reports source defaults in that case. It must
+not claim v2 remote verification until a v2 payload is actually published and
+activated. This correction updates local templates only; it does not publish
+server settings. Earlier remote verification applies to the older v1 payload.
 
 ## Publish in Firebase Console
 
@@ -40,8 +45,8 @@ immediate server-side quota/security switch.
 
 A config payload must have exactly version, model, cloudPrompt and devicePrompt.
 The version must match the application's ANALYSIS_VERSION. Model identifiers
-must match the Gemini name format; this does not establish model availability
-or pricing. Prompts must contain 20–12000 characters. Invalid payloads use local
+must equal the currently verified gemini-3.5-flash-lite; other model choices
+require a fresh no-cost pricing/account review. Prompts must contain 20–12000 characters. Invalid payloads use local
 settings. An explicit false feature flag remains false even if the payload is
 invalid. Unknown/malformed flag strings use enabled local defaults.
 
