@@ -244,3 +244,28 @@ v2 defaults; independent false flags remain effective. The client reports
 defaults honestly. Local v2 templates are published with source, but no server
 Remote Config setting was changed and no v2 remote-verification pass is claimed.
 This release remains in draft PR #28; main is not merged.
+
+
+### November 21 content safeguards and general lease path
+
+The official CLI completed a Hosting-only deployment after fresh Cloud Billing
+verification showed no linked account. Official no-billing Hosting quota behavior
+was rechecked. No billing/plan/API/provider change or Remote Config publication
+occurred. Predeploy typecheck/build passed.
+
+Hosted DOM loads `/assets/index-olgSHuM7.js`, matching the local production entry.
+SHA-256: `899eac41a7a724c52249d2f136f2d43560b0d794cfea51a08e993372d439c1aa`.
+Mask contract is present; development diagnostics are excluded from dist. No
+hosted model call was made for this asset/UI smoke check.
+
+189 web tests, 94 engine tests, nine Firebase checks, typecheck and build pass.
+The exact-sentence lease template is removed after Likhil's review; one newly
+approved full public lease returned cloud 10/10 on the general path. Stronger
+v3 content checks withhold observed timing/geography/notice, interim-ownership
+and unsigned-form execution overclaims; they are narrow lexical triage, not
+entailment verification. See DEMO_READINESS.md for the 49/50 broader full-sample
+observations, focused follow-ups and unresolved signature/content caveats.
+
+PR #28 was merged by the maintainer at 65152ce. This follow-up is isolated on
+codex/content-quality-v3 based on that main; original local history and the
+newer upstream evaluation report are preserved. Broader Gate A remains open.

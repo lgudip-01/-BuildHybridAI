@@ -145,7 +145,7 @@ No production approval code or bypass is supplied by this test harness. Until
 the actual engine lands and this gate passes, Step 1 remains blocked.
 
 
-## Bounded simple lease-term format
+## Retired bounded simple lease-term format (historical)
 
 `sourceQuotedLeaseTermReview()` recognizes only the simple masked date form
 `2. Term. The lease starts on [DATE_1] and ends on [DATE_2].` (number optional).
@@ -184,3 +184,54 @@ checklist and unsupported-indemnity responses still fail, with no retries or
 silent rewriting. 178 web tests, core typecheck, production build and nine
 Firebase checks pass. One post-correction full public lease completed cloud
 10/10; see DEMO_READINESS.md for actual content observations and limits.
+
+
+## Grounding policy v3: observed timing, geography and notice overclaims
+
+v3 strengthens prompts and adds narrow lexical withholding for observed errors:
+- An explicit more-than-N-days-late fee trigger cannot be narrated as a missing
+  or unspecified grace period. Questions about waiver/procedure remain allowed.
+- A restriction expressly within the United States cannot be narrated as an
+  undefined geographic scope/area. Questions about narrowing it remain allowed.
+- Without source notice wording, an explanation cannot assert termination
+  without notice requirements. At-will/at-any-time alone is insufficient.
+
+These guards are conservative triage, not general geographic/employment/legal
+entailment verification. They can reject nuanced wording; they do not prove all
+accepted claims. They run after JSON/token validation and before restoration,
+without rewriting replies or triggering retries. Sources with express notice
+wording and accurate timing/geography explanations remain accepted. Local
+Remote Config templates are synchronized; server settings remain unchanged.
+
+188 web tests and core/web typechecks pass. Focused rent/deposit cloud acceptance
+passed 2/2 with correct values/timing. A full offer run returned 11/11 validation
+but revealed geography/notice overclaims; after correction, one fresh focused
+c6/c8 run passed 2/2 with accurate nationwide scope and notice left unspecified.
+Those separate observations must not be called a new full-offer run under the
+final guards. The manual diagnostic adds a fixed c6/c8 selection before masking.
+
+
+The v3 follow-up also withholds observed assertions of execution from short
+unsigned signature forms (By/For/party signature lines), without trying to verify
+real signatures. It does not handle every wording or signature format. Prompt
+constraints distinguish intended signatories from proof of signing and keep
+imagined liability carve-outs out of factual explanations. Counterexample tests
+permit missing-notice descriptions and do not infer a fee trigger from negated
+wording. 195 web tests and core/web typechecks pass after these corrections.
+
+
+## November 21: general lease analysis after engine-owner review
+
+Likhil approved/merged #28 and requested retirement of the exact-sentence lease
+helper. The helper, questions, format version, enum schemas and equality validator
+are removed. All lease wording now uses the general v2 path with the normal
+JSON/token/grounding checks. Diagnostics report leaseTermReview general-v2.
+Four lease formulations on both providers verify ordinary analysis rather than
+a prescribed answer; the exact sample case failed before removal. The older
+negated-checklist replay and unknown-token tests remain rejected.
+
+189 web tests, 94 engine tests, core typecheck, production build and nine Firebase
+setup checks pass. The lower web count reflects retirement of nine tests for the
+removed template, replaced by general-path coverage within two provider tests.
+The existing labeled guarantee format is unchanged; it is not evidence of
+unconstrained offline reasoning.

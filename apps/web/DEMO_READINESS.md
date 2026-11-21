@@ -489,3 +489,126 @@ general offline, native-device or hosted-content acceptance. The date clause
 still uses the previously labeled application-authored format; the new general
 policy did not add further fixed answers. Earlier 6/10 and inconclusive runs
 remain in this ledger. Gate A still requires remaining samples and hosted review.
+
+
+## November 20 broader acceptance and stronger content review
+
+Zero-cost prerequisites were rechecked before this increment: actual project
+Cloud Billing has no linked account, and standard gemini-3.5-flash-lite input/
+output remain free in current official pricing. No billing/model/provider change.
+Each fixed public selection was prepared before genuine engine masking, reviewed
+and approved once; all actual inference sources below are cloud. No batch retry.
+
+- Rent/deposit c5/c6: 2/2 after timing instruction/guard correction. Correct
+  independent values, five-day trigger and 21-day deposit period; no false
+  missing-grace-period claim. A waiver/procedure question remains broad.
+- Full offer: 11/11 runtime validation, but content FAILED on geography/notice
+  overclaims. The United States scope was called undefined and at-will wording
+  was treated as waiving notice. After new instructions/guards, a fresh c6/c8
+  focused run passed 2/2: nationwide scope stated; notice left unspecified in
+  the excerpt. This is not a new full-offer run under the final guards.
+- Full freelance: 10/10 runtime validation, all drafts empty. Parties, address,
+  amounts, payment-routing fields and tax identifier restore locally; hourly
+  fee/project cap, payment-in-full ownership condition and 14-day mutual notice
+  are retained. Content caveats: ownership exposure for the creator is loosely
+  reasoned, and c9/c10 signature forms are described as executed. No proof of
+  actual signing is supplied by these blocks. c6 remains engine-typed payment
+  (known upstream classification miss), while its ownership text reaches the
+  analyzer unchanged.
+- Full promissory note: 9/9, all drafts empty. Principal/interest/installments,
+  penalty-free prepayment and ten-day acceleration threshold are preserved.
+  Mr. Mendoza remains a distinct masked identity, not silently assigned to a
+  same-surname person. Guarantee uses the existing labeled source-based format.
+- Full SaaS: 9/10. c7 is withheld for unsupported indemnity wording. Other
+  responses preserve EUR annual fee, 1% monthly interest, 99.9% availability,
+  5% credit, 36/12-month terms and mutual 90-day nonrenewal notice. Signature
+  block c10 again overclaims established execution.
+
+DevTools was recording before the SaaS send. Inspected the existing c7 Response
+without another request; its first sentence correctly states the mutual
+fees-paid/12-month cap and confidentiality exception. It then says other potential
+exclusions such as indemnification, IP infringement and gross negligence are
+unspecified and therefore ambiguous. This hypothetical carve-out list is not
+supplied by the clause and remains rejected. Only the necessary masked review
+wording is used for regression; provider metadata/opaque signatures are excluded.
+
+The offer preview had needsReview true due to conservative masking of a document
+title and Employee ID label; it was inspected and explicitly approved without
+clearing that flag. All other listed previews had needsReview false. All fixture
+values passed the local surviving-value check; no original/vault map was sent.
+These results distinguish runtime validation from content quality. They do not
+close the broader Gate A or establish general reliability/legal accuracy.
+
+Full NDA completed cloud 10/10 with empty drafts. It recognizes mutual purpose/
+permitted disclosure, flags the three-year survival language naming only one
+party, preserves notice recipients/contact methods, and retains Delaware law.
+The narrower public-information exclusion and asymmetric damages acknowledgment
+are discussed without inventing replacement terms. Signature forms again use
+execution wording, and some questions repeat information or use a loose role
+label (e.g. disclosing party when asking about the other party's survival period).
+Those are content caveats, not evidence of perfect reasoning.
+
+Across the five full samples in this increment, runtime validation was 49/50
+(offer 11/11, freelance 10/10, note 9/9, SaaS 9/10, NDA 10/10). These runs used
+the observed prompt/guard states during the increment; later targeted corrections
+must be reported separately, not converted into a new unified full-matrix pass.
+All accepted drafts were empty. The earlier lease 10/10 used the preceding
+policy and is not a fresh sixth sample run under the final safeguards.
+
+Further correction adds source instructions that hypothetical additional
+carve-outs are questions, not proof of ambiguity, and signature forms identify
+intended signatories rather than prove execution. A narrow signature-form guard
+withholds the observed execution assertions. Counterexamples ensure the newly
+added timing/notice checks do not treat negated fee wording as an affirmative
+trigger or a missing-notice statement as a waiver. Those controls failed before
+correction; original unsupported-indemnity/guarantee validation remains intact.
+195 web tests and core/web typechecks pass. No invalid response is rewritten,
+and no guard causes automatic retries.
+
+
+### November 21 continuation: interim ownership and signature status
+
+The first focused freelance c6/c9/c10 run returned 3/3 validation but still had
+content overclaims: creator ownership until payment and showing execution in a
+signature-form sentence followed by a disclaimer. Further tests reproduced the
+problem on both providers. The prompt now states only the payment condition and
+asks about unspecified interim rights; lexical checks withhold observed interim-
+creator-ownership and signature-execution assertion forms.
+
+A fresh post-correction focused run returned 2/3: ownership correctly leaves
+interim rights unspecified; c10 is withheld for asserted execution. c9 still says
+its execution by before a disclaimer, so that additional observed phrase is
+being covered too. This is NOT a content-quality pass and must not be called a
+3/3 success under the final guard. No unchanged rerun was made.
+
+Likhil approved and merged PR #28 into main at 65152ce while this work was local.
+His new review asks to retire the exact-sentence lease-term template in favor of
+the general v2 path. Follow-up work will preserve this working tree in a separate
+branch based on that main, retaining the newer upstream evaluation report.
+
+
+### November 21 general lease path: 10/10 without the template
+
+After retiring sourceQuotedLeaseTermReview and its special schema/equality
+validator, one newly masked/reviewed full public lease completed actual cloud
+10/10, failed empty, all redlines empty. Diagnostics report defaults,
+clause-analysis-v2, explanation-grounding-v3 and leaseTermReview general-v2.
+The date clause now naturally states the actual start/end dates and asks about
+renewal/early termination; no application-authored lease explanation is supplied.
+Both distinct tenants, landlord/contact alias, apartment, independent amounts
+and dates restore correctly. Rent correctly preserves the more-than-five-days
+late threshold. No unsupported indemnity explanation or asserted execution
+appears. Some questions remain broad/redundant; this is not a legal certificate.
+
+SaaS focused c7/c10 after the final prompt/guard changes returned cloud 2/2.
+The cap's mutual fees-paid/12-month basis and confidentiality exception are
+correct, and signatories are identified as intended, without proof of execution.
+The cap explanation still discusses hypothetical IP/security carve-outs, so
+content refinement remains open even though runtime validation passes.
+
+The final freelance focused result stays 2/3, with a signature claim withheld;
+an additional accepted phrase its execution by is now rejected by a replay.
+No further freelance send was made to chase a green count. This work strengthens
+withholding and removes a demo-specific lease path; it does not close the broader
+Gate A. Next is uniform final-policy sample/content review and complete hosted
+acceptance, preserving these limitations and every earlier result.
