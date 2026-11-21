@@ -22,6 +22,7 @@ vi.mock('./analysisConfig', async original => {
 import { WebBridge } from './webBridge';
 import { AnalysisUnavailableError } from './cloudAnalyzer';
 import { loadAnalysisConfig, DEFAULT_ANALYSIS_CONFIG, DEFAULT_PAYLOAD, parseAnalysisConfig } from './analysisConfig';
+import { sourceQuotedLeaseTermReview, validateSourceQuotedLeaseTermReview, LEASE_TERM_REVIEW_QUESTIONS } from '@clause-guard/core/analysis';
 
 const ai = {} as AI;
 function batch(count = 2, source?: string): ApprovedBatch {
@@ -44,6 +45,55 @@ beforeEach(() => {
 });
 
 describe('approved web analysis', () => {
+  it.each(['in_cloud', 'on_device'])('constrains a simple lease term on %s without a risk checklist or retry', async source => {
+    const clause = '2. Term. The lease starts on [DATE_2] and ends on [DATE_3].' as CleanText;
+    const explanation = sourceQuotedLeaseTermReview(clause)!;
+    const data: Analysis = {clauseId:'c1', risk:'low', explanation, redline:'', questions:[...LEASE_TERM_REVIEW_QUESTIONS]};
+    mocks.generate.mockResolvedValueOnce(output('c1', source, data));
+    const result = await new WebBridge(ai).analyze(batch(1, clause));
+    expect(result.results).toEqual([data]);
+    expect(result.failed).toEqual([]);
+    expect(mocks.generate).toHaveBeenCalledTimes(1);
+    const params = mocks.factory.mock.calls[0]![1];
+    for (const schema of [JSON.parse(JSON.stringify(params.inCloudParams.generationConfig.responseSchema)),
+      params.onDeviceParams.promptOptions.responseConstraint]) {
+      expect(schema.properties.explanation.enum).toEqual([explanation]);
+      expect(schema.properties.questions.items.enum).toEqual([...LEASE_TERM_REVIEW_QUESTIONS]);
+    }
+    expect(params.inCloudParams.systemInstruction).toContain('simple lease term');
+  });
+  it.each(['in_cloud', 'on_device'])('keeps the observed negated indemnity checklist rejected on %s', async source => {
+    const clause = '2. Term. The lease starts on [DATE_2] and ends on [DATE_3].';
+    const explanation = 'This clause establishes the start and end dates for the lease using the explicit dates [DATE_2] and [DATE_3]. No major red flags such as asymmetric obligations, broad indemnity, uncapped liability, IP assignment, restrictive covenants, unilateral termination, or unclear payment duties are present in this excerpt.';
+    mocks.generate.mockResolvedValueOnce(output('c1', source, {clauseId:'c1', risk:'low', explanation, redline:'', questions:[]}));
+    const result = await new WebBridge(ai).analyze(batch(1, clause));
+    expect(result.results).toEqual([]);
+    expect(result.failed).toMatchObject([{reason:'invalid_response', detail:expect.stringContaining('indemnity')}]);
+    expect(mocks.generate).toHaveBeenCalledTimes(1);
+  });
+  it.each(['in_cloud', 'on_device'])('rejects ignored lease-term format on %s rather than replacing the reply', async source => {
+    const clause = '2. Term. The lease starts on [DATE_2] and ends on [DATE_3].';
+    mocks.generate.mockResolvedValueOnce(output('c1', source, {clauseId:'c1', risk:'low', explanation:'The lease has dates.', redline:'', questions:[]}));
+    const result = await new WebBridge(ai).analyze(batch(1, clause));
+    expect(result.results).toEqual([]);
+    expect(result.failed).toMatchObject([{reason:'invalid_response', detail:expect.stringContaining('lease-term review format')}]);
+    expect(mocks.generate).toHaveBeenCalledTimes(1);
+  });
+  it.each(['in_cloud', 'on_device'])('validates term tokens before applying the bounded format on %s', async source => {
+    const clause = '2. Term. The lease starts on [DATE_2] and ends on [DATE_3].';
+    mocks.generate.mockResolvedValueOnce(output('c1', source, {clauseId:'c1', risk:'low', explanation:'Check [DATE_99].', redline:'', questions:[]}));
+    expect((await new WebBridge(ai).analyze(batch(1, clause))).failed).toMatchObject([{reason:'unknown_placeholder'}]);
+    expect(mocks.generate).toHaveBeenCalledTimes(1);
+  });
+  it.each(['in_cloud', 'on_device'])('keeps qualified lease terms on the normal guarded path on %s', async source => {
+    const clause = '2. Term. The lease starts on [DATE_2] and ends on [DATE_3] unless renewed.';
+    const data: Analysis = {clauseId:'c1', risk:'medium', explanation:'Review the renewal conditions.', redline:'', questions:[]};
+    mocks.generate.mockResolvedValueOnce(output('c1', source, data));
+    expect((await new WebBridge(ai).analyze(batch(1, clause))).results).toEqual([data]);
+    const params = mocks.factory.mock.calls[0]![1];
+    expect(JSON.parse(JSON.stringify(params.inCloudParams.generationConfig.responseSchema)).properties.explanation.enum).toBeUndefined();
+    expect(params.onDeviceParams.promptOptions.responseConstraint.properties.explanation.enum).toBeUndefined();
+  });
   it.each(['in_cloud', 'on_device'])('generates an accepted source-quoted guarantee review on %s in one call', async source => {
     const clause = "5. Guarantor. [PARTY_A], of [ADDRESS_1], guarantees all of Borrower's obligations under this Note." as CleanText;
     const explanation = sourceQuotedGuaranteeReview(clause)!;
@@ -339,6 +389,26 @@ describe('guarantee explanation grounding', () => {
 it('allows a source-supported indemnity and neutral questions without inventing it in the explanation', () => {
   expect(() => validateExplanationGrounding({...answer(), explanation:'[PARTY_A] owes an indemnity.'}, '[PARTY_A] indemnifies the Landlord.' as CleanText)).not.toThrow();
   expect(() => validateExplanationGrounding({...answer(), explanation:'The Tenants waive claims.', questions:['Is any separate indemnity intended?']}, 'The Tenants waive claims.' as CleanText)).not.toThrow();
+});
+
+describe('bounded lease-term scope', () => {
+  const source = '2. Term. The lease starts on [DATE_2] and ends on [DATE_3].' as CleanText;
+  it.each([
+    '2. Term. The lease starts on [DATE_2] and ends on [DATE_3] unless renewed.',
+    '2. Term. The lease starts on [DATE_2] and ends on [DATE_3]. Rent may increase.',
+    'The lease starts on [DATE_2] and ends on [DATE_3].',
+    '2. Term. The lease starts on July 1 and ends on July 31.',
+    '2. Term. The lease starts on [date_2] and ends on [date_3].',
+  ])('does not replace analysis of other or qualified wording: %s', text => {
+    expect(sourceQuotedLeaseTermReview(text as CleanText)).toBeUndefined();
+  });
+  it.each([
+    {redline:'Move the end date.'},
+    {questions:['Is the guarantee unlimited?']},
+  ])('rejects changed drafts or unrelated questions in the bounded format %#', changed => {
+    const data: Analysis = {clauseId:'c1', risk:'low', explanation:sourceQuotedLeaseTermReview(source)!, redline:'', questions:[]};
+    expect(() => validateSourceQuotedLeaseTermReview({...data, ...changed}, data.explanation)).toThrow();
+  });
 });
 
 describe('bounded source-quoted guarantee format', () => {

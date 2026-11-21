@@ -4,7 +4,7 @@ import { approve, assertApproved } from '@clause-guard/privacy-engine/approval';
 import { unmask } from '@clause-guard/privacy-engine/unmask';
 import { initAI } from './firebase';
 import { WebBridge } from './webBridge';
-import { ANALYSIS_REVIEW_RULES, REDLINE_POLICY_VERSION, EXPLANATION_GROUNDING_RULES, GROUNDING_POLICY_VERSION, GUARANTEE_REVIEW_FORMAT_VERSION } from '@clause-guard/core/analysis';
+import { ANALYSIS_REVIEW_RULES, REDLINE_POLICY_VERSION, EXPLANATION_GROUNDING_RULES, GROUNDING_POLICY_VERSION, GUARANTEE_REVIEW_FORMAT_VERSION, LEASE_TERM_REVIEW_FORMAT_VERSION } from '@clause-guard/core/analysis';
 import { loadAnalysisConfig } from './analysisConfig';
 
 const texts = import.meta.glob('../../../samples/*.txt', { query: '?raw', import: 'default' });
@@ -16,6 +16,16 @@ let bridge: WebBridge | undefined;
 const getBridge = () => bridge ??= new WebBridge(initAI());
 function devOnly() {
   if (!import.meta.env.DEV) throw new Error('Sample checks are development-only.');
+}
+
+/** Fixed diagnostic categories only; never carries a rejected span or model reply. */
+export class SamplePreparationError extends Error {
+  constructor(readonly reason: 'local_privacy_block' | 'fixture_value_remaining') {
+    super(reason === 'local_privacy_block'
+      ? 'The sample failed the local privacy checks. No analysis request was made.'
+      : 'A required fixture value survived masking. No analysis request was made.');
+    this.name = 'SamplePreparationError';
+  }
 }
 
 /** Fixed public repository fixtures only. This stage never calls analyze(). */
@@ -36,10 +46,10 @@ export async function prepareSample(sample: string, clauseIds?: readonly string[
   const clauses = clauseIds ? allClauses.filter(clause => clauseIds.includes(clause.id)) : allClauses;
   // Reusing this id ensures preparing the same sample invalidates its earlier preview.
   const result = await mask(`public-sample-${sample}`, clauses, getBridge());
-  if (!result.ok) throw new Error('The sample failed the local leak check. No analysis request was made.');
+  if (!result.ok) throw new SamplePreparationError('local_privacy_block');
   const masked = result.clauses.map(c => c.text).join('\n').toLowerCase();
   if (expected.mask.some(value => masked.includes(value.toLowerCase()))) {
-    throw new Error('A required fixture value survived masking. No analysis request was made. Report the sample name for local-engine investigation.');
+    throw new SamplePreparationError('fixture_value_remaining');
   }
   const preview = Object.freeze({ sample, result });
   prepared.add(preview);
@@ -73,6 +83,7 @@ export async function runSample(preview: Preview, options: { reviewed: true }) {
       redlinePolicy: REDLINE_POLICY_VERSION,
       groundingPolicy: GROUNDING_POLICY_VERSION,
       guaranteeReviewFormat: GUARANTEE_REVIEW_FORMAT_VERSION,
+      leaseTermReviewFormat: LEASE_TERM_REVIEW_FORMAT_VERSION,
       cloudGroundingRulesPresent: config.cloudPrompt.includes(EXPLANATION_GROUNDING_RULES),
       deviceGroundingRulesPresent: config.devicePrompt.includes(EXPLANATION_GROUNDING_RULES),
     },

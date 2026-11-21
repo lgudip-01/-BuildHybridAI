@@ -49,3 +49,9 @@ it('still rejects an old preview after preparing a new selection', async () => {
   await expect(runSample(old, { reviewed: true })).rejects.toMatchObject({ code: 'stale' });
   expect(sdk.generate).not.toHaveBeenCalled();
 });
+
+it('prepares the held lease selection before any analysis call', async () => {
+  const preview = await prepareSample('lease', ['c2', 'c4', 'c7']);
+  expect(preview.result.clauses.map(clause => clause.id)).toEqual(['c2', 'c4', 'c7']);
+  expect(sdk.generate).not.toHaveBeenCalled();
+});
