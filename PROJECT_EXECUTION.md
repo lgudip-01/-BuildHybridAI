@@ -884,3 +884,79 @@ tree matches fetched 559820d except this tracker completion. The old failed-run
 checkboxes above are historical; the user's newer 10/10 request and v2 sequence
 supersede their planned focused/publish-before-full ordering. Broader Gate A
 remains open. No additional model send followed the successful full-lease run.
+
+
+## Near-perfect quality bar and remaining sample increment — November 20
+
+User preference is saved in AGENTS.md. Aim for near-perfect execution while
+keeping evidence candid; no single-run or schema result proves legal accuracy.
+
+- [x] Check refs/current PR #28 discussion and document-work issue; no new teammate
+  runtime change or ownership reply supersedes this increment.
+- [x] Reproduce rent timing contradiction; five regressions fail before correction.
+- [x] Strengthen shared prompt/guard; focused rent/deposit cloud 2/2, timing and
+  independent values correct. A residual waiver/procedure question remains.
+- [x] Full offer cloud 11/11 validation; inspect content and identify geographic
+  scope/advance-notice overclaims instead of treating count as quality success.
+- [x] Add geography/notice withholding and source instructions; focused c6/c8
+  cloud 2/2 after correction. Preserve full-run flaws as historical evidence.
+- [x] Pass 188 web tests and core/web typechecks; synchronization of local prompt
+  templates does not publish server settings.
+- [x] Inspect full freelance, note, SaaS and NDA previews/results one sample at a
+  time; no automatic retries. Record 49/50 runtime validation across all five
+  remaining full samples, with content caveats and focused checks separately.
+- [ ] Publish tested code/evidence, verify fetched tree and deploy no-billing
+  Hosting-only release.
+
+The full offer preview set needsReview true because document-title/Employee ID
+label text was conservatively masked. It was explicitly inspected and approved;
+no flag was cleared or engine batch reconstructed. Employee ID and its value
+restored correctly, although the model's question about that relationship is
+redundant. No unmasked fixture value was sent.
+
+
+## November 21: follow-up on merged main and sample-template retirement
+
+Likhil merged #28 into main at 65152ce after approving the v2 migration/privacy
+invariants. He asked for the exact-sentence date template to be retired in favor
+of the general v2 path. GitHub connector writes still return 403; authorized
+publication uses the signed-in browser.
+
+Reconciliation preserved all local work: 13d29d1 remains on the original local
+branch; new codex/content-quality-v3 starts from origin/main and applies only
+that work as 8b1fc7d. The newer upstream evaluation PDF is unchanged. No reset,
+force push, branch deletion or agent-performed main merge occurred.
+
+- [x] Preserve the working tree before changing branches and retain old history.
+- [x] Retire the exact-sentence lease helper/schema/validator; preserve general
+  runtime validation and the prior unsupported-checklist regression.
+- [x] Verify four lease formulations on cloud/device mocked providers; the exact
+  sample case failed before retirement. 189 web + 94 engine tests and nine
+  Firebase checks pass; typecheck/build pass.
+- [x] Record first freelance 3/3 focused validation as a content failure; subsequent
+  2/3 leaves a signature claim withheld and one additional assertion now covered.
+  Do not label signature quality resolved or these runs a unified full pass.
+- [x] Record SaaS focused 2/2 under final general path: mutual cap and intended
+  signatories restored; broader hypothetical carve-out commentary is a caveat.
+- [x] Verify one full lease run without the special template: cloud 10/10,
+  failed empty, general-v2 reported and correct local restoration.
+- [x] Publish separate draft follow-up PR #31; application/templates/release
+  evidence match fetched 872f39e, excluding final root instruction/tracker files.
+  Verify the complete tree after the root upload.
+- [x] Deploy verified no-billing Hosting-only build and record current live asset:
+  /assets/index-olgSHuM7.js; no hosted model call in this smoke check.
+
+User preference: close completed task tabs; old project tabs were closed, leaving
+active diagnostic, publication, billing and live-check pages only. Close those
+too after their evidence is recorded. Unrelated user tabs stay untouched.
+
+Broader Gate A remains open for a uniform final-policy full matrix/content
+review and complete hosted acceptance. This increment records actual failures
+and withholds known overclaims rather than weakening guards to force green.
+
+
+Publication: https://github.com/lgudip-01/-BuildHybridAI/pull/31 is draft. The
+application, local templates and release evidence match fetched 872f39e before
+this final root update. No final-policy full-matrix or hosted-inference success
+is claimed. Close the publication tab after final verification; other completed
+project tabs have been closed as requested.
