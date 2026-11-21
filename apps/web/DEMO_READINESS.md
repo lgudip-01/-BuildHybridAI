@@ -357,3 +357,31 @@ drafts, with two replay regressions that failed before the fix. Existing neutral
 questions/results remain; no extra cloud call was used for this post-processing.
 156 web tests, core typecheck and production build pass. Full samples are manual
 local diagnostic selections, not an automatic six-sample retry loop.
+
+
+### November 20 — held clauses and bounded lease-term format
+
+One explicitly reviewed c2/c4/c7 batch returned cloud 2/3: correct distinct tenant
+restoration in c2, correct landlord/contact restoration in c7, c4 withheld. The
+recorded c4 response recited a negated generic risk checklist containing indemnity;
+the strict source-wording guard remains and still rejects that captured wording.
+
+Only the simple masked lease start/end-date form now selects
+`source-quoted-lease-term-v1`: an explicitly application-authored explanation
+quotes the clause, frames missing context and preliminary risk, with empty draft
+and two allowed neutral questions. Cloud/device schemas constrain it, runtime
+checks reject deviations, and other/qualified clauses stay on the normal path.
+This is not unrestricted AI legal reasoning or a general hallucination fix.
+
+Initial post-change c4 attempt: page reloaded before observation, inconclusive.
+After fixing the test environment with localhost-only acceptance mode (no HMR),
+one fresh preview/approval returned **cloud 1/1**, exact local date restoration,
+empty redline, two allowed questions and no failures. No automatic retry loop.
+174 web tests and typecheck/build pass. Focused passes across separate runs do not
+constitute a new full-lease or full six-sample quality pass.
+
+For stable local acceptance: `npm run dev:acceptance --workspace @clause-guard/web`.
+Stop an existing task-owned 5173 server first. Open localhost:5173, and manually
+reload after every source/config change before masking/reviewing a new version.
+Use normal `dev` for hot-reload development. Diagnostics remain out of production.
+Preparation errors reveal only fixed categories, never raw spans or SDK replies.

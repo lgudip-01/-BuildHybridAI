@@ -195,3 +195,28 @@ no plan/API/provider/payment change occurred. Hosted DOM loads
 `024ae9f14a048f0bea4572458ec1d10c8af609fd15b16347c9aa0d7b3be60e96`.
 Mask contract is present; no hosted inference was run for this smoke check.
 This review fix does not close the full sample explanation-quality gate.
+
+
+### November 20 bounded lease-term correction
+
+Immediately before the Hosting-only deployment, Cloud Billing showed no linked
+account. The previously verified Spark hard-stop quota path remains unchanged;
+no payment, plan, API or provider settings changed. The deployment process has
+finished; the hosted DOM now loads the tested production entry:
+`/assets/index-vEwRZA-q.js`. Local SHA-256:
+`700f0028f0d2bd32dac184c346682836ef18c305b4cae34ddd71e70f13f70032`.
+Mask contract and Nano-ready status are visible. This is an asset/UI smoke check;
+no hosted inference was performed. The CLI completion output was unavailable
+after its process ended, so no release ID or timestamp is asserted here.
+
+94 engine tests, 174 web tests, nine Firebase setup checks, core typecheck and
+production typecheck/build pass. Development diagnostics remain excluded from
+production. The exact simple masked lease-date form now uses the visibly
+application-authored source-quoted-lease-term-v1 format; provider noncompliance
+is rejected. General qualified/extended terms stay on the existing guarded path.
+The unrelated indemnity-checklist rejection remains covered and unchanged.
+
+Focused local acceptance passed c2/c7 in a 2/3 batch and c4 in a separate stable
+1/1 run. An intervening page-reset attempt is explicitly inconclusive. These are
+not a full-lease or all-six-sample pass; see DEMO_READINESS.md for limitations.
+PR #28 remains draft and main is unchanged.

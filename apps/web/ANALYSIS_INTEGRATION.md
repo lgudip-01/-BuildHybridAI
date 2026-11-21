@@ -143,3 +143,19 @@ verify Gemini/Nano execution, real cloud responses, or an outgoing-request audit
 
 No production approval code or bypass is supplied by this test harness. Until
 the actual engine lands and this gate passes, Step 1 remains blocked.
+
+
+## Bounded simple lease-term format
+
+`sourceQuotedLeaseTermReview()` recognizes only the simple masked date form
+`2. Term. The lease starts on [DATE_1] and ends on [DATE_2].` (number optional).
+It returns a visibly labeled application-authored source quote and review context.
+`LEASE_TERM_REVIEW_QUESTIONS` supplies the two allowed questions;
+`validateSourceQuotedLeaseTermReview()` requires that explanation, empty draft,
+and only those questions. The model still selects a preliminary risk priority.
+The web cloud/device schemas enforce the explanation/question choices; normal
+JSON/token/grounding checks run first. Provider noncompliance fails visibly and
+is never silently replaced. Other wording, added duties/qualifiers or unmasked
+dates stay on the normal guarded path. This bounded format does not verify date
+chronology, legal meaning, the full agreement, or the correctness of a risk rating.
+Native adapters need equivalent schema/validation wiring before claiming support.
