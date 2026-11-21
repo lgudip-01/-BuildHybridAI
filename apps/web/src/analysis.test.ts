@@ -45,6 +45,23 @@ beforeEach(() => {
 });
 
 describe('approved web analysis', () => {
+  it.each(['in_cloud', 'on_device'])('preserves an express high-risk indemnity on %s under the retired-prompt migration', async source => {
+    const old = {...DEFAULT_PAYLOAD, version:'clause-analysis-v1',
+      cloudPrompt:'Flag asymmetric obligations, broad indemnity, uncapped liability and unclear payment duties.',
+      devicePrompt:'Offline scan: flag broad indemnity, uncapped liability and payment ambiguity.'};
+    vi.mocked(loadAnalysisConfig).mockResolvedValue(parseAnalysisConfig(JSON.stringify(old)));
+    const clause = "[PARTY_A] shall indemnify [PARTY_B] for all claims, including claims caused solely by [PARTY_B]'s negligence.";
+    const data: Analysis = {clauseId:'c1', risk:'high', explanation:"The indemnity expressly includes claims caused solely by [PARTY_B]'s negligence, shifting that exposure to [PARTY_A].", redline:'', questions:['Is coverage of the other party’s sole negligence intended?']};
+    mocks.generate.mockResolvedValueOnce(output('c1', source, data));
+    const result = await new WebBridge(ai).analyze(batch(1, clause));
+    expect(result.results).toEqual([data]);
+    expect(result.failed).toEqual([]);
+    expect(mocks.generate).toHaveBeenCalledTimes(1);
+    const params = mocks.factory.mock.calls[0]![1];
+    expect(params.inCloudParams.systemInstruction).not.toContain(old.cloudPrompt);
+    expect(params.onDeviceParams.createOptions.initialPrompts[0].content[0].value).not.toContain(old.devicePrompt);
+  });
+
   it.each(['in_cloud', 'on_device'])('constrains a simple lease term on %s without a risk checklist or retry', async source => {
     const clause = '2. Term. The lease starts on [DATE_2] and ends on [DATE_3].' as CleanText;
     const explanation = sourceQuotedLeaseTermReview(clause)!;
