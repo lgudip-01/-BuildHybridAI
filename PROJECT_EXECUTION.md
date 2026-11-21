@@ -731,8 +731,75 @@ separate explanation-quality gate.
 
 ### Next bounded lease check under current clause-local validation
 
-- [ ] Reconfirm no-billing/model pricing prerequisites before inference.
-- [ ] Prepare and inspect only c2/c4/c7 with genuine engine masking/approval.
-- [ ] Send one explicitly approved batch; no full-sample loop or retries.
-- [ ] Record source, failures and local restoration without weakening validation.
-- [ ] Publish the observed result and preserve broader acceptance limits.
+- [x] Reconfirm no-billing/model pricing prerequisites before inference.
+- [x] Prepare and inspect only c2/c4/c7 with genuine engine masking/approval.
+- [x] Send one explicitly approved three-clause batch: 2/3 cloud validated.
+- [x] Record source, failures and local restoration without weakening validation.
+- [x] Publish the observed result and preserve broader acceptance limits.
+
+
+## Held lease outcome and bounded term correction — November 20
+
+The first preparation attempt was unavailable while the local Vite server was
+stopped; it did not establish a privacy-engine or fixture leak. Restarted the
+local server. Pattern-only preparation of c2/c4/c7 passes with no analysis call.
+Development diagnostics now show only fixed preparation categories (local privacy
+block, surviving fixture value, or preparation unavailable); no raw spans, SDK
+errors, response bodies or credentials are exposed by this error path.
+
+One reviewed c2/c4/c7 cloud batch completed 2/3. c2 restores both tenants once,
+keeps multiple tenants, asks neutrally about joint/several obligations and the
+represented party. c7 restores the landlord name/contact details and describes
+repair reporting without inventing cost allocations. c4 remains withheld.
+
+Inspected c4's recorded HTTP response without another send. Its explanation
+negated a generic list of red flags, including broad indemnity, on a clause that
+only states two dates. The existing guard conservatively rejects this unrelated
+checklist even when negated. Captured only the masked explanation as a regression;
+provider metadata and opaque signatures are not persisted in source/docs.
+
+Correction checklist:
+- [x] Reproduce the observed response and keep its strict rejection covered.
+- [x] Constrain only the exact simple masked lease start/end-date form, <=1500
+  characters; qualified, extended, unmasked-date and other wording stays normal.
+- [x] Use visibly application-authored source-quoted explanation and fixed neutral
+  questions in both cloud/device schemas; require empty draft and exact format.
+- [x] Reject provider noncompliance instead of replacing an invalid reply.
+- [x] Preserve token/grounding/approval/source checks and guarantee format behavior.
+- [x] Pass 174 web tests, core typecheck and production build.
+- [x] Confirm a stable single-clause live check: cloud 1/1, dates restored, empty
+  draft, two allowed questions and source-quoted-lease-term-v1 reported.
+- [x] Publish source/evidence and verify fetched source equality: all application
+  and release-evidence paths match fetched 11b147c; tracker updated afterward.
+- [x] Deploy/verify the tested correction on the no-billing demo: hosted DOM
+  loads /assets/index-vEwRZA-q.js; no hosted inference in this smoke check.
+
+The initial post-correction c4 attempt reloaded before any result could be
+observed. It is inconclusive, not a pass or confirmed provider failure. Vite logs
+show websocket connection loss and reconnection. Added dev:acceptance, which
+binds only 127.0.0.1:5173 with strictPort and hmr false; resolved configuration
+verified. Normal dev/production behavior stays unchanged. Acceptance runs must
+reload manually after source/config changes. After this concrete environment
+correction, one newly previewed/approved c4 check completed cloud 1/1. No automatic
+retry or broad batch loop was introduced. The inconclusive attempt remains in
+the evidence ledger rather than being erased.
+
+The returned explanation quotes February 1, 2026 and January 31, 2027 after local
+restoration, clearly says Source-based lease-term review, asks about intended
+dates and early termination/renewal elsewhere, and frames risk as preliminary.
+This is a constrained review template, not free-form legal reasoning. c2/c7 and
+c4 passed focused checks across separate runs; there is no new full-lease pass.
+The broader six-sample and complete hosted-content acceptance gate stays open.
+
+
+Final publication check: application and evidence paths match the fetched
+11b147c branch, excluding this final tracker update. No working changes were
+discarded. A concurrent upstream update moved main to d7052f3 via merged PR #29;
+its only changed file is reports/privacy-engine-evals.pdf. PR #28 does not change
+that report, so its newer upstream version must remain intact on eventual merge.
+No runtime code changed upstream and no main merge was performed locally.
+The report describes engine masking/type/restoration tests, not complete cloud
+review acceptance; its freelance c6 clause-type miss remains recorded upstream.
+Next increment: one reviewed full-lease run under the current guards, classify
+any failures without retry loops, then remaining sample and hosted acceptance.
+Gate A stays open; later import/native/chat/polish gates remain pending.
