@@ -4,7 +4,7 @@ import { approve, assertApproved } from '@clause-guard/privacy-engine/approval';
 import { unmask } from '@clause-guard/privacy-engine/unmask';
 import { initAI } from './firebase';
 import { WebBridge } from './webBridge';
-import { ANALYSIS_REVIEW_RULES, REDLINE_POLICY_VERSION, EXPLANATION_GROUNDING_RULES, GROUNDING_POLICY_VERSION, GUARANTEE_REVIEW_FORMAT_VERSION, LEASE_TERM_REVIEW_FORMAT_VERSION } from '@clause-guard/core/analysis';
+import { ANALYSIS_REVIEW_RULES, REDLINE_POLICY_VERSION, EXPLANATION_GROUNDING_RULES, GROUNDING_POLICY_VERSION, GUARANTEE_REVIEW_FORMAT_VERSION } from '@clause-guard/core/analysis';
 import { loadAnalysisConfig } from './analysisConfig';
 
 const texts = import.meta.glob('../../../samples/*.txt', { query: '?raw', import: 'default' });
@@ -83,7 +83,7 @@ export async function runSample(preview: Preview, options: { reviewed: true }) {
       redlinePolicy: REDLINE_POLICY_VERSION,
       groundingPolicy: GROUNDING_POLICY_VERSION,
       guaranteeReviewFormat: GUARANTEE_REVIEW_FORMAT_VERSION,
-      leaseTermReviewFormat: LEASE_TERM_REVIEW_FORMAT_VERSION,
+      leaseTermReview: 'general-v2',
       cloudGroundingRulesPresent: config.cloudPrompt.includes(EXPLANATION_GROUNDING_RULES),
       deviceGroundingRulesPresent: config.devicePrompt.includes(EXPLANATION_GROUNDING_RULES),
     },

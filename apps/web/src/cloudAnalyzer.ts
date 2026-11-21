@@ -3,7 +3,6 @@ import {
   clausePlaceholders, ANALYSIS_JSON_SCHEMA, AnalysisValidationError,
   validateAnalysis, validateBatch, applyCommercialRedlineGuard, validateExplanationGrounding,
   sourceQuotedGuaranteeReview, validateSourceQuotedGuaranteeReview, GUARANTEE_REVIEW_QUESTIONS,
-  sourceQuotedLeaseTermReview, validateSourceQuotedLeaseTermReview, LEASE_TERM_REVIEW_QUESTIONS,
 } from '@clause-guard/core/analysis';
 import { getGenerativeModel, InferenceMode, InferenceSource, Schema, type AI } from 'firebase/ai';
 import { assertApproved } from './approvalGuard';
@@ -53,10 +52,9 @@ export async function analyzeApproved(ai: AI, batch: ApprovedBatch): Promise<Ana
       : ranOn === 'device' ? InferenceMode.ONLY_ON_DEVICE : config.deviceFallbackEnabled ? InferenceMode.PREFER_IN_CLOUD : InferenceMode.ONLY_IN_CLOUD;
     try {
       const signal = AbortSignal.timeout(60_000);
-      const leaseTermReview = sourceQuotedLeaseTermReview(clause.text);
-      const review = leaseTermReview ?? sourceQuotedGuaranteeReview(clause.text);
-      const reviewQuestions = leaseTermReview ? LEASE_TERM_REVIEW_QUESTIONS : GUARANTEE_REVIEW_QUESTIONS;
-      const reviewInstruction = review ? `\nFor this ${leaseTermReview ? 'simple lease term' : 'unspecified guarantee'}, use the exact source-based explanation in the response schema. ` +
+      const review = sourceQuotedGuaranteeReview(clause.text);
+      const reviewQuestions = GUARANTEE_REVIEW_QUESTIONS;
+      const reviewInstruction = review ? '\nFor this unspecified guarantee, use the exact source-based explanation in the response schema. ' +
         'Do not add commentary to it. Return an empty redline and select relevant questions from the schema. ' +
         'Choose risk as a preliminary review priority only; do not assume unstated guarantee terms.' : '';
       const deviceSchema = review ? { ...ANALYSIS_JSON_SCHEMA, properties: { ...ANALYSIS_JSON_SCHEMA.properties,
@@ -103,8 +101,7 @@ export async function analyzeApproved(ai: AI, batch: ApprovedBatch): Promise<Ana
       // Reject the unsupported explanation/risk result rather than silently
       // rewriting its rationale or presenting it as a successful analysis.
       validateExplanationGrounding(validated, clause.text);
-      if (leaseTermReview) validateSourceQuotedLeaseTermReview(validated, leaseTermReview);
-      else if (review) validateSourceQuotedGuaranteeReview(validated, review);
+      if (review) validateSourceQuotedGuaranteeReview(validated, review);
       results.push(applyCommercialRedlineGuard(validated, clause.text));
     } catch (error) {
       // Stale approval must abort the entire batch, including when a model call rejected.

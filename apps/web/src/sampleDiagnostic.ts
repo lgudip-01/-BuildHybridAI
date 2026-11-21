@@ -7,7 +7,10 @@ const PRESETS = {
   leaseHeld: { sample:'lease', ids:['c2', 'c4', 'c7'] },
   leaseTerm: { sample:'lease', ids:['c4'] },
   offer: { sample:'offer-letter', ids:['c3', 'c4', 'c8'] },
+  offerReview: { sample:'offer-letter', ids:['c6', 'c8'] },
   freelance: { sample:'freelance', ids:['c9'] },
+  freelanceReview: { sample:'freelance', ids:['c6', 'c9', 'c10'] },
+  saasReview: { sample:'saas', ids:['c7', 'c10'] },
   guarantee: { sample:'promissory-note', ids:['c8'] },
   leaseFull: { sample:'lease', ids:undefined },
   offerFull: { sample:'offer-letter', ids:undefined },
@@ -30,9 +33,12 @@ export function mountSampleDiagnostic(root: HTMLElement): void {
       <option value="lease">Lease: premises and maintenance (c3, c7)</option>
       <option value="leaseRent">Lease: rent and deposit reference isolation (c5, c6)</option>
       <option value="leaseHeld">Lease: withheld preamble, term and maintenance (c2, c4, c7)</option>
-      <option value="leaseTerm">Lease: simple start/end-date review (c4)</option>
+      <option value="leaseTerm">Lease: general start/end-date review (c4)</option>
       <option value="offer">Offer: introduction, compensation and at-will (c3, c4, c8)</option>
+      <option value="offerReview">Offer: stated geography and mutual at-will review (c6, c8)</option>
       <option value="freelance">Freelance: company signature (c9)</option>
+      <option value="freelanceReview">Freelance: conditional ownership and signature forms (c6, c9, c10)</option>
+      <option value="saasReview">SaaS: mutual cap and signature form (c7, c10)</option>
       <option value="guarantee">Promissory note: source-quoted guarantee (c8)</option>
       <option value="leaseFull">Full public lease</option>
       <option value="offerFull">Full public offer letter</option>
