@@ -124,6 +124,9 @@ npm test
 
 In development. Submission due **Nov 30, 2026 at 2 PM PT**. See [HACKATHON.md](HACKATHON.md) for the rules and where each requirement stands.
 
+For local web setup, App Check registration, and synthetic cloud checks, see
+[Firebase web setup](apps/web/FIREBASE_SETUP.md).
+
 ## License
 
 [MIT](LICENSE)

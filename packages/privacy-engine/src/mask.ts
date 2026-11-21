@@ -1,7 +1,7 @@
 import type { AiBridge, Clause, ClauseType, MaskResult } from '@clause-guard/core/types';
 import { isCurrent, seal, startRun, type Run } from './approval';
 import { leakCheck } from './leakCheck';
-import { dedupeEntities, findOccurrences, normalize, resolveOverlaps, toEntity, type Candidate, type Entity } from './merge';
+import { dedupeEntities, findOccurrences, normalize, resolveOverlaps, separateCoordinatedNames, toEntity, type Candidate, type Entity } from './merge';
 import { readClause } from './onDevice';
 import { PlaceholderRegistry } from './placeholders';
 import { findDefinedTerms, findNames, findPatterns, type Span } from './regex';
@@ -47,7 +47,16 @@ export async function mask(docId: string, clauses: Clause[], bridge: AiBridge): 
   for (const term of clauses.flatMap((c) => findDefinedTerms(c.text))) {
     found.find((e) => normalize(e.value).startsWith(`${normalize(term)} `))?.variants.push(term);
   }
-  const entities = dedupeEntities(found);
+  const coordinated = separateCoordinatedNames(found);
+  if (coordinated.ambiguousOrganizations.length) {
+    return seal({ ok: false, docId, leaks: clauses.flatMap(clause =>
+      coordinated.ambiguousOrganizations.filter(value => findOccurrences(clause.text, value).length > 0)
+        .map(value => ({ clauseId: clause.id, snippet: value,
+          reason: 'Ambiguous organization and individual names. Clarify the named parties before analysis.' }))),
+    }, run);
+  }
+  needsReview ||= coordinated.needsReview;
+  const entities = dedupeEntities(coordinated.entities);
 
   const registry = new PlaceholderRegistry();
   const drafts = clauses.map((clause) => {
