@@ -803,3 +803,43 @@ review acceptance; its freelance c6 clause-type miss remains recorded upstream.
 Next increment: one reviewed full-lease run under the current guards, classify
 any failures without retry loops, then remaining sample and hosted acceptance.
 Gate A stays open; later import/native/chat/polish gates remain pending.
+
+
+## Full-lease acceptance increment — November 20
+
+Checklist for this bounded increment:
+- [x] Confirm clean working tree and published-source equality; refresh refs and
+  PR #28 comments. No newer review or runtime change supersedes this run.
+- [x] Start localhost-only dev:acceptance after the earlier server had stopped.
+- [x] Verify current project has no linked billing account and the configured
+  standard model's input/output pricing remains free.
+- [x] Mask and inspect all ten public lease clauses; no fixture values remain;
+  separate tenant identities and genuine engine-issued approval retained.
+- [x] Approve one full batch and inspect all accepted explanations/restorations.
+- [x] Record all failures without a retry, validator relaxation or fabricated
+  success. Result: cloud 6/10, all six accepted drafts empty.
+- [ ] Full lease accepted: c3/c5/c8/c9 remain withheld for indemnity wording not
+  established in their source clauses. Gate A stays open.
+- [x] Publish this evidence and verify fetched source equality: all application
+  and evidence paths match fetched 1b2bf07, excluding this tracker update.
+
+The accepted clauses are c1/c2/c4/c6/c7/c10. See DEMO_READINESS.md for per-clause
+content review and the limits of the fixed failure category. No new code or
+configuration changed, so no redundant model run, build or unit suite was used
+to relabel this evidence. The live production build remains index-vEwRZA-q.js.
+
+Next corrective increment checklist (before another acceptance send):
+- [x] Inspect retained request evidence without resending: DevTools request table
+  is empty after the run, so these four response bodies cannot be recovered.
+  Closed DevTools without reload/send; do not invent their exact wording.
+  Use the previously captured masked c4 checklist replay as available evidence.
+- [ ] Resolve the general prompt-policy conflict: prevent unrelated risk-list
+  narration while preserving source-supported risk detection and exact guards.
+- [ ] Add meaningful cloud/device replay coverage and run affected checks.
+- [ ] Recheck no-cost prerequisites, then choose one justified focused live check.
+- [ ] Publish correction/evidence before any subsequent full-lease acceptance.
+
+This replaces the earlier assumption that completing the held-clause focused
+checks would establish full-lease readiness. Later sample/hosted acceptance and
+import/native/chat/polish gates remain pending. No main merge, paid service or
+deployment occurred in this increment.
