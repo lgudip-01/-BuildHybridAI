@@ -17,13 +17,17 @@ public class ClauseGuardAIPlugin: CAPPlugin, CAPBridgedPlugin {
         CAPPluginMethod(name: "onDeviceStatus", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "downloadModel", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "onDevice", returnType: CAPPluginReturnPromise),
-        CAPPluginMethod(name: "analyze", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "analyzeClause", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "vaultKey", returnType: CAPPluginReturnPromise),
     ]
 
     public override func load() {
-        // TODO: install App Check first (debug provider in DEBUG, App Attest in release),
-        // then create the Firebase AI Logic instance for analyze().
+        #if canImport(FirebaseAILogic) && canImport(FoundationModels) && compiler(>=6.2.3)
+        // App Check (debug provider in DEBUG, App Attest in release), then Firebase. Needs GoogleService-Info.plist.
+        if !AnalysisSupport.configureFirebase() {
+            NSLog("ClauseGuardAI: GoogleService-Info.plist is missing; cloud analysis is unavailable.")
+        }
+        #endif
     }
 
     // MARK: - Vault key
@@ -120,13 +124,50 @@ public class ClauseGuardAIPlugin: CAPPlugin, CAPBridgedPlugin {
         call.reject("The on-device model isn't available.", "UNAVAILABLE")
     }
 
-    // MARK: - analyze (leak-checked text only)
+    // MARK: - analyzeClause (leak-checked text only)
 
-    @objc func analyze(_ call: CAPPluginCall) {
-        guard let clauses = call.getArray("clauses") else { return call.reject("clauses is required") }
-        _ = clauses
-        // TODO: PREFER_IN_CLOUD with prompts and schema from Remote Config.
-        // Resolve ["results": [...], "ranOn": "cloud" | "device"]. Input is leak-checked text only; never log it.
-        call.reject("analyze not implemented")
+    /// One masked clause through Firebase AI Logic. Cloud first, then on-device when allowed; once the batch has an
+    /// answer, JS pins the rest to that source. Approval, validation and name restoring all happen in JS.
+    /// The input is leak-checked text only; nothing here logs a prompt, an input or a model answer.
+    @objc func analyzeClause(_ call: CAPPluginCall) {
+        guard let cloudSystem = call.getString("cloudSystem"),
+              let deviceSystem = call.getString("deviceSystem"),
+              let input = call.getString("input"),
+              let schema = call.getObject("schema"),
+              let model = call.getString("model") else {
+            return call.reject("cloudSystem, deviceSystem, input, schema and model are required")
+        }
+        let pin = call.getString("pin")
+        let allowDevice = call.getBool("allowDeviceFallback") ?? true
+        let timeout = Double(call.getInt("timeoutMs") ?? 60_000) / 1000
+
+        let order: [String]
+        switch pin {
+        case "cloud": order = ["cloud"]
+        case "device": order = ["device"]
+        default: order = allowDevice ? ["cloud", "device"] : ["cloud"]
+        }
+
+        #if canImport(FirebaseAILogic) && canImport(FoundationModels) && compiler(>=6.2.3)
+        if #available(iOS 26.0, *) {
+            Task {
+                var failure = "model_error"
+                for source in order {
+                    do {
+                        let system = source == "cloud" ? cloudSystem : deviceSystem
+                        let text = try await AnalysisSupport.withDeadline(seconds: timeout) {
+                            try await AnalysisSupport.run(source: source, model: model, system: system, input: input, schema: schema)
+                        }
+                        return call.resolve(["text": text, "source": source])
+                    } catch {
+                        failure = String(describing: type(of: error)) // type name only: messages could echo contract text
+                    }
+                }
+                call.reject("The model request could not be completed (\(failure)).", "MODEL_ERROR")
+            }
+            return
+        }
+        #endif
+        call.reject("Analysis needs iOS 26 or later.", "UNAVAILABLE")
     }
 }
