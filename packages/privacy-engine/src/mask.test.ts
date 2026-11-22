@@ -272,6 +272,17 @@ describe('mask', () => {
     expect(result.needsReview).toBe(true);
   });
 
+  it('does not ask for review when the model only reports details the patterns also found', async () => {
+    const texts = ['Notices go to 77 Willow Lane, Springfield, IL 62704 or legal@quillfeather.io.'];
+    const result = await mask('doc-model-agrees', texts.map((text, index) => ({ id: `c${index + 1}`, index, text })), fakeBridge([
+      { text: '77 Willow Lane', kind: 'address', party: false },
+      { text: 'legal@quillfeather.io', kind: 'organization', party: false },
+    ]));
+    if (!result.ok) throw new Error(JSON.stringify(result.leaks));
+
+    expect(result.needsReview).toBe(false);
+  });
+
   it('labels each masked clause with the type the on-device model gives it, in one call per clause', async () => {
     const working = fakeBridge(model);
     const prompts: string[] = [];

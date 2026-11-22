@@ -36,7 +36,7 @@ export async function mask(docId: string, clauses: Clause[], bridge: AiBridge): 
   for (const clause of clauses) {
     const names = findNames(clause.text, true);
     found.push(...names.map(spanToEntity));
-    byRules.push(...names.map((s) => ` ${normalize(s.value)} `));
+    byRules.push(...[...names, ...findPatterns(clause.text)].map((s) => words(s.value)));
     if (!useModel) continue;
     try {
       const reading = await readClause(bridge, clause);
@@ -50,7 +50,7 @@ export async function mask(docId: string, clauses: Clause[], bridge: AiBridge): 
   }
   // A name only the model saw, such as "Globex" or "maria lopez", is of a kind the rules can't find.
   // It is masked, but the same kind elsewhere is masked only if the model saw it there too, so a person checks.
-  needsReview ||= byModel.some((e) => !byRules.some((r) => r.includes(` ${normalize(e.value)} `)));
+  needsReview ||= byModel.some((e) => !byRules.some((r) => r.includes(words(e.value))));
   // A defined short form, as in Northwind Analytics, Inc. ("Northwind"), is masked like the full name.
   for (const term of clauses.flatMap((c) => findDefinedTerms(c.text))) {
     found.find((e) => normalize(e.value).startsWith(`${normalize(term)} `))?.variants.push(term);
@@ -116,6 +116,11 @@ function saveVaultInOrder(run: Run, entries: Record<string, string>): Promise<vo
     if (vaultWrites.get(run.docId) === write) vaultWrites.delete(run.docId);
   }).catch(() => undefined);
   return write;
+}
+
+/** " 77 willow lane " for "77 Willow Lane,": lowercase words between spaces, so one value can be found inside another. */
+function words(value: string): string {
+  return ` ${value.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, ' ').trim()} `;
 }
 
 // A capitalized phrase shaped like "Jane Smith" also gets the person's last and first names as variants,
