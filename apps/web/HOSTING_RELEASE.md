@@ -295,3 +295,31 @@ extension DOM control works. A visible Chrome window was requested to unblock
 the isolated offline test and diagnose this pending masking step. Neither that
 check nor the final v5 full matrix is claimed complete. Keep PR #31 draft and
 Gate A open; do not advance import/native/chat/polish gates on this evidence.
+
+### November 22 resumed acceptance and draft-reference correction
+
+Recovered the earlier hosted preview with a degraded patterns-only/review warning
+after 185,806 ms. Explicit inspection/approval returned actual cloud 4/4 under
+grounding v5, with corrected contact scope/source-based printed-name wording,
+local restoration and edit clearing. Preserve the masking reliability limitation.
+
+Ordinary offline device inference exposed a date-only draft dropping the end date.
+The new commercial-review-v4 drafting check visibly withholds omitted source
+references without synthesizing prose or retrying. 238 web tests, core typecheck
+and production typecheck/build pass; prompts/schemas/grounding/model unchanged.
+
+Official Hosting-only CLI deploy completed after fresh no-billing and official
+hard-stop quota checks. Current hosted entry `/assets/index-Cr3HSrZw.js` matches
+local SHA-256 `a0829eeeab5a552c0eeb0c218260c8af839ecdf1e3a148d8b927656b9ca41bd3`.
+A fresh ordinary date-clause offline check passed actual device 1/1, correct
+restoration and visible interception of the incomplete draft. DevTools confirmed
+blocked cloud request/zero bytes; No throttling restored. This is a preliminary
+guarded review, not successful generated replacement wording. See DEMO_READINESS.md.
+No billing/payment/trial, API/provider/model or server Remote Config change.
+The current full sample matrix remains pending until separately observed.
+
+The subsequent frozen 3f096b6 matrix completed actual cloud 60/60 across all six
+samples under grounding v5/draft policy v4, all drafts empty. Methods were 50
+general, nine labeled signatory and one labeled guarantee. Content/restoration
+was inspected; broad/redundant questions remain limitations. See DEMO_READINESS.md
+for row-level evidence. This branch-based result does not close #30's main check.

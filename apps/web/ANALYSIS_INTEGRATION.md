@@ -263,3 +263,13 @@ lexical guards, not general entailment or question-quality verification.
 
 The diagnostic exposes requestedReviewMethods to distinguish general analysis
 from installed source-based formats without revealing originals or vault data.
+
+## Draft reference preservation (commercial-review-v4)
+
+After strict response validation, the local drafting check also withholds a
+nonempty replacement that omits any approved source reference. The preliminary
+review remains, with a visible application-authored explanation that the draft
+was withheld. This covers the observed ordinary offline date-only replacement
+which dropped the end-date reference. No replacement is synthesized and no extra
+model request occurs. All references being present is necessary, not proof that
+wording is complete or equivalent. Existing commercial-draft review still applies.

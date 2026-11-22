@@ -755,3 +755,80 @@ provider failure, successful review, or current-policy hosted content pass.
 Native Chrome reports no visible window. Supported extension APIs do not expose
 network emulation, so ordinary offline and uniform v5 matrix/content acceptance
 remain pending. The v4 60/60 matrix remains separate historical evidence.
+
+## November 22: recovered hosted result and ordinary offline check
+
+Native Chrome control works after the user exposed a visible window. The old
+mask completed in 185,806 ms with an explicit patterns-only/review warning;
+some per-clause model classification was present, but at least one local model
+read failed. The cause was not captured; do not attribute it to window visibility.
+All four fictional masked clauses and ten ledger values were inspected without
+clearing the warning. Actual no-billing state/current free model pricing were
+rechecked before approving this exact batch once.
+
+Hosted index-BkV4srSd.js returned cloud 4/4, all drafts empty. Contact wording
+correctly scoped phone communications, and the compound printed-name block used
+the visibly application-authored source quotation without asserting execution.
+Identities, account/contact details and amount restored locally. Editing the
+contract cleared preview, approval and results. This closes that hosted check;
+the long/degraded masking observation remains a reliability limitation.
+
+An ordinary one-clause lease-term preview then masked two dates on device in
+12,117 ms, leak check passed, and was inspected before approval. DevTools set
+ONLY this hosted tab Offline. Its actual cloud generateContent request failed
+net::ERR_INTERNET_DISCONNECTED, zero bytes transferred. The SDK confirmed device
+source and returned 1/1 validated with both dates correctly restored. Content
+FAILED: its replacement was DATE_1 alone, dropping DATE_2 and the whole clause.
+The factual explanation was correct; the chronology question cannot inspect
+the opaque dates. No source-based template was requested for this ordinary clause.
+No throttling was restored and verified immediately after the observation.
+
+Added redline policy commercial-review-v4: visibly withhold drafts omitting any
+approved source reference, retaining the validated preliminary explanation/risk/
+questions and adding a local drafting notice. Never synthesize replacement prose
+or retry. Two cloud/device replay tests failed before correction, then passed;
+an all-references-retained noncommercial rewrite remains allowed. Presence of
+references is necessary, not proof of complete/equivalent wording. Existing JSON,
+unknown-token and grounding validation runs first. 238 web tests and build pass.
+Shared generation prompts/schemas and grounding v5 are unchanged by this guard.
+Fresh ordinary offline verification of the corrected guard remains pending.
+
+Corrected release verified live: index-Cr3HSrZw.js, SHA-256
+a0829eeeab5a552c0eeb0c218260c8af839ecdf1e3a148d8b927656b9ca41bd3.
+New date-only preview masked two dates on device in 752 ms, leak check passed,
+then was inspected/approved once with only the test tab Offline. DevTools showed
+the new generateContent request failed ERR_INTERNET_DISCONNECTED with zero bytes.
+Actual device 1/1 preliminary review restored both dates correctly. The model
+again proposed an incomplete draft; the application visibly withheld it with
+the new local notice and displayed no replacement wording. This proves guard
+interception, not improved generative drafting. Questions remained broad (rent
+currency/early termination). No source-based term template or extra retry was
+used. No throttling restored and verified afterwards. Ordinary offline safe
+rendering/restoration passes within this one-clause scope; not cold-start or
+general offline legal-accuracy certification.
+
+## Uniform final-policy matrix — November 22, frozen analyzer 3f096b6
+
+Each exact masked preview/ledger was inspected before one manual approval; no
+analyzer, generation prompt, schema or validator changed between rows. Actual
+no-billing state/current free standard model pricing were checked before sending.
+Every row reports clause-analysis-v3 defaults, explanation-grounding-v5 and
+commercial-review-v4. This is on codex/content-quality-v3, NOT main (65152ce).
+
+| Sample | Actual source | Validated | Methods | Content/restoration review |
+| --- | --- | --- | --- | --- |
+| Lease | cloud | 10/10 | 9 general, 1 signatory | Distinct tenants/landlord, three dates and independent amounts preserved; late threshold and lawful deductions correct. No amount-as-recipient question. |
+| Freelance | cloud | 10/10 | 8 general, 2 signatory | Services, hourly/cap figures, payment routing, pay-in-full ownership condition and mutual notice preserved. Interim rights remain questions. One mutual-notice question redundantly asks about already stated mutuality. |
+| Offer | cloud | 11/11 | 9 general, 2 signatory | Bonus remains eligible/up-to; option remains subject to approval; US scope and mutual at-will retained. Conservative title/Employee-ID review flag inspected without clearing; labels/values restore. |
+| SaaS | cloud | 10/10 | 9 general, 1 signatory | Subscription limits, annual advance fee/interest, availability/credit, mutual cap/exception, renewal and jurisdiction preserved. No invented higher-fees comparison. |
+| NDA | cloud | 10/10 | 8 general, 2 signatory | Mutual purpose, named-party survival, notice channels and permission to seek relief preserved. No assumed signing event or guaranteed court outcome. |
+| Promissory note | cloud | 9/9 | 7 general, 1 guarantee, 1 signatory | Principal/rate/installments, debit instructions, permission to prepay and acceleration threshold preserved. Mr. Mendoza remains distinct; guarantee/source labels and SSN restore locally. |
+
+Total 60/60, failed empty in every row, all drafts empty: 50 general reviews,
+nine labeled application-authored source-based signatory reviews, one separately
+labeled guarantee. No replaced invalid response, automatic retry, billing/API/
+provider/model or server configuration change. Some questions remain broad,
+redundant or negotiation-oriented; this is bounded preliminary fixture acceptance,
+not perfect content, legal certification, reliable generated drafting, a native
+platform pass, or the issue #30 requirement to run on main. Earlier v4 runs,
+hosted content failures, degraded masking and the offline bad draft remain above.
