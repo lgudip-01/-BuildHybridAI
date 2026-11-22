@@ -612,3 +612,146 @@ No further freelance send was made to chase a green count. This work strengthens
 withholding and removes a demo-specific lease path; it does not close the broader
 Gate A. Next is uniform final-policy sample/content review and complete hosted
 acceptance, preserving these limitations and every earlier result.
+
+
+## November 21 concise policy v3 and structural field-format verification
+
+Initial v3 retired v1/v2 global-topic prompts, kept independent false kill
+switches, and configured cloud temperature 0. Runtime guards remained intact.
+A fresh freelance c6/c9/c10 run still returned 2/3; signature wording was not
+reliably corrected by instructions alone. That failure is retained.
+
+Added a general bounded grammar for masked signatory/identification fields:
+By/For/role fields, printed capacities, letter closings and selected identifier/
+date fields across layouts, not one contract sentence. Unknown titles, malformed
+tokens, operative additions and out-of-bounds blocks remain on ordinary analysis.
+Eligible blocks use visibly application-authored source-quoted guidance, empty
+drafts and allowed neutral questions in both schemas and exact runtime validation.
+Provider noncompliance is rejected, never replaced. This is not free-form model
+legal reasoning or verification of actual signatures/authority.
+
+The first field-format freelance run passed 3/3 with ownership interim rights
+left unspecified and source-based signatory text. One structural reply returned
+three allowed questions; the final format now limits responses to two distinct
+allowed questions, encoded in schemas and runtime validation.
+
+A fresh SaaS c7/c10 follow-up returned 2/2 runtime validation, with compliant
+source-based signatory text and two questions, but content FAILED for an invented
+higher-fees/disproportionate-risk comparison in c7. The mutual formula supplies
+no direction or comparative quantities. A cloud/device regression failed before
+a narrow withholding guard; factual source paraphrases and adequacy questions
+remain accepted. Global explanations now request factual paraphrase only;
+interpretations, possible effects and negotiated additions belong in questions.
+
+The fixed diagnostics report requestedReviewMethods per clause, so source-based
+formats cannot be confused with ordinary analysis. This is a requested format,
+not proof that a failed clause passed it. Earlier observations remain separate
+from the final-policy matrix being verified in this increment.
+
+
+## Frozen-baseline final-policy matrix — 5b0a147 (November 21)
+
+Code is frozen for these manually prepared/reviewed single sends. Policy
+clause-analysis-v3, explanation-grounding-v4, cloud temperature configured to 0.
+Actual no-billing state was freshly checked before the matrix. Each row records
+its real SDK source and requested general/source-based methods, not merely an
+installed format version. No analyzer/prompt/schema/validation code changes between these matrix rows.
+The acceptance-only WebSocket transport correction below precedes the final
+lease row; the production bundle is byte-for-byte unchanged.
+
+| Sample | Actual source | Validated | Requested methods | Content review |
+| --- | --- | --- | --- | --- |
+| Freelance | cloud | 10/10 | 8 general, 2 labeled signatory fields | Services, amounts, payment routing, ownership condition and mutual 14-day notice retained. Interim rights are questions; no asserted signing event. |
+| SaaS | cloud | 10/10 | 9 general, 1 labeled signatory field | Fees, availability/credit, mutual cap/exception, renewal and jurisdiction preserved. No invented higher-fees comparison in explanation. |
+| Offer | cloud | 11/11 | 9 general, 2 labeled signatory fields | Bonus remains eligibility/up-to; equity remains an option subject to approval; nationwide scope and mutual at-will wording retained. Review flag inspected without clearing it. |
+| Promissory note | cloud | 9/9 | 7 general, 1 labeled guarantee, 1 labeled signatory field | Principal/interest/installments, permissive prepayment and acceleration trigger preserved. Mr. Mendoza remains distinct; no invented interim guarantee scope. |
+| NDA | cloud | 10/10 | 8 general, 2 labeled signatory fields | Mutual purpose, named-party survival, separate notice channels and permission to seek relief preserved. No invented signing status. |
+| Lease | cloud | 10/10 | 9 general, 1 labeled signatory field | Independent dates/amounts, more-than-five-days late threshold, lawful deductions, distinct tenants and landlord restored. One deposit question incorrectly used its amount as a recipient; see correction below. |
+
+All six rows returned failed empty: 60/60 runtime validation, 50 general reviews,
+nine labeled signatory-field reviews and one labeled guarantee. All drafts empty. Interpretive/commercial
+choices remain questions. Some questions can still be broad; these are inspected
+fixed-fixture observations, not general legal-accuracy certification. The deposit
+question defect prevents calling this a perfect content pass. Hosted acceptance
+remains pending until observed. Earlier failed and
+prototype runs above are retained and not counted as part of this frozen matrix.
+
+
+### Acceptance infrastructure interruption before the final lease result
+
+The initial full-lease approval was initiated, but its result was lost after a
+Vite connection interruption reset the page to Ready. Completion and request
+count cannot be confirmed; it may have consumed quota. It is inconclusive, not
+a pass or confirmed provider failure. The five saved rows remain 50/50.
+
+Verified the task server command really used mode acceptance. Vite 8's documented
+server.ws option is separate from server.hmr; hmr false still leaves a reconnect
+client that reloads after disconnect. Added ws false only to the localhost
+acceptance server. Resolved configuration confirms host 127.0.0.1, strict port
+5173, hmr false and ws false. No production behavior or analyzer changed.
+
+Without inference, selected a nondefault diagnostic preset, stopped the verified
+task-owned server, observed the state intact, restarted it, and observed the
+same selection/status retained. Production entry index-BPhxPItv.js remained
+byte-identical before/after the dev-only fix: SHA-256
+c9d2c140cd18709de5b5ed4d63f7a8b51f037fa5d82f893ea20809ccc703c1ff.
+Only the interrupted lease case is newly prepared/approved after this concrete
+infrastructure correction; earlier five samples are not repeated.
+
+### Deposit question correction after content review
+
+The lease c6 question asked where/how Tenants must pay the deposit to AMOUNT_3,
+which restores an amount into a recipient position. Correct JSON and token
+membership did not catch that semantic error. Added a narrow amount-as-recipient
+guard across explanation, draft and questions. It rejects the response, never
+rewrites or retries it. This is lexical triage, not general question validation.
+The shared generation instructions, schemas and configured model are unchanged.
+
+Both cloud/device provider replay tests failed before correction, then passed;
+controls preserve amount limits and legitimate unknown-recipient questions.
+225 web tests and production typecheck/build pass. One freshly masked and
+explicitly approved rent/deposit follow-up returned actual cloud 2/2, failed
+empty, correct independent amounts/timing and sensible deduction/holding
+questions. This is a separate post-guard observation, not a replacement of the
+original matrix row or a claim of 60 fresh calls on the changed validator.
+
+An ordinary lease-date offline preview was prepared but NOT approved: native
+Chrome access reports no window, while extension DOM access works. The supported
+browser API exposes no network emulation. No network setting changed and no
+offline pass is claimed; a visible Chrome window is requested to unblock the
+isolated DevTools test. Prior offline failures/limited source-based evidence
+remain above. Broader Gate A remains open pending this and hosted acceptance.
+
+### Hosted acceptance found two additional content gaps
+
+Official Hosting-only deployment completed on the verified no-billing project.
+Hosted entry index-ClxvN20o.js matched local SHA-256
+912651ab5eb42cfaf8503be9c4cc0c47591eafbc4f12003df51530545e784986.
+The default fictional four-clause demo masked ten values locally in 5,461 ms;
+all masked clauses and ledger entries were inspected before genuine approval.
+Actual cloud returned 4/4 validated, with all drafts empty and local restoration.
+Editing the contract then cleared preview, approval and result without another
+model send. Production attestation was used, not a local diagnostic/debug page.
+
+Content FAILED in c3/c4 despite runtime validation: a contact phone was expanded
+into a requirement for all communications, and a printed Name/CEO/entity field
+was narrated as a signing event. This observation is retained, not a final
+hosted content pass. Seven new replay/layout checks failed before correction.
+
+The field grammar now recognizes general Name/By identity-capacity-entity tuples
+and common printed role acronyms across unseen token IDs, while unknown titles
+and operative suffixes still fall back to ordinary analysis. This format quotes
+the approved fields and makes no inference about actual signing or representation.
+Added a narrow contact-scope withholding guard and source-role/contact-scope
+instructions (grounding v5), synchronized only in local Remote Config templates.
+235 web tests and production typecheck/build pass. No privacy/approval/source
+validation was relaxed. A fresh hosted verification remains pending.
+
+The corrected hosted entry index-BkV4srSd.js is verified live and matches local
+SHA-256 749cac1535ce0ddb374cb968a79bc61037a4439c7c55de84ca3521f8f1592ae4.
+Its fresh default-demo attempt is still masking locally with Nano-ready shown;
+no preview completed and no cloud approval/send was made. Do not call this a
+provider failure, successful review, or current-policy hosted content pass.
+Native Chrome reports no visible window. Supported extension APIs do not expose
+network emulation, so ordinary offline and uniform v5 matrix/content acceptance
+remain pending. The v4 60/60 matrix remains separate historical evidence.

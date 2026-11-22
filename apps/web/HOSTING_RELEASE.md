@@ -269,3 +269,29 @@ observations, focused follow-ups and unresolved signature/content caveats.
 PR #28 was merged by the maintainer at 65152ce. This follow-up is isolated on
 codex/content-quality-v3 based on that main; original local history and the
 newer upstream evaluation report are preserved. Broader Gate A remains open.
+
+### November 21 factual v3 / grounding v5 release checkpoint
+
+Official CLI Hosting-only deployment completed after actual Cloud Billing showed
+no linked billing account and current official Hosting no-billing hard-stop
+quota behavior was checked. No billing, payment, trial, API/provider/model or
+server Remote Config setting changed. Local templates describe current defaults.
+
+Current hosted module is `/assets/index-BkV4srSd.js`, matching the production
+build. SHA-256: `749cac1535ce0ddb374cb968a79bc61037a4439c7c55de84ca3521f8f1592ae4`.
+235 web tests and production typecheck/build pass. Development diagnostics
+remain excluded. Prior unchanged engine (94) and Firebase (nine) checks passed.
+
+The immediately preceding hosted build index-ClxvN20o.js completed a genuine
+masked approval/cloud/restoration flow, 4/4 validated, and passed edit clearing.
+Content review caught contact-scope and compound printed-signatory errors; this
+is retained as a failed content observation. Grounding v5 and the extended
+general field grammar address those cases with failing-before regressions.
+
+The fresh check on the current hosted asset is pending local masking: Nano-ready
+is shown, but no preview/result has completed. No cloud approval/send was made
+for that attempt. Native Chrome control also reports no visible window, while
+extension DOM control works. A visible Chrome window was requested to unblock
+the isolated offline test and diagnose this pending masking step. Neither that
+check nor the final v5 full matrix is claimed complete. Keep PR #31 draft and
+Gate A open; do not advance import/native/chat/polish gates on this evidence.

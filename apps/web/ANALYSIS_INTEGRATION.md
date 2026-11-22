@@ -235,3 +235,31 @@ setup checks pass. The lower web count reflects retirement of nine tests for the
 removed template, replaced by general-path coverage within two provider tests.
 The existing labeled guarantee format is unchanged; it is not evidence of
 unconstrained offline reasoning.
+
+
+## Policy v3 and the general signatory/identification field format
+
+Version v3 retires older global-topic prompts and uses concise factual
+paraphrase instructions, keeping interpretations and missing terms in questions.
+Cloud temperature is configured to 0 (not a guarantee of deterministic or accurate
+output). Remote false kill switches remain effective when old payloads fall back
+to current defaults; no server configuration is published by this change.
+
+The signatory field grammar is in core/signatoryReview.ts. It quotes only supplied
+approved masked fields and makes no signing-status assertion. A positive field/
+capacity grammar rejects operative/unknown content and bounded input violations
+to the ordinary analyzer. Both provider schemas constrain the application-owned
+explanation and allowed questions; runtime equality, empty-draft, uniqueness and
+two-question checks reject noncompliance. No invalid response is substituted.
+The existing separately labeled guarantee format remains unchanged.
+
+Name/By identity-capacity-entity tuples are also accepted across token IDs and
+common printed role acronyms. They are quoted without inferring who actually
+signed, who represents whom, or authority. Unknown titles/operative suffixes
+still use ordinary analysis. Grounding v5 also withholds two observed semantic
+errors: amounts used as payment recipients (including questions), and a contact
+phone expanded into a requirement for all communications. These are narrow
+lexical guards, not general entailment or question-quality verification.
+
+The diagnostic exposes requestedReviewMethods to distinguish general analysis
+from installed source-based formats without revealing originals or vault data.
