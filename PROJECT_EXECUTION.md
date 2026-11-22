@@ -1160,3 +1160,34 @@ service was enabled, and production JS is byte-identical to the existing release
 All old local branches and teammate work remain preserved. Next independent task
 is compatibility review of #32/#33 in isolation; actual chat enablement continues
 to require engine/UI delivery and real privacy/content acceptance.
+
+## November 22: independent PR #32/#33 compatibility review
+
+- [x] Refresh refs and #13/#34 comments after the browser-review interruption;
+  no new engine/UI delivery. PR #34 publication/checkpoint is verified and tabs closed.
+- [x] Create a disposable local review worktree from bbac120; combine #32 at
+  3e90529 and #33 at 1a6b334 without changing main or teammate branches.
+- [x] Baseline combined verification: 320 web + 107 engine tests pass, all twelve
+  imported fixtures match, core typecheck and production build pass. No model calls.
+- [x] Reproduce a #32 false-negative review flag using an email and URL containing
+  a model-only name: two failing cases; a missed lowercase name remains in masked output.
+- [x] Reproduce #33 deletion of substantive standalone rent/year/account numbers:
+  three failing cases. Reproduce a slow import overwriting newer manual edits:
+  one failing actual-handler/ReviewSession case with controlled hooks/file read.
+- [x] Preserve six failing cases on the local review branch and as a checked patch;
+  document precise source locations, scope and correction requests in
+  PR_COMPATIBILITY_REVIEW.md. Do not count these as passing or approve integration.
+- [x] Publish report/repro patch (application docs match fetched 9782f32); post
+  findings to #32/#33 with Likhil tagged and summarize blockers in #30. Final
+  root upload/full-tree verification follows in the PR #34 checkpoint; close tabs.
+- [ ] Author corrections and retests before integration approval. Main/cloud-chat
+  activation and real device/payload checks remain separate gates.
+
+Review handoff: #32 comment 7083451440 and #33 comment 7083456530 contain the
+three findings and requested corrections. Full rerun after adding the cases:
+320 web passes/four expected failures, 107 engine passes/two expected failures;
+typecheck passes. All six failures are review cases, with no unrelated baseline
+failure. Runtime implementation and deployed app remain unchanged. Do not approve
+integration merely because the original twelve fixtures pass. Retest the author's
+corrected heads before advancing; all local evidence is preserved at the documented
+temporary worktree/review commit. No main merge, force push, reset or branch deletion.
