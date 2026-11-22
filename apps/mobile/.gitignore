@@ -5,3 +5,8 @@ ios/App/Pods/
 ios/App/build/
 **/google-services.json
 **/GoogleService-Info.plist
+**/build/
+.gradle/
+*.apk
+local.properties
+.idea/

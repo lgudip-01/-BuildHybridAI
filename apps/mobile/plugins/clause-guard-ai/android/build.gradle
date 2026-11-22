@@ -1,20 +1,48 @@
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:8.13.0'
+        classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:2.4.0'
+    }
+}
+
 apply plugin: 'com.android.library'
 apply plugin: 'org.jetbrains.kotlin.android'
 
 android {
     namespace "app.clauseguard.ai"
-    compileSdk 35
-    defaultConfig { minSdk 26; targetSdk 35 }
-    compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
-    kotlinOptions { jvmTarget = '17' }
+    compileSdk rootProject.ext.compileSdkVersion
+    // firebase-ai-ondevice needs API 26 or higher, so the app's minSdk must be at least 26.
+    defaultConfig {
+        minSdk rootProject.ext.minSdkVersion
+        targetSdk rootProject.ext.targetSdkVersion
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_21
+        targetCompatibility JavaVersion.VERSION_21
+    }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21
+    }
+}
+
+repositories {
+    google()
+    mavenCentral()
 }
 
 dependencies {
     implementation project(':capacitor-android')
-    implementation platform('com.google.firebase:firebase-bom:34.0.0')
-    implementation 'com.google.firebase:firebase-ai'
-    implementation 'com.google.firebase:firebase-appcheck-playintegrity'
-    debugImplementation 'com.google.firebase:firebase-appcheck-debug'
-    // TODO: add the Firebase AI Logic on-device (Gemini Nano) add-on once confirmed against the current docs.
+    // No BoM: the on-device SDK is not in the Firebase BoM yet. Versions from the Firebase AI Logic hybrid docs.
+    implementation 'com.google.firebase:firebase-ai:18.2.0'
+    implementation 'com.google.firebase:firebase-ai-ondevice:16.0.0-beta08'
+    implementation 'com.google.firebase:firebase-appcheck-playintegrity:19.0.0'
+    debugImplementation 'com.google.firebase:firebase-appcheck-debug:20.1.0'
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0'
 }

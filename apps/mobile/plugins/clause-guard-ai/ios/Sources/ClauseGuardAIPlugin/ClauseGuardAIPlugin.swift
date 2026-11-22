@@ -107,6 +107,10 @@ public class ClauseGuardAIPlugin: CAPPlugin, CAPBridgedPlugin {
                         call.resolve(["text": response.content])
                     }
                 } catch {
+                    #if DEBUG
+                    // The error only, never the prompt or the result: both hold raw contract text.
+                    NSLog("ClauseGuardAI onDevice failed: %@ (%@)", String(describing: type(of: error)), error.localizedDescription)
+                    #endif
                     call.reject("On-device generation failed: \(error.localizedDescription)")
                 }
             }
