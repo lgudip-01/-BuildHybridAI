@@ -1,7 +1,8 @@
-import type { AiBridge, Analysis, AnalyzeResult, Clause, ClauseFailure, MaskResult } from '@clause-guard/core/types';
+import type { AiBridge, Analysis, AnalyzeResult, ClauseFailure, MaskResult } from '@clause-guard/core/types';
 import { mask } from '@clause-guard/privacy-engine/mask';
 import { approve, assertApproved } from '@clause-guard/privacy-engine/approval';
 import { unmask } from '@clause-guard/privacy-engine/unmask';
+import { splitClauses } from './clauses';
 
 export type ReviewOutcome = { restored: Analysis[]; failed: ClauseFailure[]; ranOn?: 'cloud' | 'device' };
 export type ReviewSnapshot = {
@@ -12,11 +13,6 @@ export type ReviewSnapshot = {
   outcome?: ReviewOutcome;
   error?: string;
 };
-
-export function splitClauses(text: string): Clause[] {
-  return text.split(/\n\s*\n/).map(part => part.trim()).filter(Boolean)
-    .map((text, index) => ({ id: `c${index + 1}`, index, text }));
-}
 
 export function reviewBusy(snapshot: ReviewSnapshot): boolean {
   return snapshot.phase === 'masking' || snapshot.phase === 'analyzing';

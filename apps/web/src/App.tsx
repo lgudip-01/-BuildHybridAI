@@ -1,11 +1,13 @@
 // Minimal review flow for the existing bench; the UI teammate owns the full product screens.
 import type { Clause, EntityKind, LedgerEntry, MaskResult, OnDeviceStatus } from '@clause-guard/core/types';
 import { PLACEHOLDER } from '@clause-guard/privacy-engine/placeholders';
-import { Download, LoaderCircle, ShieldCheck, ShieldX, TriangleAlert } from 'lucide-react';
-import { useCallback, useEffect, useState, useSyncExternalStore, type KeyboardEvent } from 'react';
+import { Download, FileUp, LoaderCircle, ShieldCheck, ShieldX, TriangleAlert } from 'lucide-react';
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore, type KeyboardEvent } from 'react';
 import type { AiBridge } from '@clause-guard/core/types';
 import { REDLINE_REVIEW_NOTICE } from '@clause-guard/core/analysis';
-import { ReviewSession, reviewBusy, splitClauses, type ReviewOutcome } from './reviewFlow';
+import { splitClauses } from './clauses';
+import { readDocument } from './importDocument';
+import { ReviewSession, reviewBusy, type ReviewOutcome } from './reviewFlow';
 
 const SAMPLE_CONTRACT = `This Mutual Non-Disclosure Agreement is made on January 1, 2026 between Acme Corp ("the Company") and Dana Reyes ("Contractor").
 
@@ -64,8 +66,25 @@ export function App({ bridge }: { bridge: AiBridge & { downloadModel(onProgress:
   const run: Run | null = review.masked ? { result: review.masked, ms: review.ms ?? 0 } : null;
   const [downloadError, setDownloadError] = useState<string | null>(null);
   const [active, setActive] = useState<string | null>(null);
+  const [importing, setImporting] = useState(false);
+  const [importError, setImportError] = useState<string | null>(null);
+  const fileInput = useRef<HTMLInputElement>(null);
 
   const clauses = splitClauses(contract);
+
+  async function importFile(file: File | undefined) {
+    if (!file) return;
+    setImporting(true);
+    setImportError(null);
+    try {
+      if (session.edit(await readDocument(file))) setActive(null);
+    } catch (e) {
+      setImportError(`Couldn't read ${file.name}: ${errorText(e)}`);
+    } finally {
+      setImporting(false);
+      if (fileInput.current) fileInput.current.value = '';
+    }
+  }
 
   const refreshStatus = useCallback(
     () => bridge.onDeviceStatus().then(setStatus, () => setStatus('unavailable')),
@@ -118,8 +137,19 @@ export function App({ bridge }: { bridge: AiBridge & { downloadModel(onProgress:
           <div className="pane-head">
             <h2 id="contract-title">Contract</h2>
             <span className="meta">
-              {clauses.length} {clauses.length === 1 ? 'clause' : 'clauses'}, split on blank lines
+              {clauses.length} {clauses.length === 1 ? 'clause' : 'clauses'}
             </span>
+            <input
+              ref={fileInput}
+              type="file"
+              accept=".pdf,.docx,.txt"
+              hidden
+              onChange={(e) => void importFile(e.target.files?.[0])}
+            />
+            <button className="ghost" onClick={() => fileInput.current?.click()} disabled={busy || importing}>
+              {importing ? <LoaderCircle className="spin" size={14} aria-hidden /> : <FileUp size={14} strokeWidth={1.75} aria-hidden />}
+              {importing ? 'Reading' : 'Import PDF or Word'}
+            </button>
           </div>
           <textarea
             className="contract"
@@ -130,9 +160,10 @@ export function App({ bridge }: { bridge: AiBridge & { downloadModel(onProgress:
             onKeyDown={onContractKey}
             spellCheck={false}
             aria-labelledby="contract-title"
-            placeholder="Paste a contract. Each paragraph separated by a blank line is one clause."
+            placeholder="Paste a contract, or import a PDF or Word file. Files are read on this device and never uploaded."
           />
           <div className="pane-foot">
+            {importError && <span className="meta" role="alert">{importError}</span>}
             <kbd className="shortcut">Ctrl Enter</kbd>
             {busy && <span id="review-busy-hint" className="meta">Editing is locked until this review finishes.</span>}
             <button className="primary" onClick={() => void session.mask()} disabled={busy || progress !== null || clauses.length === 0}>
