@@ -11,6 +11,7 @@ const PRESETS = {
   freelance: { sample:'freelance', ids:['c9'] },
   freelanceReview: { sample:'freelance', ids:['c6', 'c9', 'c10'] },
   saasReview: { sample:'saas', ids:['c7', 'c10'] },
+  saasCap: { sample:'saas', ids:['c7'] },
   guarantee: { sample:'promissory-note', ids:['c8'] },
   leaseFull: { sample:'lease', ids:undefined },
   offerFull: { sample:'offer-letter', ids:undefined },
@@ -39,6 +40,7 @@ export function mountSampleDiagnostic(root: HTMLElement): void {
       <option value="freelance">Freelance: company signature (c9)</option>
       <option value="freelanceReview">Freelance: conditional ownership and signature forms (c6, c9, c10)</option>
       <option value="saasReview">SaaS: mutual cap and signature form (c7, c10)</option>
+      <option value="saasCap">SaaS: mutual liability cap (c7)</option>
       <option value="guarantee">Promissory note: source-quoted guarantee (c8)</option>
       <option value="leaseFull">Full public lease</option>
       <option value="offerFull">Full public offer letter</option>

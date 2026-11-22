@@ -3,6 +3,7 @@ import {
   clausePlaceholders, ANALYSIS_JSON_SCHEMA, AnalysisValidationError,
   validateAnalysis, validateBatch, applyCommercialRedlineGuard, validateExplanationGrounding,
   sourceQuotedGuaranteeReview, validateSourceQuotedGuaranteeReview, GUARANTEE_REVIEW_QUESTIONS,
+  sourceQuotedSignatoryReview, validateSourceQuotedSignatoryReview, SIGNATORY_REVIEW_QUESTIONS,
 } from '@clause-guard/core/analysis';
 import { getGenerativeModel, InferenceMode, InferenceSource, Schema, type AI } from 'firebase/ai';
 import { assertApproved } from './approvalGuard';
@@ -13,7 +14,7 @@ const makeCloudSchema = (review?: string, questions: readonly string[] = GUARANT
   risk: Schema.enumString({ enum: ['low', 'medium', 'high'] }),
   explanation: review ? Schema.enumString({ enum: [review] }) : Schema.string(),
   redline: Schema.string(),
-  questions: Schema.array({ items: review ? Schema.enumString({ enum: [...questions] }) : Schema.string() }),
+  questions: Schema.array({ items: review ? Schema.enumString({ enum: [...questions] }) : Schema.string(), ...(review && {maxItems:questions.length}) }),
 } });
 const cloudSchema = makeCloudSchema();
 
@@ -52,21 +53,22 @@ export async function analyzeApproved(ai: AI, batch: ApprovedBatch): Promise<Ana
       : ranOn === 'device' ? InferenceMode.ONLY_ON_DEVICE : config.deviceFallbackEnabled ? InferenceMode.PREFER_IN_CLOUD : InferenceMode.ONLY_IN_CLOUD;
     try {
       const signal = AbortSignal.timeout(60_000);
-      const review = sourceQuotedGuaranteeReview(clause.text);
-      const reviewQuestions = GUARANTEE_REVIEW_QUESTIONS;
-      const reviewInstruction = review ? '\nFor this unspecified guarantee, use the exact source-based explanation in the response schema. ' +
+      const signatoryReview = sourceQuotedSignatoryReview(clause.text);
+      const review = signatoryReview ?? sourceQuotedGuaranteeReview(clause.text);
+      const reviewQuestions = signatoryReview ? SIGNATORY_REVIEW_QUESTIONS : GUARANTEE_REVIEW_QUESTIONS;
+      const reviewInstruction = review ? '\nUse the exact source-based explanation supplied in the response schema. ' +
         'Do not add commentary to it. Return an empty redline and select relevant questions from the schema. ' +
-        'Choose risk as a preliminary review priority only; do not assume unstated guarantee terms.' : '';
+        'Choose risk as a preliminary review priority only; do not infer unstated facts.' : '';
       const deviceSchema = review ? { ...ANALYSIS_JSON_SCHEMA, properties: { ...ANALYSIS_JSON_SCHEMA.properties,
         explanation: { type: 'string', enum: [review] },
-        questions: { type: 'array', items: { type: 'string', enum: [...reviewQuestions] } },
+        questions: { type: 'array', items: { type: 'string', enum: [...reviewQuestions] }, maxItems:reviewQuestions.length },
       } } : ANALYSIS_JSON_SCHEMA;
       const model = getGenerativeModel(ai, {
         mode,
         inCloudParams: {
           model: config.model,
           systemInstruction: config.cloudPrompt + placeholderRules + reviewInstruction,
-          generationConfig: { responseMimeType: 'application/json', responseSchema: review ? makeCloudSchema(review, reviewQuestions) : cloudSchema, maxOutputTokens: 2048 },
+          generationConfig: { temperature: 0, responseMimeType: 'application/json', responseSchema: review ? makeCloudSchema(review, reviewQuestions) : cloudSchema, maxOutputTokens: 2048 },
         },
         onDeviceParams: {
           createOptions: {
@@ -101,7 +103,8 @@ export async function analyzeApproved(ai: AI, batch: ApprovedBatch): Promise<Ana
       // Reject the unsupported explanation/risk result rather than silently
       // rewriting its rationale or presenting it as a successful analysis.
       validateExplanationGrounding(validated, clause.text);
-      if (review) validateSourceQuotedGuaranteeReview(validated, review);
+      if (signatoryReview) validateSourceQuotedSignatoryReview(validated, signatoryReview);
+      else if (review) validateSourceQuotedGuaranteeReview(validated, review);
       results.push(applyCommercialRedlineGuard(validated, clause.text));
     } catch (error) {
       // Stale approval must abort the entire batch, including when a model call rejected.
