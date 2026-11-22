@@ -35,6 +35,9 @@ const KIND_LABEL: Record<EntityKind, string> = {
   EMAIL: 'Email',
   PHONE: 'Phone',
   ACCOUNT: 'Account number',
+  URL: 'Web address',
+  IP: 'IP address',
+  HANDLE: 'Handle',
 };
 
 // Splitting on a capture group keeps the placeholders at the odd indexes.

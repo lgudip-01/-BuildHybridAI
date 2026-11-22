@@ -4,7 +4,7 @@ import { leakCheck } from './leakCheck';
 import { dedupeEntities, findOccurrences, normalize, resolveOverlaps, separateCoordinatedNames, toEntity, type Candidate, type Entity } from './merge';
 import { readClause } from './onDevice';
 import { PlaceholderRegistry } from './placeholders';
-import { findDefinedTerms, findNames, findPatterns, type Span } from './regex';
+import { findDefinedTerms, findNames, findPatterns, looksLikePersonName, type Span } from './regex';
 import { saveVault } from './vault';
 
 /**
@@ -30,19 +30,27 @@ export async function mask(docId: string, clauses: Clause[], bridge: AiBridge): 
   // The broad pattern pass runs even with the model, so a name the model misses is still masked.
   // The same on-device call also gives each clause its type, which the cloud uses but masking never needs.
   const found: Entity[] = [];
+  const byRules: string[] = [];
+  const byModel: Entity[] = [];
   const types: (ClauseType | undefined)[] = [];
   for (const clause of clauses) {
-    found.push(...findNames(clause.text, true).map(spanToEntity));
+    const names = findNames(clause.text, true);
+    found.push(...names.map(spanToEntity));
+    byRules.push(...names.map((s) => ` ${normalize(s.value)} `));
     if (!useModel) continue;
     try {
       const reading = await readClause(bridge, clause);
       found.push(...reading.entities);
+      byModel.push(...reading.entities);
       types.push(reading.type);
     } catch {
       needsReview = true;
       types.push(undefined);
     }
   }
+  // A name only the model saw, such as "Globex" or "maria lopez", is of a kind the rules can't find.
+  // It is masked, but the same kind elsewhere is masked only if the model saw it there too, so a person checks.
+  needsReview ||= byModel.some((e) => !byRules.some((r) => r.includes(` ${normalize(e.value)} `)));
   // A defined short form, as in Northwind Analytics, Inc. ("Northwind"), is masked like the full name.
   for (const term of clauses.flatMap((c) => findDefinedTerms(c.text))) {
     found.find((e) => normalize(e.value).startsWith(`${normalize(term)} `))?.variants.push(term);
@@ -110,8 +118,11 @@ function saveVaultInOrder(run: Run, entries: Record<string, string>): Promise<vo
   return write;
 }
 
+// A capitalized phrase shaped like "Jane Smith" also gets the person's last and first names as variants,
+// so "Smith's" or "Jane" on its own is masked with it.
 function spanToEntity(span: Span): Entity {
-  const base = span.kind === 'PERSON' ? 'person' : span.kind === 'ORG' ? 'org' : 'other';
+  const person = span.kind === 'PERSON' || (span.kind === 'NAME' && looksLikePersonName(span.value));
+  const base = person ? 'person' : span.kind === 'ORG' ? 'org' : 'other';
   return toEntity(span.kind, span.value, base);
 }
 
