@@ -30,13 +30,14 @@ export const ANALYSIS_REVIEW_RULES = 'Review from a neutral perspective when the
   'If a revision depends on the represented party or an unagreed commercial choice, leave redline empty and ask a neutral question about that choice. ' +
   'Do not present a clause-level omission as an established omission from the entire agreement.';
 
-export const GROUNDING_POLICY_VERSION = 'explanation-grounding-v4';
+export const GROUNDING_POLICY_VERSION = 'explanation-grounding-v5';
 // Keep global instructions about evidence, not a catalog of legal labels that
 // could be echoed into unrelated clauses. Runtime rejection guards stay separate.
 export const EXPLANATION_GROUNDING_RULES = 'Describe only facts and relationships established by the supplied wording. ' +
   'Keep the explanation to one or two short factual sentences paraphrasing the supplied wording. ' +
   'Put interpretations, possible effects and negotiated alternatives in questions rather than stating them as facts. ' +
   'Preserve stated conditions, mutuality, numerical thresholds and geographic scope. ' +
+  'For contact-only fields, paraphrase the listed contact details without expanding their scope to all communications. ' +
   'Put absent details and possible negotiated additions only in questions, not in the explanation. ' +
   'For an identification or signatory block, report the printed people, entities and roles only; do not claim an event has occurred. ' +
   'If a condition leaves interim rights unclear, ask about those rights instead of selecting an owner. ' +
@@ -46,6 +47,7 @@ export const EXPLANATION_GROUNDING_RULES = 'Describe only facts and relationship
 export const ANALYSIS_OUTPUT_RULES = ANALYSIS_REVIEW_RULES + ' ' + EXPLANATION_GROUNDING_RULES + ' Return only JSON: {clauseId, risk: low|medium|high, explanation, redline, questions: string[]}. ' +
   'Echo the exact clause id as clauseId. Preserve every placeholder exactly, including brackets and case, ' +
   'in all fields and questions. Never invent a placeholder or rewrite [PARTY_A] as Party A. ' +
+  'Preserve each typed placeholder\'s source role in questions as well as explanations: an amount is a quantity, never a payment recipient. ' +
   'Square brackets are reserved exclusively for exact placeholders already present in the supplied clause. ' +
   'Never add drafting blanks such as [NUM], [years/months], [EMAIL_2], [ADDRESS_2], or [insert address]. ' +
   'Preserve existing durations, amounts, dates and contact details in redlines; do not replace them with blanks or unsupported alternatives. ' +
@@ -204,6 +206,16 @@ export function validateSourceQuotedSignatoryReview(analysis: Analysis, expected
  * Call after validateAnalysis, so unsupported output cannot hide bad JSON/tokens.
  */
 export function validateExplanationGrounding(analysis: Analysis, source: CleanText): void {
+  // A notice address plus a phone contact does not establish that every
+  // communication must be by telephone. Narrow replay triage, not a general
+  // interpretation of notice delivery rules or the imperative "Call".
+  const noticeContact = /\bnotices go to\b/i.test(source) && /\bcall\s+\[PHONE_[A-Z0-9]+\]/i.test(source) &&
+    !/\b(?:communications|only|exclusively)\b/i.test(source);
+  if (noticeContact && /\bcommunications\s+(?:must|shall)\s+be\s+(?:made|sent)\s+by\s+(?:calling|phone)\b/i.test(analysis.explanation)) {
+    const error = new AnalysisValidationError('invalid_response');
+    error.message = 'The explanation inferred a phone requirement for all communications from contact details. Review the source wording.';
+    throw error;
+  }
   // Replay guard for an observed role error after otherwise correct restoration:
   // an amount token cannot be the recipient of a payment. Check questions too;
   // asking about missing context does not make a typed-token contradiction safe.
