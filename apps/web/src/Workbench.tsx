@@ -1,10 +1,12 @@
-// Test bench for the privacy engine against real Gemini Nano. The Web app role replaces this with the product UI.
+// The working tool: paste a contract, mask it on device, and see exactly what the cloud would receive.
+import { Capacitor } from '@capacitor/core';
 import type { Clause, ClauseType, EntityKind, LedgerEntry, MaskResult, OnDeviceStatus } from '@clause-guard/core/types';
 import { mask } from '@clause-guard/privacy-engine/mask';
 import { classify } from '@clause-guard/privacy-engine/onDevice';
 import { PLACEHOLDER } from '@clause-guard/privacy-engine/placeholders';
 import { Download, LoaderCircle, ShieldCheck, ShieldX, TriangleAlert } from 'lucide-react';
-import { useCallback, useEffect, useState, type KeyboardEvent } from 'react';
+import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from 'react';
+import { useReveal } from './motion';
 import type { AiBridge } from '@clause-guard/core/types';
 
 const SAMPLE_CONTRACT = `This Mutual Non-Disclosure Agreement is made on January 1, 2026 between Acme Corp ("the Company") and Dana Reyes ("Contractor").
@@ -16,12 +18,15 @@ Notices go to 42 Elm Street, Suite 300, Springfield, NJ 07001. Call (555) 123-45
 By: Dana Reyes
 Name: Michael Chen, CEO, Acme Corp`;
 
+// iPhones use Apple's built-in model; Chrome and Android use Gemini Nano.
+const MODEL_NAME = Capacitor.getPlatform() === 'ios' ? 'Apple Intelligence' : 'Gemini Nano';
+
 const STATUS_LABEL: Record<OnDeviceStatus | 'checking', string> = {
   checking: 'Checking on-device model',
-  available: 'Gemini Nano ready',
-  downloadable: 'Gemini Nano not downloaded',
-  downloading: 'Gemini Nano downloading',
-  unavailable: 'Gemini Nano unavailable',
+  available: `${MODEL_NAME} ready`,
+  downloadable: `${MODEL_NAME} not downloaded`,
+  downloading: `${MODEL_NAME} downloading`,
+  unavailable: `${MODEL_NAME} unavailable`,
 };
 
 const KIND_LABEL: Record<EntityKind, string> = {
@@ -53,6 +58,11 @@ function splitClauses(text: string): Clause[] {
 }
 
 function unavailableReason(): string {
+  const platform = Capacitor.getPlatform();
+  if (platform === 'ios') {
+    return "Apple Intelligence isn't available on this iPhone. It needs iOS 26 or later with Apple Intelligence turned on in Settings.";
+  }
+  if (platform === 'android') return "This phone doesn't support Gemini Nano.";
   if ('LanguageModel' in globalThis) {
     return 'Chrome says this device cannot run Gemini Nano. Open chrome://on-device-internals to see why.';
   }
@@ -62,7 +72,9 @@ function unavailableReason(): string {
   return `Chrome ${chrome} has the Prompt API turned off. Enable chrome://flags/#prompt-api-for-gemini-nano-multimodal-input, then relaunch Chrome.`;
 }
 
-export function App({ bridge }: { bridge: AiBridge & { downloadModel(onProgress: (fraction: number) => void): Promise<void> } }) {
+export function Workbench({ bridge }: { bridge: AiBridge & { downloadModel(onProgress: (fraction: number) => void): Promise<void> } }) {
+  const workspaceRef = useRef<HTMLDivElement>(null);
+  useReveal(workspaceRef, '.pane');
   const [status, setStatus] = useState<OnDeviceStatus | 'checking'>('checking');
   const [progress, setProgress] = useState<number | null>(null);
   const [contract, setContract] = useState(SAMPLE_CONTRACT);
@@ -118,13 +130,10 @@ export function App({ bridge }: { bridge: AiBridge & { downloadModel(onProgress:
   }
 
   return (
-    <div className="app">
-      <header className="topbar">
-        <div className="brand">
-          <ShieldCheck className="brand-mark" size={20} strokeWidth={1.75} aria-hidden />
-          <span className="brand-name">Clause Guard</span>
-          <span className="brand-sub">Privacy engine</span>
-        </div>
+    <section className="bench" id="try">
+      <header className="bench-head">
+        <p className="eyebrow">Try it</p>
+        <h2 className="section-title">Mask a real contract, right here.</h2>
         <ModelStatus status={status} progress={progress} onDownload={download} />
       </header>
 
@@ -137,7 +146,7 @@ export function App({ bridge }: { bridge: AiBridge & { downloadModel(onProgress:
         </p>
       )}
 
-      <main className="workspace">
+      <div className="workspace" ref={workspaceRef}>
         <section className="pane" aria-labelledby="contract-title">
           <div className="pane-head">
             <h2 id="contract-title">Contract</h2>
@@ -147,6 +156,7 @@ export function App({ bridge }: { bridge: AiBridge & { downloadModel(onProgress:
           </div>
           <textarea
             className="contract"
+            data-lenis-prevent
             value={contract}
             onChange={(e) => setContract(e.target.value)}
             onKeyDown={onContractKey}
@@ -168,12 +178,12 @@ export function App({ bridge }: { bridge: AiBridge & { downloadModel(onProgress:
             <h2 id="output-title">Sent to the cloud</h2>
             {run?.result.ok && <span className="meta">{run.result.ledger.length} values replaced</span>}
           </div>
-          <div className="pane-body">
+          <div className="pane-body" data-lenis-prevent>
             <Output run={run} error={error} active={active} onActive={setActive} />
           </div>
         </section>
-      </main>
-    </div>
+      </div>
+    </section>
   );
 }
 
@@ -182,7 +192,7 @@ function ModelStatus(props: { status: OnDeviceStatus | 'checking'; progress: num
   if (progress !== null) {
     return (
       <div className="status" data-state="downloading">
-        <span>Downloading Gemini Nano</span>
+        <span>Downloading {MODEL_NAME}</span>
         <progress value={progress} max={1} aria-label="Model download" />
         <span className="num">{Math.round(progress * 100)}%</span>
       </div>
