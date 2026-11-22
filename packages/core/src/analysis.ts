@@ -80,8 +80,9 @@ export const DEVICE_ANALYSIS_PROMPT = 'Offline preliminary contract scan only. '
   'Flag a concrete concern only when supported by this masked clause. ' +
   'Say the scan is preliminary and limited; low risk is not contract approval. Leave redline empty if unsure. ' + ANALYSIS_OUTPUT_RULES;
 
-export const REDLINE_POLICY_VERSION = 'commercial-review-v3';
+export const REDLINE_POLICY_VERSION = 'commercial-review-v4';
 export const REDLINE_REVIEW_NOTICE = 'Local drafting check: proposed replacement wording was withheld because changes to commercial terms require review. Confirm the represented party and intended changes before drafting a replacement.';
+export const INCOMPLETE_REDLINE_NOTICE = 'Local drafting check: proposed replacement wording was withheld because it omits approved source references. Review the complete clause before drafting a replacement.';
 // Conservative triage, not a legal/semantic verifier. Check BOTH versions so
 // removing an existing restriction/exception is held just like adding one.
 const COMMERCIAL_TERMS = /\b(?:fees?|payments?|rent|deposits?|interest|salary|bonus|equity|shares?|liabilit(?:y|ies)|joint(?:ly)?[\s-]+and[\s-]+several(?:ly)?|indemni\w*|guarant\w*|remed(?:y|ies)|service\s+credits?|availab(?:ility|le)|downtime|maintenance|terminat\w*|renew\w*|non[-\s]?compet\w*|assign\w*|ownership)\b/i;
@@ -89,12 +90,20 @@ const COMMERCIAL_TERMS = /\b(?:fees?|payments?|rent|deposits?|interest|salary|bo
 /** Run after JSON/token validation, before local restoration. No extra model call. */
 export function applyCommercialRedlineGuard(analysis: Analysis, source: CleanText): Analysis {
   const normalized = (text: string) => text.replace(/\s+/g, ' ').trim();
-  if (!analysis.redline.trim() || normalized(analysis.redline) === normalized(source) ||
-      !(COMMERCIAL_TERMS.test(source) || COMMERCIAL_TERMS.test(analysis.redline))) return analysis;
+  if (!analysis.redline.trim() || normalized(analysis.redline) === normalized(source)) return analysis;
+  // A full-clause replacement must retain each approved source reference.
+  // Presence is necessary, not proof of complete or equivalent legal wording.
+  // Withhold visibly like commercial drafts; preserve the validated review and
+  // never synthesize replacement prose or make an extra model request.
+  const draftReferences = new Set(analysis.redline.match(PLACEHOLDER) ?? []);
+  const missingReference = (source.match(PLACEHOLDER) ?? []).some(reference => !draftReferences.has(reference));
+  const notice = missingReference ? INCOMPLETE_REDLINE_NOTICE
+    : (COMMERCIAL_TERMS.test(source) || COMMERCIAL_TERMS.test(analysis.redline)) ? REDLINE_REVIEW_NOTICE : undefined;
+  if (!notice) return analysis;
   // Retain the response contract/size limit and never truncate inside a token.
-  const room = 4000 - REDLINE_REVIEW_NOTICE.length - 2;
+  const room = 4000 - notice.length - 2;
   const explanation = analysis.explanation.slice(0, room).replace(/\[[^\]]*$/, '').trimEnd();
-  return { ...analysis, redline: '', explanation: `${REDLINE_REVIEW_NOTICE}\n\n${explanation}` };
+  return { ...analysis, redline: '', explanation: `${notice}\n\n${explanation}` };
 }
 
 // Same placeholder grammar as privacy-engine/placeholders.ts, with alphabetic party suffixes.
