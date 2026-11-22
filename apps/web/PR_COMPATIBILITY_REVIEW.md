@@ -114,3 +114,49 @@ Local evidence is preserved on codex/compat-engine-import-20261122-1257 at
 No production implementation changes were made during this review. Integration
 approval remains blocked pending corrections/retests; existing fixture passes
 alone do not close these findings.
+
+## Independently prepared candidate corrections — not adopted or deployed
+
+To reduce author work, a second disposable checkout preserves the original
+failure checkout and prepares minimal corrections on local branch
+codex/compat-candidate-fixes-20261122 at d2613f7. No teammate branch is changed.
+
+[PR_COMPATIBILITY_CANDIDATE.patch](PR_COMPATIBILITY_CANDIDATE.patch) is an optional
+patch against the combined checkout AFTER applying PR_COMPATIBILITY_REPROS.patch:
+
+```sh
+git apply --check apps/web/PR_COMPATIBILITY_REPROS.patch
+git apply apps/web/PR_COMPATIBILITY_REPROS.patch
+# The six original review cases fail here, as documented above.
+git apply --check apps/web/PR_COMPATIBILITY_CANDIDATE.patch
+git apply apps/web/PR_COMPATIBILITY_CANDIDATE.patch
+```
+
+Both candidate forward-apply checking against the original failure checkout and
+reverse checking against the candidate checkout pass. Review the patch before
+applying; these commands are for a disposable combined checkout matching the
+pinned heads, not an arbitrary working tree with local edits.
+
+Candidate changes:
+- Rule coverage uses actual rule-derived names/aliases and complete contact
+  matches. Partial address coverage stays restricted to addresses, preventing an
+  email/path word from claiming independent person/company-name coverage.
+  Coverage is checked after defined short aliases are registered. A new long-
+  company short-form control initially failed in the candidate; this ordering
+  correction fixes it. That was a candidate-only failure, separate from the
+  original six findings.
+- Generic splitting preserves bare numeric lines while retaining explicit
+  Page N / Page N of M / dash-delimited page furniture handling.
+- Import completion uses an import generation and captured ReviewSession snapshot.
+  Intervening edits/reviews cancel completion with an explicit local message;
+  an older import cannot overwrite a newer import or reset its loading/error state.
+
+Candidate verification: 326 web tests + 112 engine tests = 438 passes, including
+all original six regressions, five additional positive/concurrency controls and
+all twelve imported fixtures. Core typecheck and production typecheck/build pass.
+No live model calls, browser end-to-end import checks or deployment were performed.
+
+This proves the candidate against the controlled cases, not adoption into #32/#33,
+complete parser correctness, real Nano behavior or readiness to deploy the combined
+branches. The author still needs to review/adopt corrections and retest the actual
+PR heads. The existing deployed app and disabled chat runtime remain unchanged.
