@@ -1,8 +1,9 @@
 # Clause Guard execution checklist
 
-Current checkpoint: November 21, 2026 (America/New_York).
+Current checkpoint: November 22, 2026 (America/New_York).
 Historical increments follow; the latest increment controls the active gate.
-Current gate: A, content/sample acceptance and complete hosted review.
+Current gate: A, branch acceptance complete within documented scope; maintainer
+review/merge and the issue #30 main verification remain open.
 
 The user has requested implementation of the full project across web, iOS and
 Android, following the existing roadmap. Before each step, publish its checklist
@@ -996,10 +997,11 @@ Checklist:
   attempt as inconclusive. Production unchanged by this dev-only transport fix.
 - [x] Pass 225 web tests and core/web typechecks/build after the recipient guard;
   prior unchanged engine (94) and Firebase (nine) checks remain recorded.
-- [ ] Verify ordinary offline content/restoration. Preview prepared; native Chrome
-  reports no window and supported extension APIs lack network emulation. No
-  network change or offline send made. Visible Chrome window requested.
-- [ ] Complete hosted review only if prerequisite checks pass.
+- [x] Verify ordinary offline content/restoration: completed November 22 after
+  restoring native control and correcting the observed incomplete draft. The
+  earlier no-window/prepared-only blocker remains in the historical evidence.
+- [x] Complete hosted review: November 22 actual cloud 4/4 plus edit clearing;
+  inspect degraded masking warning without clearing it.
 - [x] Publish reviewed source/release evidence and verify the fetched application
   tree at 923883b; deploy verified no-billing Hosting-only build. Final root
   tracker upload/full-tree verification are reported in the PR checkpoint.
@@ -1026,13 +1028,13 @@ visible window. A human action was requested only to expose a Chrome window for
 the isolated DevTools test/diagnosis. Do not advance Gate B while this is blocked.
 
 Next required checks, in order within Gate A:
-- [ ] Restore visible native Chrome control and diagnose the pending local mask;
-  retain it as inconclusive if its result cannot be recovered. No blind resend.
-- [ ] Complete fresh v5 hosted preview/approval/content/restoration and edit clearing.
-- [ ] Verify one ordinary general clause offline with actual device source and
-  restored values; restore the tab's network setting afterwards.
-- [ ] Run and inspect a uniform v5 six-sample matrix without changing policy
-  between rows. Keep the v4 60/60 and focused checks separate.
+- [x] Restore native control and inspect the recovered 185,806 ms degraded mask.
+  Its cause was not captured; no blind resend was made.
+- [x] Complete v5 hosted preview/approval/content/restoration and edit clearing.
+- [x] Verify one ordinary general clause offline with actual device source and
+  restored values, incomplete draft visibly withheld; No throttling restored.
+- [x] Run and inspect uniform v5 six-sample matrix on frozen 3f096b6. Keep the
+  earlier v4 60/60 and focused checks separate.
 - [x] Update draft PR #31 title/description around current scope and tag Likhil
   for review; prepare the verified publication checkpoint. Close completed
   project tabs while retaining the pending hosted-mask handoff. Gate B's local
@@ -1045,3 +1047,76 @@ reset, force push, branch deletion or main merge occurred. PR #31 stays draft.
 235 web tests and build pass; remaining acceptance boxes above are intentionally
 open. Finished diagnostic/billing tabs are closed; the unresolved hosted-mask
 page is retained as a handoff. No further model request was made while blocked.
+
+## November 22: resumed hosted/offline acceptance and draft preservation
+
+- [x] Restore native Chrome access; recover the old preview rather than resend.
+  Mask completed after 185,806 ms with patterns-only/review warning; cause not
+  captured. Inspect all four fictional clauses/ten values without clearing it.
+- [x] Recheck no-billing/free model pricing; approve exact preview once. Hosted
+  grounding-v5 cloud 4/4 has correct contact scope and source-based printed-name
+  review. Restore all local values; verify editing clears preview/approval/results.
+- [x] Mask ordinary one-clause lease dates on device, inspect two placeholders,
+  select only the tab Offline, verify cloud failure/zero bytes, actual device
+  source and both dates restored. Restore and verify No throttling afterwards.
+  Runtime 1/1, but content FAILED: date-only replacement dropped the end date.
+- [x] Two provider replay regressions fail before correction; visibly withhold
+  drafts omitting source references without replacing prose or retrying. Keep
+  complete-reference noncommercial rewrites and strict validation first.
+- [x] 238 web tests, core typecheck and production typecheck/build pass. Prompts,
+  schemas, configured model, grounding v5 and privacy boundaries unchanged.
+- [x] Verify corrected ordinary offline behavior once on the tested deployed
+  build: actual device 1/1, both dates restored, incomplete draft visibly withheld.
+  Cloud request blocked/zero bytes; No throttling restored. This is safe display,
+  not improved model drafting. Current entry index-Cr3HSrZw.js verified live.
+- [x] Publish source/evidence, verify fetched application tree at 4d7b67a, update
+  PR #31 and close finished test tabs. Full-tree/root verification follows in
+  the final PR checkpoint.
+
+New teammate branches are preserved, not merged: engine-masking-gaps at 3e90529
+(masking patterns/review warning changes), docs-import at 1a6b334 (local PDF/DOCX,
+section splitting, twelve fixtures). Main remains 65152ce and PR #31 has no new
+reviewer comment at this checkpoint. Review these branches before Gate B/integration;
+do not overwrite their work. Final-policy full matrix remains an unchecked Gate A
+item; the v4 60/60 cannot be relabeled. Long/degraded masking remains a reliability
+limitation, not a new pass or a proven consequence of window visibility.
+
+## November 22: final branch matrix and team v2 priorities
+
+- [x] Run all six samples on frozen analyzer 3f096b6 without changing policy:
+  actual cloud lease 10/10, freelance 10/10, offer 11/11, SaaS 10/10, NDA 10/10,
+  note 9/9. Failed empty and all drafts empty. 50 general, nine labeled signatory,
+  one labeled guarantee. Preserve broad/redundant-question quality caveats.
+- [x] Complete current-policy hosted flow/restoration/edit clearing and ordinary
+  guarded offline restoration, retaining degraded-mask and incomplete-draft evidence.
+- [x] Publish final source/evidence and verify the fetched application tree at
+  4d7b67a; post #30 results/dependencies, update PR #31 and close completed test
+  tabs. The final root upload/full-tree check is reported in the PR checkpoint.
+- [ ] Likhil reviews/merges #31 when approved; verify and run the cloud checks on
+  main before closing #30's explicitly main-based requirement. No agent main merge.
+
+Issue #30 supersedes older assumed owner priorities: team v2 target is November 23
+at 2:59 AM Eastern (November 22, 11:59 PM Pacific). Our assigned scope is six-sample
+cloud acceptance, general lease path, clearly preliminary offline results, cloud
+chat (#9/#13), and Hosting after merges. No main success is inferred from this branch.
+
+Do not duplicate the new teammate work: review #32 (3e90529 engine masking gaps)
+and #33 (1a6b334 local PDF/DOCX plus twelve fixtures) for integration/compatibility
+before the import gate. Both are unmerged and preserved. Main remains 65152ce.
+
+Next Cloud AI step after the acceptance gate: chat #9/#13 using the confirmed
+engine-issued frozen context/question tickets, per-question masked approval,
+atomic one-use consumption, current-revision checks, masked-only bounded history,
+exact placeholder/clause-citation validation and local restoration. Likhil confirmed
+the contract in #13 but the engine APIs are not implemented; Sai's UI confirmation
+is still outstanding. Request concrete delivery in #30; never remask a question
+with document mask(), fabricate approval tickets, or enable chat before the real
+question-masking privacy checks pass. Keep mobile ownership with Aarush (#17/#30).
+
+Final publication handoff: #30 now contains the branch results and explicitly
+open main requirement, with Likhil tagged for #31 review/merge and chat engine
+delivery, Sai for #13 UI confirmation, and Aarush for mobile PR/device evidence.
+Main is not modified by the agent. The runtime source/tests/templates/release
+evidence match 4d7b67a; only this final tracker update follows. Keep the long-mask,
+broad-question and generated-draft limitations visible; do not mark native,
+masked chat, import integration or main acceptance complete from branch results.
