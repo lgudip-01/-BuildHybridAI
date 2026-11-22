@@ -1191,3 +1191,34 @@ failure. Runtime implementation and deployed app remain unchanged. Do not approv
 integration merely because the original twelve fixtures pass. Retest the author's
 corrected heads before advancing; all local evidence is preserved at the documented
 temporary worktree/review commit. No main merge, force push, reset or branch deletion.
+
+## November 22: optional independent candidate corrections
+
+- [x] Preserve original failure evidence at 4a81662 and create a second isolated
+  candidate checkout; do not modify teammate branches or deployed source.
+- [x] Correct rule coverage, preserve standalone numeric values, and make import
+  completion generation/snapshot-aware with an explicit cancellation outcome.
+- [x] Keep actual short-name/address coverage, explicit page markers and latest-
+  import behavior covered. An added long-company short-form control failed first;
+  checking coverage after defined-alias registration corrected that candidate issue.
+- [x] Candidate full verification: 326 web + 112 engine = 438 passes, core typecheck
+  and production typecheck/build pass, all twelve imported fixtures retained.
+- [x] Preserve candidate at d2613f7 and create PR_COMPATIBILITY_CANDIDATE.patch,
+  checked forwards against original failure checkout and backwards against candidate.
+- [x] Publish candidate artifact/report at fetched 715a560; notify owners in
+  #32/#33 and #30 (comments 7083669351, 7083673650, 7083681170). Final root upload/
+  full-tree verification follows in PR #34 checkpoint; close finished tabs.
+  Candidate corrections are review material, not adopted/deployed behavior.
+- [ ] Author review/adoption and actual-head retests before approving integration.
+
+Both original failure and candidate worktrees/commits remain available. Only
+review documentation/patch artifacts are added to the published chat branch;
+its runtime remains disabled and production source remains unchanged.
+
+Candidate handoff complete: all 438 cases pass only on the isolated candidate,
+with engine/core typechecks and production typecheck/build passing. Original
+six failures and both local worktrees remain preserved. The actual #32/#33 heads
+still require author review/adoption and retest. The engine coverage correction
+changes the review flag; it does not automatically discover the intentionally
+missed name or certify fully redacted input. Keep actual chat activation, main
+acceptance, real browser/Nano checks and phone evidence as separate open gates.
