@@ -1,6 +1,8 @@
 # Clause Guard execution checklist
 
-Checkpoint: November 19, 2026 (America/New_York).
+Current checkpoint: November 21, 2026 (America/New_York).
+Historical increments follow; the latest increment controls the active gate.
+Current gate: A, content/sample acceptance and complete hosted review.
 
 The user has requested implementation of the full project across web, iOS and
 Android, following the existing roadmap. Before each step, publish its checklist
@@ -960,3 +962,86 @@ application, local templates and release evidence match fetched 872f39e before
 this final root update. No final-policy full-matrix or hosted-inference success
 is claimed. Close the publication tab after final verification; other completed
 project tabs have been closed as requested.
+
+
+## November 21: concise policy v3 and general signatory fields (in progress)
+
+Checklist:
+- [x] Refresh refs/PR #31 discussion; published c0230e1 matches the clean starting
+  tracked tree. No newer maintainer runtime change supersedes the work.
+- [x] Replace global legal-topic lists with concise source-fact instructions;
+  retire cached v1/v2 prompts while retaining independent false kill switches.
+  Configure cloud temperature 0; no model/provider/API change.
+- [x] Six migration/provider checks fail before correction, then pass. Known
+  overclaim guards and actual high-risk source-supported analysis remain covered.
+- [x] Fresh policy-v3 freelance c6/c9/c10 returns 2/3; ownership improves, but
+  signature wording still fails. Do not erase or relabel that observation.
+- [x] Add a bounded signatory/identification FIELD grammar across layouts, not an
+  exact sentence or named sample. Unknown/operative fields stay on ordinary
+  analysis. Explicitly labeled application-authored source quote, fixed neutral
+  questions and empty draft are enforced by both schemas and equality checks.
+  Provider noncompliance remains a failure, never a substituted answer.
+- [x] Pass 218 web tests, core/web typechecks; tests include unseen token IDs and
+  field layouts, lowercase/unknown tokens, unknown titles, operative additions,
+  input bounds and cloud/device schema enforcement.
+- [x] Verify affected freelance/SaaS clauses under the new field format; preserve
+  the intermediate cap-comparison failure and its subsequent guard/correction.
+- [x] Run/review all six fixed samples on frozen analyzer 5b0a147: actual cloud
+  60/60 validation (50 general, nine signatory, one guarantee). Content review
+  found an amount-as-recipient deposit question; this is not a perfect content
+  pass. New cloud/device replay failures precede its narrow guard; one fresh
+  post-guard rent/deposit batch passes actual cloud 2/2. All prior runs retained.
+- [x] Correct the dev acceptance WebSocket reconnect reset, prove selection
+  survives a server restart without inference, retain the interrupted lease
+  attempt as inconclusive. Production unchanged by this dev-only transport fix.
+- [x] Pass 225 web tests and core/web typechecks/build after the recipient guard;
+  prior unchanged engine (94) and Firebase (nine) checks remain recorded.
+- [ ] Verify ordinary offline content/restoration. Preview prepared; native Chrome
+  reports no window and supported extension APIs lack network emulation. No
+  network change or offline send made. Visible Chrome window requested.
+- [ ] Complete hosted review only if prerequisite checks pass.
+- [x] Publish reviewed source/release evidence and verify the fetched application
+  tree at 923883b; deploy verified no-billing Hosting-only build. Final root
+  tracker upload/full-tree verification are reported in the PR checkpoint.
+  Close completed task tabs; retain only the pending hosted-mask handoff.
+
+Pricing/actual project state were rechecked before inference: standard configured
+model input/output remain free and the project has no linked billing account.
+Only approved masked fixture clauses were sent; no unchanged automatic retry.
+The field review labels its application-authored guidance visibly and does not
+prove actual signing, authority or legal correctness. It is not free-form model
+reasoning. The existing bounded guarantee format remains separately labeled.
+
+Hosted follow-up: the default four-clause demo returned cloud 4/4 and passed
+edit clearing, but content review caught contact-scope and compound Name/CEO/entity
+signing claims. Seven checks failed before extending the general field grammar
+and adding a narrow contact-scope guard/instructions. Grounding v5, 235 web tests
+and build now pass; a new hosted check is pending. The 60/60 matrix above is
+explicitly the prior v4 baseline and must not be relabeled as a v5 full matrix.
+
+Current deployment: official Hosting-only CLI succeeded, live entry
+index-BkV4srSd.js matches the tested build. Fresh hosted v5 masking remains
+pending (no preview, no cloud approval/send); native Chrome also reports no
+visible window. A human action was requested only to expose a Chrome window for
+the isolated DevTools test/diagnosis. Do not advance Gate B while this is blocked.
+
+Next required checks, in order within Gate A:
+- [ ] Restore visible native Chrome control and diagnose the pending local mask;
+  retain it as inconclusive if its result cannot be recovered. No blind resend.
+- [ ] Complete fresh v5 hosted preview/approval/content/restoration and edit clearing.
+- [ ] Verify one ordinary general clause offline with actual device source and
+  restored values; restore the tab's network setting afterwards.
+- [ ] Run and inspect a uniform v5 six-sample matrix without changing policy
+  between rows. Keep the v4 60/60 and focused checks separate.
+- [x] Update draft PR #31 title/description around current scope and tag Likhil
+  for review; prepare the verified publication checkpoint. Close completed
+  project tabs while retaining the pending hosted-mask handoff. Gate B's local
+  PDF/DOCX fixtures remain blocked by the unchecked acceptance items above.
+
+Publication checkpoint: source, templates, tests and release evidence match
+fetched 923883b, excluding this final tracker update. The upstream evaluation
+PDF is untouched. Local and browser-created histories remain preserved; no
+reset, force push, branch deletion or main merge occurred. PR #31 stays draft.
+235 web tests and build pass; remaining acceptance boxes above are intentionally
+open. Finished diagnostic/billing tabs are closed; the unresolved hosted-mask
+page is retained as a handoff. No further model request was made while blocked.
