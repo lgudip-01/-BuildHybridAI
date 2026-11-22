@@ -44,6 +44,26 @@ beforeEach(() => {
 });
 
 describe('approved web analysis', () => {
+  it.each(['in_cloud', 'on_device'])('withholds the recorded date-only draft without losing the valid preliminary review on %s', async source => {
+    const clause = '2. Term. The lease starts on [DATE_1] and ends on [DATE_2].';
+    const data: Analysis = {clauseId:'c1', risk:'low', explanation:'The lease starts on [DATE_1] and ends on [DATE_2].', redline:'[DATE_1]', questions:['Are the dates in chronological order?']};
+    mocks.generate.mockResolvedValueOnce(output('c1', source, data));
+    const result = await new WebBridge(ai).analyze(batch(1, clause));
+    expect(result.results).toHaveLength(1);
+    expect(result.results[0]!.redline).toBe('');
+    expect(result.results[0]!.explanation).toContain('omits approved source references');
+    expect(result.results[0]!.explanation).toContain(data.explanation);
+    expect(result.results[0]!.questions).toEqual(data.questions);
+    expect(result.failed).toEqual([]);
+    expect(mocks.generate).toHaveBeenCalledTimes(1);
+  });
+
+  it('preserves a noncommercial rewrite with every source reference retained', () => {
+    const clause = 'The term starts on [DATE_7] and ends on [DATE_9].' as CleanText;
+    const data = {...answer(), redline:'The term runs from [DATE_7] through [DATE_9].'};
+    expect(applyCommercialRedlineGuard(data, clause)).toBe(data);
+  });
+
   it.each(['in_cloud', 'on_device'])('withholds the recorded mandatory-communications overclaim on %s', async source => {
     const clause = 'Notices go to [ADDRESS_1]. Call [PHONE_1].';
     mocks.generate.mockResolvedValueOnce(output('c1', source, {clauseId:'c1', risk:'medium', explanation:'Notices must be sent to [ADDRESS_1] and communications must be made by calling [PHONE_1].', redline:'', questions:[]}));
