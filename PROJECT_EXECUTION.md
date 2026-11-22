@@ -5,6 +5,10 @@ Historical increments follow; the latest increment controls the active gate.
 Current gate: A, branch acceptance complete within documented scope; maintainer
 review/merge and the issue #30 main verification remain open.
 
+User authorized independent cloud-chat adapter implementation on November 22
+while the teammate-dependent gates remain open. See the latest increment below;
+this does not authorize enabling chat or bypassing the engine approval boundary.
+
 The user has requested implementation of the full project across web, iOS and
 Android, following the existing roadmap. Before each step, publish its checklist
 and uncertainties. Do not advance until every required check passes. Record
@@ -1120,3 +1124,39 @@ Main is not modified by the agent. The runtime source/tests/templates/release
 evidence match 4d7b67a; only this final tracker update follows. Keep the long-mask,
 broad-question and generated-draft limitations visible; do not mark native,
 masked chat, import integration or main acceptance complete from branch results.
+
+## November 22: independent cloud-chat adapter (user-authorized)
+
+Checklist:
+- [x] Recheck clean tree, refs, #13 confirmation and #30 comments before editing.
+  No new engine delivery or UI confirmation. Preserve analyzer/teammate branches.
+- [x] Isolate on codex/cloud-chat-adapter from published e2cde29; no main merge.
+- [x] Implement typed masked-only chat bridge, fixed source prompt, strict
+  placeholder/citation/schema validation and bounded immutable masked history.
+- [x] Enforce first approval check, post-config recheck, atomic consume immediately
+  before dispatch, post-dispatch current checks, cross-wrapper serialization,
+  clear/timeout cancellation, stale/late discard and fixed sanitized errors.
+- [x] Keep production disabled through fail-closed chatGuard functions; no issuer
+  or injectable production authorizer. App/production entry does not import chat.
+- [x] 58 new chat tests pass; 296 total web tests, core typecheck and production
+  typecheck/build pass. Production JS hash remains byte-identical to the live
+  index-Cr3HSrZw.js. No deployment, live inference or cloud setting change.
+- [x] Write CHAT_INTEGRATION.md with confirmed binding contract, limits, tested
+  scope and six-sample real acceptance cases. Mock passes are not live chat proof.
+- [x] Publish separate stacked draft PR #34 (base codex/content-quality-v3,
+  head codex/cloud-chat-adapter). Source/tests/handoff match fetched e6e6830
+  excluding this final tracker update. Tag Likhil/Sai with the concrete #13
+  engine/UI binding requirements in #30. Full-tree check follows in PR checkpoint.
+
+Chat runtime remains blocked: real engine ticket/context/question-mask/restoration
+exports, UI lifecycle confirmation/binding, actual outgoing-payload inspection,
+six-sample cited-answer/variant privacy checks, and current no-billing/App Check
+verification before any model call. PR #31/main verification and #32/#33 integration
+remain separate open gates. This independent code does not close those checkboxes.
+
+Independent adapter/testing step complete within this scope. PR #34 is draft,
+production guard still rejects all chat, no live inference/deployment or paid
+service was enabled, and production JS is byte-identical to the existing release.
+All old local branches and teammate work remain preserved. Next independent task
+is compatibility review of #32/#33 in isolation; actual chat enablement continues
+to require engine/UI delivery and real privacy/content acceptance.
