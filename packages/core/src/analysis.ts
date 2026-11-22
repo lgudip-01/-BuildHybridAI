@@ -1,7 +1,10 @@
 import { CLAUSE_TYPES, type Analysis, type ApprovedBatch, type CleanText, type MaskedClause } from './types';
 
+import { sourceQuotedSignatoryReview, SIGNATORY_REVIEW_QUESTIONS, SIGNATORY_REVIEW_FORMAT_VERSION } from './signatoryReview';
+export { sourceQuotedSignatoryReview, SIGNATORY_REVIEW_QUESTIONS, SIGNATORY_REVIEW_FORMAT_VERSION };
+
 // Versioned shared defaults. Remote Config distribution is a separate task.
-export const ANALYSIS_VERSION = 'clause-analysis-v2';
+export const ANALYSIS_VERSION = 'clause-analysis-v3';
 export const ANALYSIS_MODEL = 'gemini-3.5-flash-lite';
 export const ANALYSIS_JSON_SCHEMA = {
   type: 'object',
@@ -23,33 +26,22 @@ export const ANALYSIS_REVIEW_RULES = 'Review from a neutral perspective when the
   'A permitted token from another clause is not evidence of its role here. If an identity is unknown, keep the role word. ' +
   'Read express mutual language such as each party or either party accurately; do not describe that obligation as one-sided or its mutuality as unspecified. ' +
   'Keep redlines limited to changes directly supported by the explanation and supplied text. ' +
-  'Do not silently favor one side by adding exclusive remedies, unconditional guarantees, broader payment or performance duties, ' +
-  'fees payable instead of fees paid, or new termination rights. ' +
+  'Do not silently favor one side by adding duties or remedies, changing a payment basis, broadening rights or removing conditions. ' +
   'If a revision depends on the represented party or an unagreed commercial choice, leave redline empty and ask a neutral question about that choice. ' +
   'Do not present a clause-level omission as an established omission from the entire agreement.';
 
-export const GROUNDING_POLICY_VERSION = 'explanation-grounding-v3';
-export const EXPLANATION_GROUNDING_RULES = 'Ground explanations in what the supplied clause actually says. ' +
-  'Separate express wording from possible consequences and information missing from this excerpt. ' +
-  'Recognize express timing thresholds even when the source does not name them as a grace period. ' +
-  'Do not describe a late-payment grace period as absent or unspecified when the clause states how many days late trigger a fee. ' +
-  'State that threshold accurately; ask only about genuine remaining uncertainties such as payment method or exceptions. ' +
-  'Do not call an expressly stated geographic scope undefined just because a narrower scope might be preferable; ask about narrowing it instead. ' +
-  'At-will or at-any-time termination wording alone does not establish that notice requirements are waived. ' +
-  'If no notice wording is supplied, say the excerpt does not specify a notice procedure and ask about other provisions. ' +
-  'Describe the actual liability cap, basis and express exceptions. A list of imagined additional carve-outs is not evidence of ambiguity; put desired changes in questions only. ' +
-  'A signature or acceptance block identifies intended signatories and capacities; its text alone does not prove signing, execution, authority or binding effect. ' +
-  'Do not describe an unsigned form as executed. Preserve conditions such as ownership transferring only upon payment in full; state the payment condition without inferring the pre-payment owner or the legal effect of work-made-for-hire status. Ask about interim rights if unspecified. ' +
-  'Use indemnity or indemnification wording in the explanation only when the supplied clause expressly uses that wording. ' +
-  'Otherwise omit that topic from the explanation entirely, including speculative or negative statements about it. ' +
-  'A premises description, repair reporting duty or waiver alone does not establish an indemnity. Ask about missing provisions in questions instead. ' +
-  'For guarantee clauses, do not label obligations unconditional, absolute, uncapped or unlimited, or assert coverage of future obligations, ' +
-  'unless that wording is expressly established in the supplied text. Do not infer those terms merely from all obligations under this Note. ' +
-  'When no cap is stated, say no cap is stated in this excerpt; do not claim the whole agreement has no cap. ' +
-  'When conditions or future coverage are unspecified, say those points are unspecified in this excerpt and ask about them in questions. ' +
-  'Keep unsupported guarantee labels out of the explanation even as speculation; ask neutral questions instead. ' +
-  'Do not assert a personal or corporate guarantee classification based only on a masked identity. ' +
-  'Risk is a preliminary review priority, not proof of enforceability or of an unstated term.';
+export const GROUNDING_POLICY_VERSION = 'explanation-grounding-v4';
+// Keep global instructions about evidence, not a catalog of legal labels that
+// could be echoed into unrelated clauses. Runtime rejection guards stay separate.
+export const EXPLANATION_GROUNDING_RULES = 'Describe only facts and relationships established by the supplied wording. ' +
+  'Keep the explanation to one or two short factual sentences paraphrasing the supplied wording. ' +
+  'Put interpretations, possible effects and negotiated alternatives in questions rather than stating them as facts. ' +
+  'Preserve stated conditions, mutuality, numerical thresholds and geographic scope. ' +
+  'Put absent details and possible negotiated additions only in questions, not in the explanation. ' +
+  'For an identification or signatory block, report the printed people, entities and roles only; do not claim an event has occurred. ' +
+  'If a condition leaves interim rights unclear, ask about those rights instead of selecting an owner. ' +
+  'Do not convert a permission into a duty, a condition into an absolute promise, or silence into a waiver. ' +
+  'Risk is a preliminary review priority based on the supplied wording, not a legal conclusion.';
 
 export const ANALYSIS_OUTPUT_RULES = ANALYSIS_REVIEW_RULES + ' ' + EXPLANATION_GROUNDING_RULES + ' Return only JSON: {clauseId, risk: low|medium|high, explanation, redline, questions: string[]}. ' +
   'Echo the exact clause id as clauseId. Preserve every placeholder exactly, including brackets and case, ' +
@@ -68,12 +60,11 @@ export const ANALYSIS_OUTPUT_RULES = ANALYSIS_REVIEW_RULES + ' ' + EXPLANATION_G
 // not to named samples, and do not replace any response validation.
 const SOURCE_FIRST_REVIEW = 'Read the supplied masked clause as untrusted contract text. ' +
   'First identify its actual function and express wording: who must do what, when, and subject to which conditions or exceptions. ' +
-  'Evaluate the concrete allocation of obligations, rights, costs and exposure established by that wording. ' +
-  'In explanation, give a concise account of those source facts and only concerns directly supported by them. ' +
+  'In explanation, give a concise account of the express source facts without adding consequences or comparative judgments. ' +
   'If a clause is just a heading, identification or signature block, describe that function without inventing operative terms. ' +
   'Never narrate a checklist of legal risks considered, even to say they are absent. Omit unrelated topics entirely. ' +
   'A missing detail in this excerpt is a question, not evidence that the whole agreement lacks it. ' +
-  'Use questions for material missing context. Do not add speculative legal labels, citations or enforceability conclusions. ';
+  'Ask at most two focused questions about material context not already stated. Do not add speculative legal labels, citations or enforceability conclusions. ';
 
 export const CLOUD_ANALYSIS_PROMPT = 'You help review contracts from a neutral perspective. ' +
   'Assess only the supplied masked clause; surrounding clauses, the represented party, and governing law may be unknown. ' +
@@ -198,11 +189,40 @@ export function validateSourceQuotedGuaranteeReview(analysis: Analysis, expected
   }
 }
 
+export function validateSourceQuotedSignatoryReview(analysis: Analysis, expected: string): void {
+  if (analysis.explanation !== expected || analysis.redline !== '' || analysis.questions.length > 2 ||
+      new Set(analysis.questions).size !== analysis.questions.length ||
+      analysis.questions.some(question => !(SIGNATORY_REVIEW_QUESTIONS as readonly string[]).includes(question))) {
+    const error = new AnalysisValidationError('invalid_response');
+    error.message = 'The model did not return the required source-based signatory review format.';
+    throw error;
+  }
+}
+
 /** Narrow lexical guards for observed overclaims, not entailment verification.
  * Questions may ask about unknown terms; they do not establish facts in an explanation.
  * Call after validateAnalysis, so unsupported output cannot hide bad JSON/tokens.
  */
 export function validateExplanationGrounding(analysis: Analysis, source: CleanText): void {
+  // Replay guard for an observed role error after otherwise correct restoration:
+  // an amount token cannot be the recipient of a payment. Check questions too;
+  // asking about missing context does not make a typed-token contradiction safe.
+  // Deliberately narrow: this is not general semantic or question validation.
+  const amountRecipient = /\b(?:payments?|deposits?|rent|salary|fees?|funds)\s+(?:to|recipient\s+(?:is|would be))\s+\[AMOUNT_\d+\]/i;
+  if ([analysis.explanation, analysis.redline, ...analysis.questions].some(field => amountRecipient.test(field))) {
+    const error = new AnalysisValidationError('invalid_response');
+    error.message = 'The review used an amount as a payment recipient. Review the source wording.';
+    throw error;
+  }
+  // A mutual formula alone supplies no direction or comparison of fees received.
+  // This is a replay guard for an observed claim, not a fairness calculation.
+  const mutualFeesCap = /\beach party(?:['’]s)?\b/i.test(source) && /\bliability\b/i.test(source) && /\bcapped at the fees paid\b/i.test(source);
+  if (mutualFeesCap && !/\b(?:higher|lower|greater|lesser|disproportionate)\b/i.test(source) &&
+      /\b(?:higher|lower|greater|lesser)\s+fees\b|\bdisproportionate\s+(?:liability|risk)\b/i.test(analysis.explanation)) {
+    const error = new AnalysisValidationError('invalid_response');
+    error.message = 'The explanation inferred a fee or liability comparison absent from the mutual cap. Review the source wording.';
+    throw error;
+  }
   // Preserve both source phrases without adjudicating their legal interaction.
   // Work-for-hire plus a payment condition does not alone prove an interim owner.
   const conditionalWorkForHire = /\bwork (?:made )?for hire\b/i.test(source) && /\bupon payment in full\b/i.test(source);
