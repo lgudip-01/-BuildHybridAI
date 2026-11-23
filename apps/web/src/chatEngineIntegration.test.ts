@@ -195,3 +195,23 @@ it('deletion discards pending chat, isolates vaults and clears manual choices fo
   const next = session.getSnapshot().masked; expect(next).not.toHaveProperty('manuallyEdited');
   if (next?.ok) expect(next.clauses[0]!.text).toContain('bluebird');
 });
+
+
+it('keeps case variants and currency-free grouped values out of actual projected provider bodies and history', async () => {
+  const session = new ReviewSession(bridge, 'Acme Corp must pay $12,500 within 30 days.');
+  await session.mask(); session.approveForChat();
+  const chat = session.openChat(new CloudChatBridge({app:{}} as AI));
+  for (const question of ['Does acme pay 12,500?', 'Does ACME owe 12,500?']) {
+    chat.editQuestion(question); await chat.prepare();
+    expect(chat.getSnapshot().phase).toBe('review');
+    expect(chat.getSnapshot().preview?.text).not.toMatch(/acme|12,500/i);
+    await chat.approveAndSend();
+    expect(chat.getSnapshot().phase).toBe('editing');
+  }
+  expect(sdk.generate).toHaveBeenCalledTimes(2);
+  for (const [body] of sdk.generate.mock.calls) {
+    expect(body).not.toMatch(/acme|12,500/i);
+    expect(JSON.parse(body).question.text).toContain('[AMOUNT_2]');
+  }
+  expect(JSON.parse(sdk.generate.mock.calls[1]![0]).history).toHaveLength(2);
+});
