@@ -47,5 +47,6 @@ export function useScroller(): void {
 /** Smooth-scrolls to a CSS selector such as '#try'. Falls back to the browser's own scroll. */
 export function scrollToTarget(selector: string): void {
   if (scroller) scroller.scrollTo(selector, { offset: -72, duration: 1.2 });
-  else document.querySelector(selector)?.scrollIntoView({ behavior: 'smooth' });
+  // Without the scroller (reduced motion, or before it starts) jump straight there, as the user asked for less motion.
+  else document.querySelector(selector)?.scrollIntoView({ behavior: prefersReducedMotion() ? 'auto' : 'smooth' });
 }

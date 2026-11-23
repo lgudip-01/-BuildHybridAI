@@ -8,15 +8,15 @@ const STEPS = [
   },
   {
     title: 'Mask',
-    body: 'Names, amounts, dates, addresses and account numbers become placeholders like [PARTY_A]. The key to put them back stays in your phone’s secure storage.',
+    body: 'Detected names, amounts, dates, addresses and account numbers become placeholders like [PARTY_A]. The values needed to put them back stay on this device in encrypted local storage: the browser’s on the web, the Keychain or Keystore on a phone. Masking can miss text, so the next step matters.',
   },
   {
     title: 'Check and approve',
-    body: 'A leak check runs before anything leaves. If something slipped through, the send is blocked. You can read the masked text first.',
+    body: 'A leak check looks for sensitive text that survived masking and blocks the send if it finds any. It is a safety net, not proof that nothing was missed. You must review the masked preview and approve it before anything is sent.',
   },
   {
     title: 'Analyze and restore',
-    body: 'The cloud model sees only masked text and returns risk levels, plain-English explanations and suggested edits. The real names are put back on your device.',
+    body: 'Once you approve, the cloud model receives only the masked text and returns risk levels, plain-English explanations and suggested edits. The real names are put back on your device.',
   },
 ];
 
@@ -72,7 +72,7 @@ export function HowItWorks() {
     <section className="how" id="how" ref={ref}>
       <div className="how-head">
         <p className="eyebrow">How it works</p>
-        <h2 className="section-title">Four steps. Nothing sensitive leaves your device.</h2>
+        <h2 className="section-title">Four steps. You approve what leaves your device.</h2>
       </div>
       <ol className="steps">
         <div className="rail" aria-hidden>

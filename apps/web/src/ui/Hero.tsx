@@ -17,7 +17,7 @@ export function Hero() {
       <div className="orb orb-a" data-scroll data-scroll-speed="-0.12" aria-hidden />
       <div className="orb orb-b" data-scroll data-scroll-speed="0.1" aria-hidden />
 
-      <p className="eyebrow hero-fade">Contract review that keeps your secrets</p>
+      <p className="eyebrow hero-fade">Contract review with masking built in</p>
       <h1 className="hero-title">
         <span className="hero-line">
           <span className="hero-line-inner">Read the fine print.</span>
@@ -27,8 +27,9 @@ export function Hero() {
         </span>
       </h1>
       <p className="hero-sub hero-fade">
-        Clause Guard flags risky clauses, explains them in plain English and suggests edits. Names, amounts and
-        account numbers are masked on your device first, so the cloud never sees them.
+        Clause Guard flags risky clauses, explains them in plain English and suggests edits. Detected names, amounts
+        and account numbers are replaced on your device first, and you review the masked text before anything is
+        sent. Masking can miss sensitive text, so check the preview before you approve.
       </p>
       <div className="hero-cta hero-fade">
         <button className="primary big" onClick={() => scrollToTarget('#try')}>
