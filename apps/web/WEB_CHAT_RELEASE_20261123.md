@@ -76,3 +76,19 @@ verify one real synthetic chat answer and source link on the hosted production
 origin with enforced App Check. Record the resulting revision in the PR. Then
 adapt the verified flow into Sai/Aarush's latest UI without discarding their work,
 and complete native device build/testing when toolchains are available.
+
+## Deployment acceptance
+
+Published runtime tree 78b0bb21fad28e5fbed5743df59b0a4ea1c4bb05 exactly matches
+the tested runtime files. PR: https://github.com/lgudip-01/-BuildHybridAI/pull/44 .
+Hosting-only deployment completed November 23, around 15:30 Eastern.
+https://clause-guard-hackathon.web.app returned an actual cloud answer to the
+synthetic Lucia question: $250 to Example Services LLC within 30 days. Its
+#chat-source-c1 link resolves to the approved masked clause, containing only
+PARTY_A/PARTY_B/AMOUNT_1 placeholders. Production App Check remained enforced.
+The diagnostic is absent from the 59-file static production output.
+
+Sai's newly opened #41/#42/#43 were inspected. Next integration covers progress,
+manual mask/reveal/undo, confirmed clause sources and deletion. Manual edits or
+deletion must synchronously invalidate chat/question approvals; deletion clears
+per-document review choices. These features are not part of this deployment.
