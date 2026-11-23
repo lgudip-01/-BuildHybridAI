@@ -6,6 +6,7 @@ import { readClause } from './onDevice';
 import { PlaceholderRegistry } from './placeholders';
 import { findDefinedTerms, findNames, findPatterns, type Span } from './regex';
 import { saveVault } from './vault';
+import { chatSnapshot } from './chatSnapshot';
 
 /**
  * Masks every clause of one document and leak-checks the result.
@@ -87,6 +88,7 @@ export async function mask(docId: string, clauses: Clause[], bridge: AiBridge): 
       needsReview,
     },
     run,
+    chatSnapshot(registry.entries(), coordinated.entities, entities),
   );
 }
 
