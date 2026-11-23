@@ -1,4 +1,5 @@
 import { expect, it, vi } from 'vitest';
+import 'fake-indexeddb/auto';
 import type { AI } from 'firebase/ai';
 import type { ApprovedChatContext, ApprovedChatQuestion } from '@clause-guard/core/chat';
 const mock = vi.hoisted(()=>({factory:vi.fn(),config:vi.fn(),native:vi.fn()}));
@@ -19,7 +20,7 @@ it('real production boundary cannot authorize a forged ticket or make configurat
   expect(mock.config).not.toHaveBeenCalled(); expect(mock.factory).not.toHaveBeenCalled();
 });
 
-it('real native boundary and every engine integration seam remain fail closed', async()=>{
+it('real native boundary and direct engine bindings reject every forged input', async()=>{
   const context=Object.freeze({sessionId:'s',docId:'d',revision:'r',clauses:Object.freeze([])}) as ApprovedChatContext;
   const question=Object.freeze({sessionId:'s',revision:'r',turnId:'t',text:'private raw question',__brand:'approvedChatQuestion'}) as ApprovedChatQuestion;
   await expect(new NativeChatBridge().ask(context,question)).rejects.toMatchObject({code:'not_approved'});
@@ -33,4 +34,25 @@ it('real native boundary and every engine integration seam remain fail closed', 
   await expect(unmaskChatReply(context,question,{} as import('@clause-guard/core/chat').ChatReply)).rejects.toMatchObject({code:'not_approved'});
   expect(()=>new ChatConversation(batch,local,new NativeChatBridge())).toThrow(expect.objectContaining({code:'not_approved'}));
   expect(mock.native).not.toHaveBeenCalled(); expect(mock.config).not.toHaveBeenCalled(); expect(mock.factory).not.toHaveBeenCalled();
+});
+
+it('a genuine approved question cannot set up or dispatch either transport before release', async()=>{
+  const { mask } = await import('@clause-guard/privacy-engine/mask');
+  const { approve } = await import('@clause-guard/privacy-engine/approval');
+  const local: import('@clause-guard/core/types').AiBridge = {
+    onDeviceStatus: async()=> 'unavailable', onDevice: async()=> { throw new Error('No device model'); },
+    analyze: async()=> { throw new Error('No analysis provider'); },
+  };
+  const result = await mask(crypto.randomUUID(),[{id:'c1',index:0,text:'By: Lucia Martinez\nPayment is $100.'}],local);
+  if(!result.ok) throw new Error('Real masking fixture failed');
+  const context=prepareChatContext(approve(result,{reviewed:true}));
+  const draft=await maskQuestion(context,'What must Lucia pay?',local);
+  const question=approveQuestion(context,draft,{reviewed:true});
+  assertChatApproved(context,question);
+  for(const bridge of [new CloudChatBridge({app:{}} as AI),new NativeChatBridge()]) {
+    await expect(bridge.ask(context,question)).rejects.toMatchObject({code:'release_pending'});
+    assertChatApproved(context,question); // Disabled transports do not consume it.
+  }
+  expect(mock.config).not.toHaveBeenCalled(); expect(mock.factory).not.toHaveBeenCalled(); expect(mock.native).not.toHaveBeenCalled();
+  closeChatContext(context);
 });

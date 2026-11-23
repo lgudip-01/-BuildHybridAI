@@ -3,6 +3,8 @@ import type { AI } from 'firebase/ai';
 import type { ApprovedChatContext, ApprovedChatQuestion, MaskedChatContent } from '@clause-guard/core/chat';
 import type { CleanText } from '@clause-guard/core/types';
 import { CHAT_LIMITS, CHAT_PROMPT, ChatError, chatPlaceholders, validateChatContent } from '@clause-guard/core/chat';
+// Transport lifecycle tests only; production's independent release stop stays on.
+vi.mock('./chatRelease', () => ({ assertChatEgressEnabled: () => {} }));
 
 // A TEST-ONLY stand-in for the agreed engine registry. No issuer is exported by
 // production chatGuard.ts; the separate real-guard test verifies it fails closed.
