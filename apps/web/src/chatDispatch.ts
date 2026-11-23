@@ -4,6 +4,7 @@ import {
   type ApprovedChatContext, type ApprovedChatQuestion, type ChatBridge, type ChatReply, type MaskedChatContent,
 } from '@clause-guard/core/chat';
 import { assertChatApproved, assertChatCurrent, consumeChatQuestion } from './chatGuard';
+import { assertChatEgressEnabled } from './chatRelease';
 
 /** Transport implementations cannot issue approval; the engine checks below are unconditional. */
 export interface ChatTransport {
@@ -26,7 +27,7 @@ export class ApprovedChatDispatcher implements ChatBridge {
 
   async ask(context: ApprovedChatContext, question: ApprovedChatQuestion): Promise<ChatReply> {
     // FIRST operation, before config, metadata access, model setup or session lookup.
-    try { assertChatApproved(context, question); } catch (error) { throw sanitizeChatError(error); }
+    try { assertChatApproved(context, question); assertChatEgressEnabled(); } catch (error) { throw sanitizeChatError(error); }
     try { validateInput(context, question); } catch (error) { throw sanitizeChatError(error); }
     const state = this.state(context);
     if (state.closed) throw new ChatError('stale');

@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { CHAT_LIMITS, CHAT_PROMPT, ChatError, type ApprovedChatContext, type ApprovedChatQuestion } from '@clause-guard/core/chat';
 import { ANALYSIS_MODEL } from '@clause-guard/core/analysis';
 import type { CleanText } from '@clause-guard/core/types';
+vi.mock('./chatRelease', () => ({ assertChatEgressEnabled: () => {} }));
 
 // Private TEST-ONLY registry. Production chatGuard still rejects every ticket.
 const mock = vi.hoisted(() => ({ chat: vi.fn(), contexts: new WeakSet<object>(),

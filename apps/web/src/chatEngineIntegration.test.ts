@@ -7,10 +7,9 @@ import { mask } from '@clause-guard/privacy-engine/mask';
 import { loadVault } from '@clause-guard/privacy-engine/vault';
 import { assertChatCurrent, maskQuestion, prepareChatContext } from '@clause-guard/privacy-engine/chat';
 const sdk = vi.hoisted(() => ({ generate: vi.fn(), factory: vi.fn() }));
-// REAL engine functions and private registries. Only the module binding is
-// test-local; production seams/guards remain deliberately unbound and rejecting.
-vi.mock('./chatEngine', async () => await import('@clause-guard/privacy-engine/chat'));
-vi.mock('./chatGuard', async () => await import('@clause-guard/privacy-engine/chat'));
+// Unmocked production bindings and REAL engine authority. Only the outbound
+// release stop and provider/config calls are mocked in these integration tests.
+vi.mock('./chatRelease', () => ({ assertChatEgressEnabled: () => {} }));
 vi.mock('firebase/ai', async original => ({ ...await original<typeof import('firebase/ai')>(), getGenerativeModel: sdk.factory }));
 vi.mock('./analysisConfig', async original => {
   const actual = await original<typeof import('./analysisConfig')>();
