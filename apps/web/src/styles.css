@@ -600,3 +600,8 @@ button:disabled { cursor: default; }
     animation: none !important;
   }
 }
+
+.mask-controls { display: flex; flex-wrap: wrap; align-items: end; gap: 8px; margin-bottom: 12px; }
+.mask-controls label { display: grid; gap: 4px; min-width: 0; }
+.mask-controls input, .mask-controls select { max-width: 100%; font: inherit; color: inherit; background: var(--panel); border: 1px solid var(--line); border-radius: 4px; padding: 6px; }
+.mask-controls p { flex-basis: 100%; margin: 0; overflow-wrap: anywhere; }

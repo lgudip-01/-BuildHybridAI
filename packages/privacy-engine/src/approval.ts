@@ -40,7 +40,7 @@ export function approve(result: SuccessfulMask, options: { reviewed?: boolean } 
     throw new ApprovalError('stale', 'This document was masked again after this result. Approve the newest result instead.');
   }
   if (sealed.needsReview && options.reviewed !== true) {
-    throw new ApprovalError('review_required', 'Masking ran without the on-device model, so the user must review the masked text before it is sent.');
+    throw new ApprovalError('review_required', 'Review the masked text before approving this version.');
   }
   const batch: ApprovedBatch = Object.freeze({ docId: sealed.docId, clauses: Object.freeze([...sealed.clauses]) });
   approvedBatches.set(batch, { docId: sealed.docId, run: sealed.run });
@@ -79,7 +79,7 @@ export function isCurrent(run: Run): boolean {
 export function seal<T extends MaskResult>(result: T, run: Run): T {
   deepFreeze(result);
   if (result.ok) {
-    sealedResults.set(result, { ...run, needsReview: result.needsReview, clauses: result.clauses });
+    sealedResults.set(result, { ...run, needsReview: result.needsReview || result.manuallyEdited === true, clauses: result.clauses });
   }
   return result;
 }

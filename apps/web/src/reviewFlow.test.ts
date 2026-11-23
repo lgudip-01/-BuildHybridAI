@@ -142,3 +142,28 @@ it('shows all clauses as unavailable without inventing a source when all request
   expect(JSON.stringify(state)).not.toContain('INTERNAL_ERROR_SENTINEL');
   expect(sdk.generate).toHaveBeenCalledTimes(2);
 });
+
+it('requires fresh approval after local review edits, reapplies manual masks, and restores only on device', async () => {
+  const session = new ReviewSession(bridge, 'Reference bluebird.\n\nNotify bluebird.');
+  await session.mask();
+  const before = session.getSnapshot().masked!;
+  if (!before.ok) throw new Error('Unexpected block');
+  const old = approve(before, { reviewed: true });
+  const pending = session.revise({ add: 'bluebird' });
+  expect(() => assertApproved(old)).toThrow(expect.objectContaining({ code: 'stale' }));
+  expect(session.edit('replacement')).toBe(false);
+  await session.analyzeReviewed();
+  await pending;
+  expect(session.getSnapshot().masked).toMatchObject({ ok: true, manuallyEdited: true });
+  await session.mask();
+  session.edit('Reference bluebird.\n\nNotify bluebird tomorrow.');
+  await session.mask();
+  expect(sdk.generate).not.toHaveBeenCalled();
+  await session.analyzeReviewed();
+  expect(sdk.generate).toHaveBeenCalledTimes(2);
+  for (const [payload] of sdk.generate.mock.calls) {
+    expect(payload).toContain('[PRIVATE_1]');
+    expect(payload).not.toContain('bluebird');
+  }
+  expect(session.getSnapshot().outcome?.restored[1]?.explanation).toContain('bluebird');
+});

@@ -5,6 +5,7 @@ import { Download, LoaderCircle, ShieldCheck, ShieldX, TriangleAlert } from 'luc
 import { useCallback, useEffect, useState, useSyncExternalStore, type KeyboardEvent } from 'react';
 import type { AiBridge } from '@clause-guard/core/types';
 import { REDLINE_REVIEW_NOTICE } from '@clause-guard/core/analysis';
+import { MaskReviewControls } from './MaskReviewControls';
 import { ReviewSession, reviewBusy, splitClauses, type ReviewOutcome } from './reviewFlow';
 
 const SAMPLE_CONTRACT = `This Mutual Non-Disclosure Agreement is made on January 1, 2026 between Acme Corp ("the Company") and Dana Reyes ("Contractor").
@@ -35,6 +36,7 @@ const KIND_LABEL: Record<EntityKind, string> = {
   EMAIL: 'Email',
   PHONE: 'Phone',
   ACCOUNT: 'Account number',
+  PRIVATE: 'Manually masked value',
 };
 
 // Splitting on a capture group keeps the placeholders at the odd indexes.
@@ -151,12 +153,8 @@ export function App({ bridge }: { bridge: AiBridge & { downloadModel(onProgress:
             {downloadError && <div className="banner" data-tone="warn" role="alert"><p>{downloadError}</p></div>}
             <Output run={run} active={active} onActive={setActive} />
             {review.error && <div className="banner review-actions" data-tone="warn" role="alert"><p>{review.error}</p></div>}
-            {review.phase === 'review' && (
-              <div className="review-actions">
-                <p>Review the masked text above. Approving allows analysis of this masked version; original values stay in this browser’s vault.</p>
-                <button className="primary" onClick={() => void session.analyzeReviewed()}>Approve &amp; analyze</button>
-              </div>
-            )}
+            {review.phase === 'review' && review.masked?.ok && <MaskReviewControls session={session} result={review.masked} />}
+            {review.phase === 'revising' && <p role="status">Checking the revised preview on this device…</p>}
             {review.phase === 'analyzing' && <p className="review-actions" role="status">Analyzing reviewed text. This may take a moment.</p>}
             {review.outcome && <AnalysisResults clauses={clauses} outcome={review.outcome} />}
           </div>
@@ -291,7 +289,6 @@ export function AnalysisResults({ clauses, outcome }: { clauses: Clause[]; outco
     <section className="analysis-results" aria-labelledby="analysis-title">
       <div className="results-heading">
         <h2 id="analysis-title">Contract review</h2>
-        {outcome.ranOn && <span className="source-badge">{outcome.ranOn === 'cloud' ? 'Analyzed in cloud' : 'On-device preliminary scan'}</span>}
       </div>
       <p role="status">{outcome.restored.length} of {clauses.length} clauses returned a validated review. {clauses.length - outcome.restored.length} need review.</p>
       <p className="meta">Risk ratings are preliminary. Low risk does not mean contract approval.</p>
@@ -304,12 +301,16 @@ export function AnalysisResults({ clauses, outcome }: { clauses: Clause[]; outco
       {clauses.map(clause => {
         const result = results.get(clause.id);
         const failure = failures.get(clause.id);
+        const source = result ? outcome.ranOn : failure?.ranOn;
         const withheld = result?.explanation.startsWith(REDLINE_REVIEW_NOTICE);
         const explanation = withheld ? result!.explanation.slice(REDLINE_REVIEW_NOTICE.length).trim() : result?.explanation;
         return (
           <article key={clause.id} className="analysis-card" id={`review-${clause.id}`} aria-labelledby={`review-title-${clause.id}`}>
             <div className="clause-head">
               <h3 id={`review-title-${clause.id}`}>{clause.id}</h3>
+              {source === 'cloud' || source === 'device'
+                ? <span className="source-badge">{source === 'cloud' ? 'Analyzed in cloud' : 'On-device preliminary scan'}</span>
+                : <span className="meta">Execution source unavailable</span>}
               {result ? <span className="risk-label" data-risk={result.risk}>{result.risk} risk</span> : <span className="risk-label" data-risk="unreviewed">Needs review</span>}
             </div>
             <details><summary>Original clause — shown only on this device</summary><p className="clause-text">{clause.text}</p></details>
