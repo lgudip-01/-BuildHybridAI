@@ -65,3 +65,29 @@ Hosting deployment succeeded. A new tab initially reused the prior root HTML;
 a normal reload loaded the redesign. Add an explicit no-cache header for `/`
 as well as index.html; hashed assets retain their immutable caching. No security
 headers or App Check protections are weakened. Final hosted acceptance follows.
+
+## Completed hosted acceptance
+
+PR: https://github.com/lgudip-01/-BuildHybridAI/pull/45 . Runtime/config source
+044ad59 exactly matches the tested local source; deployment completed around
+15:59 Eastern November 23. Public app: https://clause-guard-hackathon.web.app .
+No billing account was freshly confirmed in Console before deployment; Spark and
+Gemini 3.5 Flash-Lite free pricing were rechecked at https://firebase.google.com/pricing
+and https://aistudio.google.com/docs/pricing#gemini-3.5-flash-lite . No changes to
+billing, APIs, credentials, IAM or App Check.
+
+Production browser checks: imported synthetic nda.docx locally, yielding the
+expected 10 clauses. A separate Lucia/bluebird/Example Services/$250/30-day fixture
+was masked with real Nano; bluebird was manually masked as PRIVATE_1 and explicitly
+approved for chat. The question preview replaced Lucia with PARTY_A. Exactly one
+explicitly approved cloud question returned the correct code, parties, amount and
+deadline with actual cloud source; details restored locally. Citation #chat-source-c1
+resolved to the approved text with PARTY_A/PRIVATE_1/PARTY_B/AMOUNT_1 placeholders.
+Undoing PRIVATE_1 then removed the restored conversation and required new approval.
+No real user document was deleted; no automatic retries or model switching. This
+is bounded functional acceptance, not general legal accuracy/privacy certification.
+
+Public root response was independently verified HTTP 200, Cache-Control:no-cache,
+X-Content-Type-Options:nosniff and existing Referrer-Policy/HSTS. The production
+output contains 63 static files, with no local diagnostic entry or environment file.
+The initial stale-tab cache observation and viewport-tool failure remain above.
