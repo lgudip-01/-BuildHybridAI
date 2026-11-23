@@ -7,6 +7,7 @@ export type ReviewOutcome = { restored: Analysis[]; failed: ClauseFailure[]; ran
 export type ReviewSnapshot = {
   contract: string;
   phase: 'editing' | 'masking' | 'review' | 'blocked' | 'analyzing' | 'results' | 'error';
+  finishedClauseReads?: number;
   masked?: MaskResult;
   ms?: number;
   outcome?: ReviewOutcome;
@@ -61,7 +62,9 @@ export class ReviewSession {
     this.update({ contract, phase: 'masking' });
     try {
       const start = performance.now();
-      const result = await mask(this.docId, clauses, this.bridge);
+      const result = await mask(this.docId, clauses, this.bridge, finishedClauseReads => {
+        this.update({ contract, phase: 'masking', finishedClauseReads });
+      });
       if (revision !== this.revision) return;
       this.update({ contract, phase: result.ok ? 'review' : 'blocked', masked: result, ms: performance.now() - start });
     } catch {

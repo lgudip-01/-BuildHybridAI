@@ -3,7 +3,7 @@ import type { Clause, EntityKind, LedgerEntry, MaskResult, OnDeviceStatus } from
 import { PLACEHOLDER } from '@clause-guard/privacy-engine/placeholders';
 import { Capacitor } from '@capacitor/core';
 import { Download, LoaderCircle, ShieldCheck, ShieldX, TriangleAlert } from 'lucide-react';
-import { useCallback, useEffect, useRef, useState, useSyncExternalStore, type KeyboardEvent } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore, type KeyboardEvent } from 'react';
 import type { AiBridge } from '@clause-guard/core/types';
 import { REDLINE_REVIEW_NOTICE } from '@clause-guard/core/analysis';
 import { useReveal } from './motion';
@@ -77,7 +77,7 @@ export function Workbench({ bridge }: { bridge: AiBridge & { downloadModel(onPro
   const [downloadError, setDownloadError] = useState<string | null>(null);
   const [active, setActive] = useState<string | null>(null);
 
-  const clauses = splitClauses(contract);
+  const clauses = useMemo(() => splitClauses(contract), [contract]);
 
   const refreshStatus = useCallback(
     () => bridge.onDeviceStatus().then(setStatus, () => setStatus('unavailable')),
@@ -144,7 +144,12 @@ export function Workbench({ bridge }: { bridge: AiBridge & { downloadModel(onPro
           />
           <div className="pane-foot">
             <kbd className="shortcut">Ctrl Enter</kbd>
-            {busy && <span id="review-busy-hint" className="meta">Editing is locked until this review finishes.</span>}
+            <span id="review-busy-hint" className="meta" role="status">{busy && (
+              review.finishedClauseReads === undefined ? 'Editing is locked until this review finishes.'
+                : review.finishedClauseReads < clauses.length
+                  ? `Reading clause ${review.finishedClauseReads + 1} of ${clauses.length} on this device.`
+                  : 'Finishing local privacy checks.'
+            )}</span>
             <button className="primary" onClick={() => void session.mask()} disabled={busy || progress !== null || clauses.length === 0}>
               {review.phase === 'masking' && <LoaderCircle className="spin" size={16} aria-hidden />}
               {review.phase === 'masking' ? 'Masking' : 'Mask contract'}
