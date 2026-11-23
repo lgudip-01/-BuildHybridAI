@@ -5,6 +5,10 @@ Historical increments follow; the latest increment controls the active gate.
 Current gate: A, branch acceptance complete within documented scope; maintainer
 review/merge and the issue #30 main verification remain open.
 
+User authorized independent cloud-chat adapter implementation on November 22
+while the teammate-dependent gates remain open. See the latest increment below;
+this does not authorize enabling chat or bypassing the engine approval boundary.
+
 The user has requested implementation of the full project across web, iOS and
 Android, following the existing roadmap. Before each step, publish its checklist
 and uncertainties. Do not advance until every required check passes. Record
@@ -1120,3 +1124,172 @@ Main is not modified by the agent. The runtime source/tests/templates/release
 evidence match 4d7b67a; only this final tracker update follows. Keep the long-mask,
 broad-question and generated-draft limitations visible; do not mark native,
 masked chat, import integration or main acceptance complete from branch results.
+
+## November 22: independent cloud-chat adapter (user-authorized)
+
+Checklist:
+- [x] Recheck clean tree, refs, #13 confirmation and #30 comments before editing.
+  No new engine delivery or UI confirmation. Preserve analyzer/teammate branches.
+- [x] Isolate on codex/cloud-chat-adapter from published e2cde29; no main merge.
+- [x] Implement typed masked-only chat bridge, fixed source prompt, strict
+  placeholder/citation/schema validation and bounded immutable masked history.
+- [x] Enforce first approval check, post-config recheck, atomic consume immediately
+  before dispatch, post-dispatch current checks, cross-wrapper serialization,
+  clear/timeout cancellation, stale/late discard and fixed sanitized errors.
+- [x] Keep production disabled through fail-closed chatGuard functions; no issuer
+  or injectable production authorizer. App/production entry does not import chat.
+- [x] 58 new chat tests pass; 296 total web tests, core typecheck and production
+  typecheck/build pass. Production JS hash remains byte-identical to the live
+  index-Cr3HSrZw.js. No deployment, live inference or cloud setting change.
+- [x] Write CHAT_INTEGRATION.md with confirmed binding contract, limits, tested
+  scope and six-sample real acceptance cases. Mock passes are not live chat proof.
+- [x] Publish separate stacked draft PR #34 (base codex/content-quality-v3,
+  head codex/cloud-chat-adapter). Source/tests/handoff match fetched e6e6830
+  excluding this final tracker update. Tag Likhil/Sai with the concrete #13
+  engine/UI binding requirements in #30. Full-tree check follows in PR checkpoint.
+
+Chat runtime remains blocked: real engine ticket/context/question-mask/restoration
+exports, UI lifecycle confirmation/binding, actual outgoing-payload inspection,
+six-sample cited-answer/variant privacy checks, and current no-billing/App Check
+verification before any model call. PR #31/main verification and #32/#33 integration
+remain separate open gates. This independent code does not close those checkboxes.
+
+Independent adapter/testing step complete within this scope. PR #34 is draft,
+production guard still rejects all chat, no live inference/deployment or paid
+service was enabled, and production JS is byte-identical to the existing release.
+All old local branches and teammate work remain preserved. Next independent task
+is compatibility review of #32/#33 in isolation; actual chat enablement continues
+to require engine/UI delivery and real privacy/content acceptance.
+
+## November 22: independent PR #32/#33 compatibility review
+
+- [x] Refresh refs and #13/#34 comments after the browser-review interruption;
+  no new engine/UI delivery. PR #34 publication/checkpoint is verified and tabs closed.
+- [x] Create a disposable local review worktree from bbac120; combine #32 at
+  3e90529 and #33 at 1a6b334 without changing main or teammate branches.
+- [x] Baseline combined verification: 320 web + 107 engine tests pass, all twelve
+  imported fixtures match, core typecheck and production build pass. No model calls.
+- [x] Reproduce a #32 false-negative review flag using an email and URL containing
+  a model-only name: two failing cases; a missed lowercase name remains in masked output.
+- [x] Reproduce #33 deletion of substantive standalone rent/year/account numbers:
+  three failing cases. Reproduce a slow import overwriting newer manual edits:
+  one failing actual-handler/ReviewSession case with controlled hooks/file read.
+- [x] Preserve six failing cases on the local review branch and as a checked patch;
+  document precise source locations, scope and correction requests in
+  PR_COMPATIBILITY_REVIEW.md. Do not count these as passing or approve integration.
+- [x] Publish report/repro patch (application docs match fetched 9782f32); post
+  findings to #32/#33 with Likhil tagged and summarize blockers in #30. Final
+  root upload/full-tree verification follows in the PR #34 checkpoint; close tabs.
+- [ ] Author corrections and retests before integration approval. Main/cloud-chat
+  activation and real device/payload checks remain separate gates.
+
+Review handoff: #32 comment 7083451440 and #33 comment 7083456530 contain the
+three findings and requested corrections. Full rerun after adding the cases:
+320 web passes/four expected failures, 107 engine passes/two expected failures;
+typecheck passes. All six failures are review cases, with no unrelated baseline
+failure. Runtime implementation and deployed app remain unchanged. Do not approve
+integration merely because the original twelve fixtures pass. Retest the author's
+corrected heads before advancing; all local evidence is preserved at the documented
+temporary worktree/review commit. No main merge, force push, reset or branch deletion.
+
+## November 22: optional independent candidate corrections
+
+- [x] Preserve original failure evidence at 4a81662 and create a second isolated
+  candidate checkout; do not modify teammate branches or deployed source.
+- [x] Correct rule coverage, preserve standalone numeric values, and make import
+  completion generation/snapshot-aware with an explicit cancellation outcome.
+- [x] Keep actual short-name/address coverage, explicit page markers and latest-
+  import behavior covered. An added long-company short-form control failed first;
+  checking coverage after defined-alias registration corrected that candidate issue.
+- [x] Candidate full verification: 326 web + 112 engine = 438 passes, core typecheck
+  and production typecheck/build pass, all twelve imported fixtures retained.
+- [x] Preserve candidate at d2613f7 and create PR_COMPATIBILITY_CANDIDATE.patch,
+  checked forwards against original failure checkout and backwards against candidate.
+- [x] Publish candidate artifact/report at fetched 715a560; notify owners in
+  #32/#33 and #30 (comments 7083669351, 7083673650, 7083681170). Final root upload/
+  full-tree verification follows in PR #34 checkpoint; close finished tabs.
+  Candidate corrections are review material, not adopted/deployed behavior.
+- [ ] Author review/adoption and actual-head retests before approving integration.
+
+Both original failure and candidate worktrees/commits remain available. Only
+review documentation/patch artifacts are added to the published chat branch;
+its runtime remains disabled and production source remains unchanged.
+
+Candidate handoff complete: all 438 cases pass only on the isolated candidate,
+with engine/core typechecks and production typecheck/build passing. Original
+six failures and both local worktrees remain preserved. The actual #32/#33 heads
+still require author review/adoption and retest. The engine coverage correction
+changes the review flag; it does not automatically discover the intentionally
+missed name or certify fully redacted input. Keep actual chat activation, main
+acceptance, real browser/Nano checks and phone evidence as separate open gates.
+
+## November 22: teammate requests, native chat and UI handoff
+
+- [x] Inspect both project locations/current Git state; fetch all refs and read
+  new PRs, issue comments, review timelines and direct mentions. Preserve local
+  graphs and all teammate branches. New work: #35 native analysis, #36 redesign.
+- [x] Respond to Aarush's #17 request: verify current Spark/no-linked-billing
+  state and official no-payment pricing; register Android/iOS app.clauseguard;
+  download and validate both SDK configs outside Git. Ask Aarush for a direct
+  delivery address/channel in #17 (7091242882); never post files/debug tokens publicly.
+- [x] Review #35 at 6cf643e: 191 web + 94 engine tests and web build pass; accept
+  one-masked-clause native interface. Flag iOS localizedDescription raw-path
+  logging/rejection to Aarush (7091360009). No real native/model run claimed.
+- [x] Inspect #36 at 628c44e; preserve Workbench ownership, flag absolute privacy
+  claims and reduced-motion smooth-scroll fallback. No visual/merge approval.
+- [x] Move chatbot to top development priority; request concrete engine exports
+  from Likhil and coordinate Aarush/Sai in #13 (7091268965).
+- [x] Share the guarded dispatcher between web/native; add native cloud-only TS
+  adapter, UI conversation store and genuine approved-batch ReviewSession hook.
+  No fake ticket registry, document-question remask, raw/history overload or
+  production mock answer. Engine seams and guards continue to reject all chat.
+- [x] Test per-question approval, native projection/source/timeout, immutable
+  masked-vs-display history, stale/close races, exact batch handoff, and closing
+  before document edits/remasks including a failed remask. Preserve any test/
+  build failures as local verification evidence; final full counts follow.
+- [x] Publish verified implementation/handoff at fetched e9f1239 and tag owners
+  in #13 (7091553991). Source/contracts match the tested local tree. Final
+  root upload/full-tree verification is reported in the #34 checkpoint.
+- [ ] Aarush supplies a private delivery endpoint; send only the requested native
+  config files. Native App Check/debug/release registration remains separate.
+- [ ] Likhil supplies real engine APIs/variants; owner-reviewed binding and actual
+  privacy/payload checks before enabling chat. Swift/Kotlin chat methods, UI view
+  binding, live six-sample answers and phone evidence remain separate gates.
+
+No deployment, live model call, payment, trial, billing linkage, enforcement
+reduction or IAM grant. New work is isolated from original primary checkout at
+/private/tmp/clauseguard-chat-mobile-20261122. See CHAT_UI_MOBILE_HANDOFF.md for
+concrete UI/native contracts, tested scope and remaining delivery requirements.
+
+Final local verification: 331 web + 94 engine tests, core typecheck and web
+production typecheck/build pass. New coverage is 35 cases beyond the initial
+296-test adapter. An early test-only mock typing error was corrected before the
+final typecheck; focused runtime checks had passed. Source commit 1ed7bea plus
+#35 (6cf643e) and #36 (628c44e) merges cleanly in a separate local checkout and
+passes 344 web tests and production typecheck/build. Its >500 kB chunk advisory
+is retained. #32/#33 are excluded; prior failure/candidate evidence is untouched.
+This is no claim about actual engine masking, native SDK builds, phones, live
+answers, main or deployment. PR #34 remains draft and chat is disabled.
+
+Final self-review found one additional lifecycle issue before handoff: an external
+remask during local question preparation left previous restored messages visible
+in phase error. A new regression failed against 1ed7bea (log preserved at
+/private/tmp/clauseguard-chat-stale-history-before.log). Stale/wrong-session
+failures now close/clear the conversation, including stale response restoration;
+cleanup exceptions still clear display state and cannot expose SDK error text.
+A throwing-cleanup control is included. Final source/combined counts supersede
+the earlier 331/344 checkpoint after the justified correction rerun.
+
+Final corrected verification: **333 web + 94 unchanged engine tests**, core
+typecheck and production typecheck/build pass. The isolated corrected #35/#36
+combination passes **346 web tests and production typecheck/build**. These final
+counts supersede 331/344. The only new cloud resources are the requested native
+app registrations; there was no inference, deployment, billing or IAM change.
+
+Verified owner replies: #17 native configs/private delivery (7091242882), #35
+native interface and raw-error review (7091360009), #36 integration/copy/motion
+review (7091379482), and #13 concrete chat UI/native/engine handoff (7091553991).
+No teammate response or engine export had arrived at this checkpoint. Original
+primary/source branches remain preserved. After full publication verification,
+the primary checkout may move to a new local branch at this tested handoff; never
+reset or overwrite the old browser/local histories.

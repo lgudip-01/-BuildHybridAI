@@ -1,7 +1,9 @@
-import type { AiBridge, Analysis, AnalyzeResult, Clause, ClauseFailure, MaskResult } from '@clause-guard/core/types';
+import type { AiBridge, Analysis, AnalyzeResult, ApprovedBatch, Clause, ClauseFailure, MaskResult } from '@clause-guard/core/types';
+import { ChatError, sanitizeChatError, type ChatBridge } from '@clause-guard/core/chat';
 import { mask } from '@clause-guard/privacy-engine/mask';
 import { approve, assertApproved } from '@clause-guard/privacy-engine/approval';
 import { unmask } from '@clause-guard/privacy-engine/unmask';
+import { ChatConversation } from './chatFlow';
 
 export type ReviewOutcome = { restored: Analysis[]; failed: ClauseFailure[]; ranOn?: 'cloud' | 'device' };
 export type ReviewSnapshot = {
@@ -28,6 +30,9 @@ export class ReviewSession {
   private state: ReviewSnapshot;
   private listeners = new Set<() => void>();
   private revision = 0;
+  private approvedBatch?: ApprovedBatch;
+  private chat?: ChatConversation;
+  private chatBridge?: ChatBridge;
 
   constructor(private readonly bridge: AiBridge, contract: string) {
     this.state = { contract, phase: 'editing' };
@@ -43,10 +48,31 @@ export class ReviewSession {
     this.listeners.forEach(listener => listener());
   }
 
+  /** After the explicit document approval/result flow, never from raw clauses. */
+  openChat(bridge: ChatBridge): ChatConversation {
+    if (this.state.phase !== 'results' || !this.approvedBatch) throw new ChatError('not_approved');
+    try { assertApproved(this.approvedBatch); } catch (error) { throw sanitizeChatError(error); }
+    if (this.chat && this.chatBridge === bridge && this.chat.getSnapshot().phase !== 'closed') return this.chat;
+    this.closeChat();
+    this.chat = new ChatConversation(this.approvedBatch, this.bridge, bridge);
+    this.chatBridge = bridge;
+    return this.chat;
+  }
+
+  /** View unmount/reset. Document changes also call this before changing state. */
+  closeChat(): void {
+    const previous = this.chat;
+    this.chat = undefined;
+    this.chatBridge = undefined;
+    previous?.close();
+  }
+
   edit(contract: string): boolean {
     // The UI also makes input read-only while a request is running. Do not
     // accept edits and then let queued sends continue under old approval.
     if (reviewBusy(this.state) || contract === this.state.contract) return false;
+    this.closeChat();
+    this.approvedBatch = undefined;
     this.revision += 1;
     this.update({ contract, phase: 'editing' });
     return true;
@@ -56,6 +82,8 @@ export class ReviewSession {
     if (reviewBusy(this.state)) return;
     const clauses = splitClauses(this.state.contract);
     if (!clauses.length) return;
+    this.closeChat();
+    this.approvedBatch = undefined;
     const revision = this.revision;
     const contract = this.state.contract;
     this.update({ contract, phase: 'masking' });
@@ -84,6 +112,7 @@ export class ReviewSession {
       const restored = answer.results.length ? await unmask(answer.docId, answer.results) : [];
       assertApproved(batch);
       if (revision !== this.revision) return;
+      this.approvedBatch = batch;
       this.update({ ...current, phase: 'results', outcome: { restored, failed: answer.failed, ranOn: answer.ranOn } });
     } catch (error) {
       if (revision !== this.revision) return;
