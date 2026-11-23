@@ -1345,3 +1345,26 @@ remains isolated on codex/chat-engine-candidate-20261122; primary checkout is
 still the preserved #34 UI handoff on codex/chat-ui-ready-20261122. No source
 was copied over teammate work or merged to main. Local/browser histories and
 all original failure evidence are retained. No live cloud chat is enabled.
+
+## November 23: real chat binding and full isolated compatibility
+
+- [x] Recheck current refs/comments: no new teammate delivery at this checkpoint.
+- [x] Replace stub engine/guard modules with direct real engine exports. Add an
+  independent unconditional release stop before config/provider/session/consume.
+- [x] Verify real approved questions stop safely on both bridges; forged objects
+  still fail authority. Binding checks: 341 web + 140 engine, typecheck/build pass.
+- [x] Reconcile #32/#33 and preserved compatibility corrections with #35/#36 in
+  an isolated branch, porting import controls/race safeguards into Workbench.
+  Full checks: 384 web + 158 engine, core/engine typechecks and web build pass.
+- [x] Preserve resolution patch and exact provenance in CHAT_BINDING_INTEGRATION.md.
+- [x] Publish thin stacked draft #38 (base #37); fetched 7a41a69 matches all
+  tested source/evidence files. This final tracker upload/full-tree check follows.
+- [ ] Owner adoption, product chat view/native methods, zero-cost/App Check and
+  bounded live acceptance, then real phones/demo. Hard chat egress stop remains.
+
+No cloud calls, deployment, payment, billing linkage or enforcement/IAM change.
+Full combined source is local only at 10d9674; primary and author branches intact.
+
+Binding review: https://github.com/lgudip-01/-BuildHybridAI/pull/38 . Owners
+Likhil/Aarush/Sai tagged in the PR with concrete adoption/UI/native needs.
+The full combined branch remains isolated locally; main was not merged.
