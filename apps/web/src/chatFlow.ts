@@ -39,6 +39,15 @@ export class ChatConversation {
     this.state = Object.freeze(state);
     this.listeners.forEach(listener => listener());
   }
+  private fail(error: unknown, question: string, messages: readonly ChatMessage[]): void {
+    const safe = sanitizeChatError(error);
+    if (safe.code === 'stale' || safe.code === 'wrong_session') {
+      this.close();
+      this.update({ ...this.state, error: safe.message });
+      return;
+    }
+    this.update({ phase: 'error', question, messages, error: safe.message });
+  }
   editQuestion(question: string): boolean {
     if (this.state.phase === 'closed' || this.state.phase === 'sending' || question === this.state.question) return false;
     ++this.generation;
@@ -60,7 +69,7 @@ export class ChatConversation {
       if (generation !== this.generation) return;
       this.update({ phase: 'review', question, messages, preview });
     } catch (error) {
-      if (generation === this.generation) this.update({ phase: 'error', question, messages, error: sanitizeChatError(error).message });
+      if (generation === this.generation) this.fail(error, question, messages);
     }
   }
   /** Bind ONLY to the explicit per-question masked-preview approval action. */
@@ -88,14 +97,17 @@ export class ChatConversation {
       if (generation !== this.generation) return;
       // No ticket/preview survives failure; a retry needs fresh local masking and
       // explicit review. There is no automatic resend of a consumed ticket.
-      this.update({ phase: 'error', question: current.question, messages: current.messages, error: sanitizeChatError(error).message });
+      this.fail(error, current.question, current.messages);
     }
   }
   /** Call before document edit/remask/import/reset, and on view unmount. */
   close(): void {
     if (this.state.phase === 'closed') return;
     ++this.generation;
-    try { this.cloud.clear(this.context); } finally {
+    try { this.cloud.clear(this.context); } catch {
+      // A transport cleanup error must not retain display data or expose an SDK
+      // error. Local generation invalidation still discards every completion.
+    } finally {
       this.update({ phase: 'closed', question: '', messages: Object.freeze([]) });
     }
   }

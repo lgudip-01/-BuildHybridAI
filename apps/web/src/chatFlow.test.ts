@@ -64,6 +64,12 @@ describe('headless UI conversation lifecycle (mocked engine, no authority)', () 
     mock.mask.mockRejectedValueOnce(new ChatError('ambiguous_entity')); const c = conversation(); await c.prepare();
     expect(c.getSnapshot().error).toContain('Use the full name'); expect(mock.approve).not.toHaveBeenCalled(); expect(bridge.ask).not.toHaveBeenCalled();
   });
+  it('drops earlier restored messages when external remasking makes local question preparation stale', async () => {
+    const c = conversation(); await c.prepare(); await c.approveAndSend(); expect(c.getSnapshot().messages).toHaveLength(1);
+    c.editQuestion('Another question'); mock.mask.mockRejectedValueOnce(new ChatError('stale')); await c.prepare();
+    expect(c.getSnapshot()).toMatchObject({ phase: 'closed', question: '', messages: [] });
+    expect(c.getSnapshot().error).toContain('no longer current'); expect(bridge.clear).toHaveBeenCalledOnce();
+  });
   it('blocks duplicate sends and editing while a turn is in flight', async () => {
     const pending = deferred<ChatReply>(); bridge.ask.mockReturnValueOnce(pending.promise); const c = conversation(); await c.prepare();
     const asking = c.approveAndSend(); await c.approveAndSend(); expect(c.editQuestion('new')).toBe(false);
@@ -89,7 +95,7 @@ describe('headless UI conversation lifecycle (mocked engine, no authority)', () 
   it('checks the current engine revision again after asynchronous restoration', async () => {
     mock.current.mockImplementationOnce(() => {}).mockImplementationOnce(() => { throw new ChatError('stale'); });
     const c = conversation(); await c.prepare(); await c.approveAndSend();
-    expect(c.getSnapshot().phase).toBe('error'); expect(c.getSnapshot().messages).toEqual([]); expect(mock.current).toHaveBeenCalledTimes(2);
+    expect(c.getSnapshot().phase).toBe('closed'); expect(c.getSnapshot().messages).toEqual([]); expect(mock.current).toHaveBeenCalledTimes(2);
   });
   it('rejects a restored result belonging to a different turn', async () => {
     mock.restore.mockResolvedValueOnce({ ...masked, turnId: 'other' }); const c = conversation(); await c.prepare(); await c.approveAndSend();
@@ -98,5 +104,10 @@ describe('headless UI conversation lifecycle (mocked engine, no authority)', () 
   it('notifies and unsubscribes without changing snapshot identity on reads', () => {
     const c = conversation(), listener = vi.fn(), unsubscribe = c.subscribe(listener), snapshot = c.getSnapshot();
     expect(c.getSnapshot()).toBe(snapshot); c.editQuestion('new'); expect(listener).toHaveBeenCalledOnce(); unsubscribe(); c.editQuestion('another'); expect(listener).toHaveBeenCalledOnce();
+  });
+  it('still clears restored display state if a transport cleanup throws', async () => {
+    const c = conversation(); await c.prepare(); await c.approveAndSend(); bridge.clear.mockImplementationOnce(() => { throw new Error('PRIVATE_CLEANUP_ERROR'); });
+    expect(() => c.close()).not.toThrow(); expect(c.getSnapshot()).toEqual({ phase: 'closed', question: '', messages: [] });
+    expect(c.editQuestion('new')).toBe(false);
   });
 });
