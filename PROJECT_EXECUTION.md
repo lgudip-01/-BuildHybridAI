@@ -1368,3 +1368,25 @@ Full combined source is local only at 10d9674; primary and author branches intac
 Binding review: https://github.com/lgudip-01/-BuildHybridAI/pull/38 . Owners
 Likhil/Aarush/Sai tagged in the PR with concrete adoption/UI/native needs.
 The full combined branch remains isolated locally; main was not merged.
+
+## November 23: product chat view candidate
+
+- [x] Recheck #13/#38 and remote heads; no new teammate implementation/review.
+- [x] Add shared ReviewChat panel using real session/controller, exact masked
+  previews, explicit per-question approval and safe release_pending feedback.
+- [x] Wire web/native bridges without enabling dispatch; retain independent stop.
+- [x] Seven view regressions: 348 thin-branch web tests; production build passes.
+  Isolated redesign/import/mobile integration: 391 web tests/build pass.
+- [x] Local desktop/430px browser check: preview, blocked send, zero config/provider
+  calls, document-edit cleanup; record synthetic-fixture limits. Stop server/tab.
+- [x] Preserve redesign wiring patch and adoption notes in CHAT_VIEW_HANDOFF.md.
+- [x] Publish stacked draft #39 (base #38); fetched 0fbbf43 matches all tested
+  source/adoption artifacts. Final tracker upload/full-tree verification follows.
+- [ ] Owner adoption, native methods, zero-cost/App Check/live acceptance, phones.
+
+Full combined view source is isolated locally at e43d254; original work preserved.
+No cloud/model call, deployment, payment, billing or enforcement/IAM change.
+
+Product chat view review: https://github.com/lgudip-01/-BuildHybridAI/pull/39 .
+Aarush/Sai tagged for view/redesign adoption; Likhil tagged for engine review.
+Native plugin chat methods and live release/phone checks remain unfinished.

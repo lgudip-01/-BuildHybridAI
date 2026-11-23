@@ -5,6 +5,8 @@ import { Download, LoaderCircle, ShieldCheck, ShieldX, TriangleAlert } from 'luc
 import { useCallback, useEffect, useState, useSyncExternalStore, type KeyboardEvent } from 'react';
 import type { AiBridge } from '@clause-guard/core/types';
 import { REDLINE_REVIEW_NOTICE } from '@clause-guard/core/analysis';
+import { ReviewChat } from './ReviewChat';
+import type { ChatBridge } from '@clause-guard/core/chat';
 import { ReviewSession, reviewBusy, splitClauses, type ReviewOutcome } from './reviewFlow';
 
 const SAMPLE_CONTRACT = `This Mutual Non-Disclosure Agreement is made on January 1, 2026 between Acme Corp ("the Company") and Dana Reyes ("Contractor").
@@ -54,7 +56,7 @@ function unavailableReason(): string {
   return `Chrome ${chrome} has the Prompt API turned off. Enable chrome://flags/#prompt-api-for-gemini-nano-multimodal-input, then relaunch Chrome.`;
 }
 
-export function App({ bridge }: { bridge: AiBridge & { downloadModel(onProgress: (fraction: number) => void): Promise<void> } }) {
+export function App({ bridge, chatBridge }: { chatBridge?: ChatBridge; bridge: AiBridge & { downloadModel(onProgress: (fraction: number) => void): Promise<void> } }) {
   const [status, setStatus] = useState<OnDeviceStatus | 'checking'>('checking');
   const [progress, setProgress] = useState<number | null>(null);
   const [session] = useState(() => new ReviewSession(bridge, SAMPLE_CONTRACT));
@@ -162,6 +164,7 @@ export function App({ bridge }: { bridge: AiBridge & { downloadModel(onProgress:
           </div>
         </section>
       </main>
+      {review.phase === 'results' && chatBridge && <ReviewChat session={session} bridge={chatBridge} />}
     </div>
   );
 }
