@@ -33,6 +33,49 @@ beforeEach(() => {
   sdk.generate.mockImplementation(async (prompt: string) => response(prompt));
 });
 
+it('reports clause reads in order, including a failed read, and waits for approval', async () => {
+  const first = deferred();
+  const second = deferred();
+  const started = deferred();
+  const advanced = deferred();
+  const analyze = vi.fn();
+  const onDevice = vi.fn()
+    .mockImplementationOnce(async () => { started.resolve(); await first.promise; throw new Error(); })
+    .mockImplementationOnce(async () => {
+      advanced.resolve();
+      await second.promise;
+      return JSON.stringify({ type: 'other', entities: [] });
+    });
+  const session = new ReviewSession({ onDeviceStatus: async () => 'available', onDevice, analyze }, contract);
+  const counts: number[] = [];
+  session.subscribe(() => {
+    const { finishedClauseReads } = session.getSnapshot();
+    if (finishedClauseReads !== undefined) counts.push(finishedClauseReads);
+  });
+  const pending = session.mask();
+  await started.promise;
+  expect(session.getSnapshot()).toMatchObject({ phase: 'masking', finishedClauseReads: 0 });
+  first.resolve();
+  await advanced.promise;
+  expect(session.getSnapshot()).toMatchObject({ phase: 'masking', finishedClauseReads: 1 });
+  await session.analyzeReviewed();
+  second.resolve();
+  await pending;
+  expect(counts).toEqual([0, 1, 2]);
+  expect(session.getSnapshot()).toMatchObject({ phase: 'review', masked: { ok: true, needsReview: true } });
+  expect(session.getSnapshot().finishedClauseReads).toBeUndefined();
+  expect(analyze).not.toHaveBeenCalled();
+});
+
+it('omits model-read progress when masking with patterns alone', async () => {
+  const session = new ReviewSession(bridge, contract);
+  const counts = new Set<number | undefined>();
+  session.subscribe(() => counts.add(session.getSnapshot().finishedClauseReads));
+  await session.mask();
+  expect(counts).toEqual(new Set([undefined]));
+  expect(session.getSnapshot().phase).toBe('review');
+});
+
 it('does not analyze until real masking is complete and the user explicitly approves', async () => {
   const session = new ReviewSession(bridge, contract);
   await session.analyzeReviewed();
