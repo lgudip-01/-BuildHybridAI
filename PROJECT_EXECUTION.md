@@ -1422,3 +1422,19 @@ deletion with storage/approval races. No new discussion comments in these PRs.
 Next integration must invalidate chat on manual changes/deletion, clear per-
 document choices, preserve source provenance, and port controls into #36 Workbench.
 These branches remain unchanged; this release does not claim their acceptance.
+
+
+## November 23: redesigned controls + chat integration
+
+- [x] Recheck refs/comments and preserve every original branch/check-out.
+- [x] Isolate #44 + #36/#33 corrections + #41/#42/#43; port controls into Workbench.
+- [x] Preserve real engine authority and revised private chat snapshots/aliases.
+- [x] Close chat on manual edits/deletion and discard pending cloud completions.
+- [x] Keep manual protections for deletion retry; clear them for the next document.
+- [x] 395 web + 163 engine tests, core/engine typechecks and production build pass.
+- [x] Real Nano progress/manual reveal/undo/chat-preview check; desktop and actual 430px layout.
+- [ ] Publish the complete integration tree and notify owners; verify published source.
+- [ ] Hosting-only update and production smoke after current no-billing verification.
+- [ ] Native #40 SDK builds, App Check and physical-device acceptance remain separate.
+
+See apps/web/WEB_CONTROLS_INTEGRATION_20261123.md for provenance, corrections and limits.
