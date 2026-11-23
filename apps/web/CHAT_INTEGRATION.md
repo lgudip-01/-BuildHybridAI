@@ -1,5 +1,14 @@
 # Cloud chat adapter — independent implementation checkpoint
 
+**Historical initial checkpoint:** the 296-test/byte-identical bundle results
+below describe the initial adapter before the native/UI extension. The current
+`CHAT_UI_MOBILE_HANDOFF.md` supersedes its implementation layout and UI handoff:
+web/native share `chatDispatch.ts`, `ChatConversation` supplies the UI lifecycle,
+and ReviewSession retains the genuine approved batch and closes chat on changes.
+The new ReviewSession hook changes the built bundle; it is not deployed. Both
+engine integration seams and guards still reject all chat. Current verification
+and activation gates are in PROJECT_EXECUTION.md and the GitHub checkpoint.
+
 November 22, 2026. Related: #9, #13 (Likhil's confirmed engine contract), #30.
 This implements the independent Cloud AI step authorized by the user while main
 review and engine/UI delivery remain pending. It does not enable production chat.
