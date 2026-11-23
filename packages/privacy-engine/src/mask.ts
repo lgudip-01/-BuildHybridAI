@@ -1,11 +1,12 @@
 import type { AiBridge, Clause, ClauseType, MaskResult } from '@clause-guard/core/types';
-import { isCurrent, seal, startRun, type Run } from './approval';
+import { ApprovalError, isCurrent, seal, startRun, type Run } from './approval';
 import { leakCheck } from './leakCheck';
 import { dedupeEntities, findOccurrences, normalize, resolveOverlaps, separateCoordinatedNames, toEntity, type Candidate, type Entity } from './merge';
 import { readClause } from './onDevice';
 import { PlaceholderRegistry } from './placeholders';
 import { findDefinedTerms, findNames, findPatterns, type Span } from './regex';
-import { saveVault } from './vault';
+import { loadVault, saveVault } from './vault';
+import { applyManualMasks, editList, type ManualMask, type ReviewEdit, type SuccessfulMask } from './manualReview';
 
 /**
  * Masks every clause of one document and leak-checks the result.
@@ -74,11 +75,12 @@ export async function mask(docId: string, clauses: Clause[], bridge: AiBridge): 
     return { id: clause.id, text };
   });
 
-  const check = leakCheck(drafts, [...registry.values(), ...entities.flatMap((e) => e.variants)]);
+  const sensitive = [...registry.values(), ...entities.flatMap((e) => e.variants)];
+  const check = leakCheck(drafts, sensitive);
   if (!check.ok) return seal({ ok: false, docId, leaks: check.leaks }, run);
 
   await saveVaultInOrder(run, registry.entries());
-  return seal(
+  const result = seal<SuccessfulMask>(
     {
       ok: true,
       docId,
@@ -88,6 +90,51 @@ export async function mask(docId: string, clauses: Clause[], bridge: AiBridge): 
     },
     run,
   );
+  reviews.set(result, { run, base: result, sensitive, manual: [] });
+  return result;
+}
+
+type ReviewState = { run: Run; base: SuccessfulMask; sensitive: string[]; manual: ManualMask[] };
+const reviews = new WeakMap<SuccessfulMask, ReviewState>();
+
+function currentReview(result: SuccessfulMask): ReviewState {
+  const state = reviews.get(result);
+  if (!state) throw new ApprovalError('not_approved', 'A genuine masked preview is required.');
+  if (!isCurrent(state.run)) throw new ApprovalError('stale', 'Mask the current document again.');
+  return state;
+}
+
+/** Local inspection only. Never substitute the revealed value into an approved batch. */
+export async function revealReviewValue(result: SuccessfulMask, placeholder: string): Promise<string> {
+  currentReview(result);
+  if (!result.ledger.some(entry => entry.placeholder === placeholder)) throw new Error('Unknown placeholder.');
+  const entries = await loadVault(result.docId);
+  currentReview(result);
+  if (!entries || !Object.hasOwn(entries, placeholder)) throw new Error('Saved value unavailable.');
+  return entries[placeholder]!;
+}
+
+/** Revise a genuine preview locally, without another inference call or reusing its approval. */
+export async function reviseMask(result: SuccessfulMask, edit: ReviewEdit): Promise<MaskResult> {
+  const { base, sensitive, manual } = currentReview(result);
+  const next = editList(result, manual, edit);
+  const run = startRun(result.docId);
+  const { drafts, ledger } = applyManualMasks(base, next);
+  const checked = leakCheck(drafts, [...sensitive, ...next.map(m => m.value)]);
+  if (!checked.ok) return seal({ ok: false, docId: result.docId, leaks: checked.leaks }, run);
+  const entries = await loadVault(run.docId);
+  if (!isCurrent(run)) throw new ApprovalError('stale', 'Mask the current document again.');
+  if (!entries) throw new Error('Saved values unavailable.');
+  for (const m of manual) delete entries[m.placeholder];
+  for (const m of next) entries[m.placeholder] = m.value;
+  await saveVaultInOrder(run, entries);
+  if (!isCurrent(run)) throw new ApprovalError('stale', 'Mask the current document again.');
+  const updated = seal<SuccessfulMask>({
+    ...base, manuallyEdited: true, ledger,
+    clauses: checked.clauses.map((clause, i) => ({ ...base.clauses[i]!, text: clause.text })),
+  }, run);
+  reviews.set(updated, { run, base, sensitive, manual: next });
+  return updated;
 }
 
 const vaultWrites = new Map<string, Promise<void>>();

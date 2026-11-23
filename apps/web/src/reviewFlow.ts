@@ -1,12 +1,13 @@
 import type { AiBridge, Analysis, AnalyzeResult, Clause, ClauseFailure, MaskResult } from '@clause-guard/core/types';
-import { mask } from '@clause-guard/privacy-engine/mask';
+import { InvalidReviewEdit, type ReviewEdit } from '@clause-guard/privacy-engine/manualReview';
+import { mask, reviseMask } from '@clause-guard/privacy-engine/mask';
 import { approve, assertApproved } from '@clause-guard/privacy-engine/approval';
 import { unmask } from '@clause-guard/privacy-engine/unmask';
 
 export type ReviewOutcome = { restored: Analysis[]; failed: ClauseFailure[]; ranOn?: 'cloud' | 'device' };
 export type ReviewSnapshot = {
   contract: string;
-  phase: 'editing' | 'masking' | 'review' | 'blocked' | 'analyzing' | 'results' | 'error';
+  phase: 'editing' | 'masking' | 'review' | 'revising' | 'blocked' | 'analyzing' | 'results' | 'error';
   masked?: MaskResult;
   ms?: number;
   outcome?: ReviewOutcome;
@@ -19,7 +20,7 @@ export function splitClauses(text: string): Clause[] {
 }
 
 export function reviewBusy(snapshot: ReviewSnapshot): boolean {
-  return snapshot.phase === 'masking' || snapshot.phase === 'analyzing';
+  return snapshot.phase === 'masking' || snapshot.phase === 'revising' || snapshot.phase === 'analyzing';
 }
 
 /** UI lifecycle only. The privacy engine remains the sole approval authority. */
@@ -28,6 +29,9 @@ export class ReviewSession {
   private state: ReviewSnapshot;
   private listeners = new Set<() => void>();
   private revision = 0;
+  // Keep manual protections for this document through edits and repeat scans.
+  // A value may already be covered by the automatic scan and have no manual token.
+  private manualValues = new Map<string, string | undefined>();
 
   constructor(private readonly bridge: AiBridge, contract: string) {
     this.state = { contract, phase: 'editing' };
@@ -61,11 +65,45 @@ export class ReviewSession {
     this.update({ contract, phase: 'masking' });
     try {
       const start = performance.now();
-      const result = await mask(this.docId, clauses, this.bridge);
+      let result = await mask(this.docId, clauses, this.bridge);
+      const reapplied = new Map<string, string | undefined>();
+      for (const value of this.manualValues.keys()) {
+        if (!result.ok) break;
+        try {
+          result = await reviseMask(result, { add: value });
+          if (result.ok) reapplied.set(value, result.ledger.at(-1)!.placeholder);
+        } catch (error) {
+          // The new automatic scan can already cover a previously added value.
+          if (!(error instanceof InvalidReviewEdit)) throw error;
+          reapplied.set(value, undefined);
+        }
+      }
+      if (result.ok) this.manualValues = reapplied;
       if (revision !== this.revision) return;
       this.update({ contract, phase: result.ok ? 'review' : 'blocked', masked: result, ms: performance.now() - start });
     } catch {
       if (revision === this.revision) this.update({ contract, phase: 'error', error: 'Masking could not finish. Try masking again before analysis.' });
+    }
+  }
+
+  async revise(edit: ReviewEdit): Promise<void> {
+    const current = this.state;
+    if (current.phase !== 'review' || !current.masked?.ok) return;
+    this.update({ ...current, phase: 'revising', error: undefined });
+    try {
+      const masked = await reviseMask(current.masked, edit);
+      if (masked.ok) {
+        if ('add' in edit) this.manualValues.set(edit.add.trim(), masked.ledger.at(-1)!.placeholder);
+        else {
+          for (const [value, token] of this.manualValues) {
+            if (token === edit.unmask) this.manualValues.delete(value);
+          }
+        }
+      }
+      this.update({ ...current, masked, phase: masked.ok ? 'review' : 'blocked', error: undefined });
+    } catch (error) {
+      if (error instanceof InvalidReviewEdit) this.update({ ...current, error: error.message });
+      else this.update({ contract: current.contract, phase: 'error', error: 'The preview could not be updated. Mask the current document again.' });
     }
   }
 
