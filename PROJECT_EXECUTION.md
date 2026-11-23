@@ -1434,7 +1434,20 @@ These branches remain unchanged; this release does not claim their acceptance.
 - [x] 395 web + 163 engine tests, core/engine typechecks and production build pass.
 - [x] Real Nano progress/manual reveal/undo/chat-preview check; desktop and actual 430px layout.
 - [x] Publish #45 complete source dcb2a3c, exact full-tree match; tag owners.
-- [ ] Hosting-only update and production smoke after current no-billing verification.
+- [x] Hosting-only deployment, fresh no-billing check, actual production chat/import/citation/undo smoke.
 - [ ] Native #40 SDK builds, App Check and physical-device acceptance remain separate.
 
 See apps/web/WEB_CONTROLS_INTEGRATION_20261123.md for provenance, corrections and limits.
+
+Integration review: https://github.com/lgudip-01/-BuildHybridAI/pull/45 .
+Deployed runtime/config source 044ad59; root responds HTTP 200 with Cache-Control:
+no-cache and existing security headers. Published source matched the complete
+tested local tree. Word NDA import produced 10 clauses on the production origin.
+A real cloud answer restored manually masked bluebird, Lucia, Example Services,
+$250 and 30 days; citation points to the approved masked source. Hosted undo then
+removed the conversation and required fresh document approval. One cloud question
+was approved for this hosted acceptance; no automatic retries or provider switch.
+
+Next: final release review/adoption against main and extension/mobile surfaces,
+then #40 full native SDK/device acceptance. Current web integration is functional,
+not waiting for missing chat implementation. Native chat remains disabled.
