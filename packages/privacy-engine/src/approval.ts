@@ -70,6 +70,11 @@ export function startRun(docId: string): Run {
   return { docId, run: runCount };
 }
 
+/** Invalidate all results and batches for a deleted document, including unfinished masks. */
+export function forgetRun(docId: string): void {
+  latestRun.delete(docId);
+}
+
 /** Engine-internal: whether `run` is still the newest masking run of its document. */
 export function isCurrent(run: Run): boolean {
   return latestRun.get(run.docId) === run.run;

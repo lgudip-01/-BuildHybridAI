@@ -1,12 +1,13 @@
 import type { AiBridge, Analysis, AnalyzeResult, Clause, ClauseFailure, MaskResult } from '@clause-guard/core/types';
 import { mask } from '@clause-guard/privacy-engine/mask';
 import { approve, assertApproved } from '@clause-guard/privacy-engine/approval';
+import { deleteVault } from '@clause-guard/privacy-engine/vault';
 import { unmask } from '@clause-guard/privacy-engine/unmask';
 
 export type ReviewOutcome = { restored: Analysis[]; failed: ClauseFailure[]; ranOn?: 'cloud' | 'device' };
 export type ReviewSnapshot = {
   contract: string;
-  phase: 'editing' | 'masking' | 'review' | 'blocked' | 'analyzing' | 'results' | 'error';
+  phase: 'editing' | 'masking' | 'review' | 'blocked' | 'analyzing' | 'deleting' | 'deleted' | 'results' | 'error';
   masked?: MaskResult;
   ms?: number;
   outcome?: ReviewOutcome;
@@ -19,12 +20,13 @@ export function splitClauses(text: string): Clause[] {
 }
 
 export function reviewBusy(snapshot: ReviewSnapshot): boolean {
-  return snapshot.phase === 'masking' || snapshot.phase === 'analyzing';
+  return snapshot.phase === 'masking' || snapshot.phase === 'analyzing' || snapshot.phase === 'deleting';
 }
 
 /** UI lifecycle only. The privacy engine remains the sole approval authority. */
 export class ReviewSession {
-  readonly docId = crypto.randomUUID();
+  private documentId = crypto.randomUUID();
+  get docId() { return this.documentId; }
   private state: ReviewSnapshot;
   private listeners = new Set<() => void>();
   private revision = 0;
@@ -50,6 +52,21 @@ export class ReviewSession {
     this.revision += 1;
     this.update({ contract, phase: 'editing' });
     return true;
+  }
+
+  async deleteDocument(): Promise<void> {
+    if (reviewBusy(this.state) || this.state.phase === 'deleted') return;
+    const { contract } = this.state;
+    this.revision += 1;
+    this.update({ contract, phase: 'deleting' });
+    try {
+      await deleteVault(this.docId);
+    } catch {
+      this.update({ contract, phase: 'error', error: 'Deletion could not finish. Try deleting this document again.' });
+      return;
+    }
+    this.documentId = crypto.randomUUID();
+    this.update({ contract: '', phase: 'deleted' });
   }
 
   async mask(): Promise<void> {
