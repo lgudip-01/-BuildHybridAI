@@ -57,3 +57,11 @@ storage on the web.
 
 Publishing/deployment checkpoints follow. No payment/billing/API/IAM/App Check
 changes, new providers, automatic retries or native chat enablement.
+
+## Release follow-up
+
+The complete tested source was published as dcb2a3c in #45, stacked on #44.
+Hosting deployment succeeded. A new tab initially reused the prior root HTML;
+a normal reload loaded the redesign. Add an explicit no-cache header for `/`
+as well as index.html; hashed assets retain their immutable caching. No security
+headers or App Check protections are weakened. Final hosted acceptance follows.
