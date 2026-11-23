@@ -37,6 +37,9 @@ const KIND_LABEL: Record<EntityKind, string> = {
   EMAIL: 'Email',
   PHONE: 'Phone',
   ACCOUNT: 'Account number',
+  URL: 'Web address',
+  IP: 'IP address',
+  HANDLE: 'Handle',
 };
 
 // Splitting on a capture group keeps the placeholders at the odd indexes.
@@ -155,8 +158,9 @@ export function App({ bridge, chatBridge }: { chatBridge?: ChatBridge; bridge: A
             {review.error && <div className="banner review-actions" data-tone="warn" role="alert"><p>{review.error}</p></div>}
             {review.phase === 'review' && (
               <div className="review-actions">
-                <p>Review the masked text above. Approving allows analysis of this masked version; original values stay in this browser’s vault.</p>
+                <p>Review the masked text above. Approve this masked version for analysis or contract questions. Original values stay on this device.</p>
                 <button className="primary" onClick={() => void session.analyzeReviewed()}>Approve &amp; analyze</button>
+                {chatBridge && <button className="ghost" onClick={() => session.approveForChat()}>Approve for chat</button>}
               </div>
             )}
             {review.phase === 'analyzing' && <p className="review-actions" role="status">Analyzing reviewed text. This may take a moment.</p>}
@@ -164,7 +168,7 @@ export function App({ bridge, chatBridge }: { chatBridge?: ChatBridge; bridge: A
           </div>
         </section>
       </main>
-      {review.phase === 'results' && chatBridge && <ReviewChat session={session} bridge={chatBridge} />}
+      {['results', 'chat'].includes(review.phase) && chatBridge && <ReviewChat session={session} bridge={chatBridge} />}
     </div>
   );
 }

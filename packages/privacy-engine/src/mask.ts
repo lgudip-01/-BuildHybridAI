@@ -4,7 +4,7 @@ import { leakCheck } from './leakCheck';
 import { dedupeEntities, findOccurrences, normalize, resolveOverlaps, separateCoordinatedNames, toEntity, type Candidate, type Entity } from './merge';
 import { readClause } from './onDevice';
 import { PlaceholderRegistry } from './placeholders';
-import { findDefinedTerms, findNames, findPatterns, type Span } from './regex';
+import { findDefinedTerms, findNames, findPatterns, looksLikePersonName, type Span } from './regex';
 import { saveVault } from './vault';
 import { chatSnapshot } from './chatSnapshot';
 
@@ -31,23 +31,48 @@ export async function mask(docId: string, clauses: Clause[], bridge: AiBridge): 
   // The broad pattern pass runs even with the model, so a name the model misses is still masked.
   // The same on-device call also gives each clause its type, which the cloud uses but masking never needs.
   const found: Entity[] = [];
+  const ruleNames: Entity[] = [];
+  const rulePatterns: Span[] = [];
+  const byModel: Entity[] = [];
   const types: (ClauseType | undefined)[] = [];
   for (const clause of clauses) {
-    found.push(...findNames(clause.text, true).map(spanToEntity));
+    const names = findNames(clause.text, true);
+    const named = names.map(spanToEntity);
+    found.push(...named);
+    ruleNames.push(...named);
+    rulePatterns.push(...findPatterns(clause.text));
     if (!useModel) continue;
     try {
       const reading = await readClause(bridge, clause);
       found.push(...reading.entities);
+      byModel.push(...reading.entities);
       types.push(reading.type);
     } catch {
       needsReview = true;
       types.push(undefined);
     }
   }
-  // A defined short form, as in Northwind Analytics, Inc. ("Northwind"), is masked like the full name.
+  // Complete rule-derived short forms before checking coverage. The same entity
+  // objects are in ruleNames and found, so only aliases of a rule-matched name
+  // count here; aliases of a model-only name still require review.
   for (const term of clauses.flatMap((c) => findDefinedTerms(c.text))) {
     found.find((e) => normalize(e.value).startsWith(`${normalize(term)} `))?.variants.push(term);
   }
+  // A name only the model saw, such as "Globex" or "maria lopez", is of a kind the rules can't find.
+  // It is masked, but the same kind elsewhere is masked only if the model saw it there too, so a person checks.
+  needsReview ||= byModel.some(entity => {
+    const value = words(entity.value);
+    // Actual rule-derived name aliases are masked globally. Incidental words
+    // inside emails/URLs are not name aliases. A complete pattern match is safe
+    // even when the model labels that complete email/domain as an organization.
+    const named = ruleNames.some(rule => rule.variants.some(variant => words(variant) === value));
+    const completePattern = rulePatterns.some(rule => words(rule.value) === value);
+    // Preserve coverage of a partial street address already inside a full
+    // rule-matched address, without extending it to model-only people/companies.
+    const address = entity.kind === 'ADDRESS' && [...ruleNames, ...rulePatterns]
+      .some(rule => rule.kind === 'ADDRESS' && words(rule.value).includes(value));
+    return !(named || completePattern || address);
+  });
   const coordinated = separateCoordinatedNames(found);
   if (coordinated.ambiguousOrganizations.length) {
     return seal({ ok: false, docId, leaks: clauses.flatMap(clause =>
@@ -112,8 +137,16 @@ function saveVaultInOrder(run: Run, entries: Record<string, string>): Promise<vo
   return write;
 }
 
+/** " 77 willow lane " for "77 Willow Lane,": lowercase words between spaces, so one value can be found inside another. */
+function words(value: string): string {
+  return ` ${value.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, ' ').trim()} `;
+}
+
+// A capitalized phrase shaped like "Jane Smith" also gets the person's last and first names as variants,
+// so "Smith's" or "Jane" on its own is masked with it.
 function spanToEntity(span: Span): Entity {
-  const base = span.kind === 'PERSON' ? 'person' : span.kind === 'ORG' ? 'org' : 'other';
+  const person = span.kind === 'PERSON' || (span.kind === 'NAME' && looksLikePersonName(span.value));
+  const base = person ? 'person' : span.kind === 'ORG' ? 'org' : 'other';
   return toEntity(span.kind, span.value, base);
 }
 

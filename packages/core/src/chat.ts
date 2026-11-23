@@ -39,6 +39,8 @@ export interface ChatBridge {
 
 export const CHAT_LIMITS = Object.freeze({ question: 2000, turns: 8, history: 20000, answer: 6000, citations: 10, timeoutMs: 30000 });
 const MESSAGES = {
+  provider_unavailable: 'The chat service is temporarily unavailable. No answer was added. Preview and approve a new question to try again.',
+  quota_exhausted: 'The no-cost chat limit was reached. Chat is paused for this page; try later. No paid fallback is used.',
   release_pending: 'Contract chat is awaiting release checks. No question was sent.',
   privacy_check_failed: 'The local question privacy check could not verify this preview. Rephrase and mask it again.',
   ambiguous_entity: 'This name could refer to more than one entity. Use the full name and review the question again.',

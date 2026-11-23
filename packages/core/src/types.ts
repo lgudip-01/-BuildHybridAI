@@ -24,7 +24,10 @@ export type EntityKind =
   | 'DATE'
   | 'EMAIL'
   | 'PHONE'
-  | 'ACCOUNT';
+  | 'ACCOUNT'
+  | 'URL'
+  | 'IP'
+  | 'HANDLE';
 
 // Text that passed the leak check. Only privacy/leakCheck.ts creates one,
 // and the cloud call only accepts this type, so raw text can't be sent by mistake.

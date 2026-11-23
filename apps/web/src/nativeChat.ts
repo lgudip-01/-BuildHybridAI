@@ -1,7 +1,9 @@
 import { registerPlugin } from '@capacitor/core';
 import { ANALYSIS_MODEL } from '@clause-guard/core/analysis';
-import { CHAT_LIMITS, CHAT_PROMPT } from '@clause-guard/core/chat';
+import { CHAT_LIMITS, CHAT_PROMPT, type ApprovedChatContext, type ApprovedChatQuestion } from '@clause-guard/core/chat';
 import { ApprovedChatDispatcher } from './chatDispatch';
+import { assertChatApproved } from './chatGuard';
+import { assertChatEgressEnabled } from './chatRelease';
 import { DEFAULT_ANALYSIS_CONFIG } from './analysisConfig';
 
 /** Swift/Kotlin contract: cloud only, stateless, no native/provider history. */
@@ -32,6 +34,11 @@ const schema = Object.freeze({ type: 'object', properties: {
  * JS clear/timeout discards late native completion; it cannot recall server work.
  */
 export class NativeChatBridge extends ApprovedChatDispatcher {
+  override async ask(context: ApprovedChatContext, question: ApprovedChatQuestion) {
+    assertChatApproved(context, question);
+    assertChatEgressEnabled(); // Native SDK/device acceptance is separate from the web release.
+    return super.ask(context, question);
+  }
   constructor() {
     super(Native, {
       loadConfig: async () => DEFAULT_ANALYSIS_CONFIG,

@@ -1,10 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import type { AI } from 'firebase/ai';
+import { AIError, AIErrorCode, type AI } from 'firebase/ai';
 import type { ApprovedChatContext, ApprovedChatQuestion, MaskedChatContent } from '@clause-guard/core/chat';
 import type { CleanText } from '@clause-guard/core/types';
 import { CHAT_LIMITS, CHAT_PROMPT, ChatError, chatPlaceholders, validateChatContent } from '@clause-guard/core/chat';
-// Transport lifecycle tests only; production's independent release stop stays on.
-vi.mock('./chatRelease', () => ({ assertChatEgressEnabled: () => {} }));
+// Transport lifecycle controls use a test-only engine registry; separate integration tests retain genuine authority.
 
 // A TEST-ONLY stand-in for the agreed engine registry. No issuer is exported by
 // production chatGuard.ts; the separate real-guard test verifies it fails closed.
@@ -21,7 +20,7 @@ vi.mock('./analysisConfig', async original => {
   const actual = await original<typeof import('./analysisConfig')>();
   return { ...actual, loadAnalysisConfig: vi.fn(async () => actual.DEFAULT_ANALYSIS_CONFIG) };
 });
-import { CloudChatBridge } from './cloudChat';
+import { CloudChatBridge, WEB_CHAT_MODEL } from './cloudChat';
 import { DEFAULT_ANALYSIS_CONFIG, loadAnalysisConfig } from './analysisConfig';
 
 let ai: AI;
@@ -131,6 +130,8 @@ describe('masked request and history boundary', () => {
     const ctx=context(), q=question(ctx); await bridge.ask(ctx,q);
     const [aiArg,params,options]=mocks.factory.mock.calls[0]!;
     expect(aiArg).toBe(ai); expect(params.mode).toBe('only_in_cloud'); expect(params.onDeviceParams).toBeUndefined();
+    expect(params.inCloudParams.model).toBe(WEB_CHAT_MODEL);
+    expect(WEB_CHAT_MODEL).toBe('gemini-3.5-flash-lite');
     expect(params.inCloudParams.systemInstruction).toBe(CHAT_PROMPT);
     expect(params.inCloudParams.generationConfig).toMatchObject({temperature:0,responseMimeType:'application/json'});
     expect(options.timeout).toBe(30000);
@@ -161,6 +162,8 @@ describe('masked request and history boundary', () => {
     mocks.generate.mockResolvedValueOnce(output({...content(),sessionId:'attacker',tools:['fetch']}));
     await expect(bridge.ask(ctx,q)).rejects.toMatchObject({code:'invalid_response'});
     const params=mocks.factory.mock.calls[0]![1]; expect(params.inCloudParams.tools).toBeUndefined();
+    expect(params.inCloudParams.model).toBe(WEB_CHAT_MODEL);
+    expect(WEB_CHAT_MODEL).toBe('gemini-3.5-flash-lite');
     expect(params.inCloudParams.systemInstruction).toBe(CHAT_PROMPT);
     expect(JSON.parse(mocks.generate.mock.calls[0]![0]).question.text).toBe(q.text);
   });
@@ -264,4 +267,18 @@ describe('strict content and citation validation', () => {
     expect(()=>validateChatContent('```json\n{}\n```',allowed,ids)).toThrow(ChatError);
     expect(validateChatContent(JSON.stringify({status:'insufficient_context',answer:'The supplied contract does not specify this.',citations:[]}),allowed,ids).status).toBe('insufficient_context');
   });
+});
+
+it('reports a safe provider failure without retrying or switching models', async () => {
+  mocks.generate.mockRejectedValueOnce(new AIError(AIErrorCode.FETCH_ERROR,'PRIVATE_UPSTREAM_BODY',{status:500}));
+  const ctx=context();
+  await expect(bridge.ask(ctx,question(ctx))).rejects.toMatchObject({code:'provider_unavailable'});
+  expect(mocks.generate).toHaveBeenCalledOnce(); expect(mocks.factory).toHaveBeenCalledOnce();
+});
+it('pauses the app on no-cost quota exhaustion before consuming another approved question', async () => {
+  mocks.generate.mockRejectedValueOnce(new AIError(AIErrorCode.FETCH_ERROR,'PRIVATE_UPSTREAM_BODY',{status:429}));
+  const ctx=context(); await expect(bridge.ask(ctx,question(ctx))).rejects.toMatchObject({code:'quota_exhausted'});
+  const next=question(ctx);
+  await expect(new CloudChatBridge(ai).ask(ctx,next)).rejects.toMatchObject({code:'quota_exhausted'});
+  expect(mocks.consumed.has(next)).toBe(false); expect(mocks.generate).toHaveBeenCalledOnce();
 });
