@@ -171,15 +171,14 @@ export async function maskQuestion(context: ApprovedChatContext, raw: string, br
       if (parts.length > 1) for (const part of [parts[0]!, parts.at(-1)!]) if (part.length >= 3) addAlias(part, '', true);
     }
   }
-  const aliasToken = (alias: Alias, source: string): string => {
+  const aliasToken = (alias: Alias): string => {
     if (alias.uncertain || alias.tokens.size !== 1) throw new ChatError('ambiguous_entity');
-    if (/^\p{Lu}[\p{L}\p{M}'’-]*$/u.test(alias.value) && !/^\p{Lu}/u.test(source)) throw new ChatError('ambiguous_entity');
     return [...alias.tokens][0]!;
   };
   // Resolve old short forms only AFTER every new full identity is registered,
   // including a new person sharing an earlier first name in this same question.
   for (const [i, span] of spans.entries()) if (span.alias) {
-    replacements[i] = aliasToken(aliases.get(normalize(span.alias.value))!, raw.slice(span.start, span.end));
+    replacements[i] = aliasToken(aliases.get(normalize(span.alias.value))!);
   }
   let masked = raw;
   for (let i = spans.length - 1; i >= 0; --i) masked = masked.slice(0, spans[i]!.start) + replacements[i] + masked.slice(spans[i]!.end);
@@ -192,7 +191,7 @@ export async function maskQuestion(context: ApprovedChatContext, raw: string, br
   }
   const repeated = selected(repeats);
   for (let i = repeated.length - 1; i >= 0; --i) {
-    const span = repeated[i]!, token = aliasToken(span.alias!, masked.slice(span.start, span.end));
+    const span = repeated[i]!, token = aliasToken(span.alias!);
     masked = masked.slice(0, span.start) + token + masked.slice(span.end);
   }
   const knownValues = [...entries.values(), ...[...aliases.values()].map(a => a.value)];

@@ -117,8 +117,10 @@ describe('local question masking and append-only identity', () => {
     const d = await document('Notices: 42 Elm Street, Suite 100.\nDelivery: 42 Elm Street, Suite 200.', addresses);
     await expect(maskQuestion(d.context, 'What about 42 Elm Street?', local())).rejects.toMatchObject({ code: 'ambiguous_entity' });
   });
-  it('does not silently interpret a lowercase capitalized single-word alias', async () => {
-    const d = await document(); await expect(maskQuestion(d.context, 'What must lucia pay?', local())).rejects.toMatchObject({ code: 'ambiguous_entity' });
+  it('masks lowercase known first names without relying on a model response', async () => {
+    const d = await document(); const draft = await maskQuestion(d.context, 'What must lucia pay?', local([], false));
+    expect(draft.text).toContain(tokenFor(d.vault, 'Lucia Martinez'));
+    expect(draft.text).not.toContain('lucia');
   });
   it('keeps complete contacts distinct from a known name inside them', async () => {
     const d = await document(), draft = await maskQuestion(d.context, 'Can notices go to Lucia at Lucia@example.test?', local());
@@ -278,5 +280,30 @@ describe('per-turn response restoration', () => {
     const restoring = unmaskChatReply(d.context, q, reply(d.context, q, 'No term is stated.'));
     const remask = mask(d.docId, [{ id: 'new', index: 0, text: 'Replacement.' }], local([], false));
     await expect(restoring).rejects.toMatchObject({ code: 'stale' }); await remask;
+  });
+});
+
+
+describe('reported case and currency-free question misses', () => {
+  it.each(['Acme', 'acme', 'ACME', 'aCmE'])('masks known company alias %s with the original token', async name => {
+    const d = await document('Acme Corp must pay $12,500.', []);
+    const draft = await maskQuestion(d.context, `What must ${name} pay?`, local([], false));
+    expect(draft.text).toBe(`What must ${tokenFor(d.vault, 'Acme Corp')} pay?`);
+    expect(draft.needsReview).toBe(true);
+  });
+  it('masks a currency-free number without guessing its currency or changing local restoration', async () => {
+    const d = await document('Acme Corp must pay $12,500.', []);
+    const draft = await maskQuestion(d.context, 'Does acme pay 12,500?', local([], false));
+    expect(draft.text).not.toMatch(/acme|12,500/i);
+    const q = approveQuestion(d.context, draft, {reviewed:true}); consumeChatQuestion(d.context,q);
+    const amount = draft.text.match(/\[AMOUNT_\d+\]/)![0];
+    const restored = await unmaskChatReply(d.context,q,reply(d.context,q,`The question mentions ${amount}.`));
+    expect(restored.answer).toBe('The question mentions 12,500.');
+    expect(await loadVault(d.docId)).toEqual(d.vault);
+  });
+  it('keeps unrelated word interiors and ordinary deadlines unchanged', async () => {
+    const d = await document('Acme Corp must pay $12,500.', []);
+    const draft = await maskQuestion(d.context,'Does acmeology last 30 days under section 12.5?',local([],false));
+    expect(draft.text).toBe('Does acmeology last 30 days under section 12.5?');
   });
 });

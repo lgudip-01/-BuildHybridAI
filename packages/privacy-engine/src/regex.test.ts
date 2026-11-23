@@ -200,3 +200,13 @@ describe('findNames', () => {
     expect(names(text, true)).toEqual([['NAME', 'Maria Lopez']]);
   });
 });
+
+
+it.each(['12,500', '1,234,567.89', '0,500'])('masks standalone comma-formatted numeric value %s', value => {
+  expect(findPatterns(`Value ${value} is private.`)).toEqual(expect.arrayContaining([expect.objectContaining({kind:'AMOUNT',value})]));
+});
+it('does not partially mask an identifier or decimal/section suffix as a grouped amount', () => {
+  for (const text of ['idA12,500B', '12,500.99.2', '30 days', 'section 12.5']) {
+    expect(findPatterns(text).filter(s=>s.kind==='AMOUNT')).toEqual([]);
+  }
+});
