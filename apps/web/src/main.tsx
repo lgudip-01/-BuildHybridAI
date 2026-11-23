@@ -13,7 +13,6 @@ import { useExternalKey } from '@clause-guard/privacy-engine/vault';
 import { NativeBridge, nativeVaultKey } from './nativeBridge';
 import { WebBridge } from './webBridge';
 import { CloudChatBridge } from './cloudChat';
-import { NativeChatBridge } from './nativeChat';
 
 function start(): ReactNode {
   try {
@@ -23,7 +22,7 @@ function start(): ReactNode {
     if (native) useExternalKey(nativeVaultKey);
     const ai = native ? undefined : initAI();
     const bridge = ai ? new WebBridge(ai) : new NativeBridge();
-    const chatBridge = ai ? new CloudChatBridge(ai) : new NativeChatBridge();
+    const chatBridge = ai ? new CloudChatBridge(ai) : undefined;
     return <App bridge={bridge} chatBridge={chatBridge} />;
   } catch (error) {
     return (

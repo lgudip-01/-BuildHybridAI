@@ -8,8 +8,7 @@ import { loadVault } from '@clause-guard/privacy-engine/vault';
 import { assertChatCurrent, maskQuestion, prepareChatContext } from '@clause-guard/privacy-engine/chat';
 const sdk = vi.hoisted(() => ({ generate: vi.fn(), factory: vi.fn() }));
 // Unmocked production bindings and REAL engine authority. Only the outbound
-// release stop and provider/config calls are mocked in these integration tests.
-vi.mock('./chatRelease', () => ({ assertChatEgressEnabled: () => {} }));
+// provider/config calls are mocked in these integration tests.
 vi.mock('firebase/ai', async original => ({ ...await original<typeof import('firebase/ai')>(), getGenerativeModel: sdk.factory }));
 vi.mock('./analysisConfig', async original => {
   const actual = await original<typeof import('./analysisConfig')>();
@@ -98,4 +97,33 @@ it('cannot create runtime authority from copied genuine objects', async () => {
   await expect(maskQuestion({ ...context }, 'What must Lucia pay?', bridge)).rejects.toMatchObject({ code: 'not_approved' });
   expect(() => assertChatCurrent(context, { sessionId: context.sessionId } as never)).toThrow(expect.objectContaining({ code: 'not_approved' }));
   expect(sdk.generate).not.toHaveBeenCalled();
+});
+
+it('explicit chat-only document approval reaches the real cloud path without clause analysis', async () => {
+  const analyze = vi.fn(bridge.analyze);
+  const session = new ReviewSession({ ...bridge, analyze }, contract);
+  session.approveForChat();
+  expect(() => session.openChat(new CloudChatBridge({app:{}} as AI))).toThrow();
+  await session.mask();
+  expect(session.getSnapshot().phase).toBe('review');
+  session.approveForChat();
+  expect(session.getSnapshot().phase).toBe('chat');
+  expect(analyze).not.toHaveBeenCalled(); expect(sdk.generate).not.toHaveBeenCalled();
+  const conversation = session.openChat(new CloudChatBridge({app:{}} as AI));
+  conversation.editQuestion('What must Lucia pay?'); await conversation.prepare();
+  expect(sdk.generate).not.toHaveBeenCalled();
+  await conversation.approveAndSend();
+  expect(conversation.getSnapshot().messages[0]?.ranOn).toBe('cloud');
+  expect(conversation.getSnapshot().messages[0]?.answer).toContain('Lucia Martinez');
+  expect(sdk.generate).toHaveBeenCalledOnce(); expect(analyze).not.toHaveBeenCalled();
+  session.edit('New contract.');
+  expect(conversation.getSnapshot()).toMatchObject({phase:'closed',question:'',messages:[]});
+  expect(() => session.openChat(new CloudChatBridge({app:{}} as AI))).toThrow();
+});
+it('chat-only document approval rejects an externally stale preview before cloud setup', async () => {
+  const session = new ReviewSession(bridge, contract); await session.mask();
+  await mask(session.docId,[{id:'new',index:0,text:'Replacement contract.'}],bridge);
+  session.approveForChat(); expect(session.getSnapshot().phase).toBe('error');
+  expect(() => session.openChat(new CloudChatBridge({app:{}} as AI))).toThrow();
+  expect(sdk.factory).not.toHaveBeenCalled(); expect(sdk.generate).not.toHaveBeenCalled();
 });

@@ -1,8 +1,8 @@
 import { ChatError } from '@clause-guard/core/chat';
 
 /**
- * Outbound chat stays disabled until the documented release checks pass.
- * Real engine authorization remains required after this stop is removed.
+ * Native chat stays disabled until its SDK/device release checks pass.
+ * Web chat uses the shared dispatcher with real engine authorization.
  * No environment flag, caller option or UI boolean can enable sending.
  * Transport tests may mock this stop; it never issues approval or tickets.
  */

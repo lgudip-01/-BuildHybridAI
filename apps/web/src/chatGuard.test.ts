@@ -36,7 +36,7 @@ it('real native boundary and direct engine bindings reject every forged input', 
   expect(mock.native).not.toHaveBeenCalled(); expect(mock.config).not.toHaveBeenCalled(); expect(mock.factory).not.toHaveBeenCalled();
 });
 
-it('a genuine approved question cannot set up or dispatch either transport before release', async()=>{
+it('a genuine approved question cannot dispatch native chat before native release', async()=>{
   const { mask } = await import('@clause-guard/privacy-engine/mask');
   const { approve } = await import('@clause-guard/privacy-engine/approval');
   const local: import('@clause-guard/core/types').AiBridge = {
@@ -49,7 +49,7 @@ it('a genuine approved question cannot set up or dispatch either transport befor
   const draft=await maskQuestion(context,'What must Lucia pay?',local);
   const question=approveQuestion(context,draft,{reviewed:true});
   assertChatApproved(context,question);
-  for(const bridge of [new CloudChatBridge({app:{}} as AI),new NativeChatBridge()]) {
+  for(const bridge of [new NativeChatBridge()]) {
     await expect(bridge.ask(context,question)).rejects.toMatchObject({code:'release_pending'});
     assertChatApproved(context,question); // Disabled transports do not consume it.
   }

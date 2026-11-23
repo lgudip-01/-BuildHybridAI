@@ -8,7 +8,7 @@ import { ChatConversation } from './chatFlow';
 export type ReviewOutcome = { restored: Analysis[]; failed: ClauseFailure[]; ranOn?: 'cloud' | 'device' };
 export type ReviewSnapshot = {
   contract: string;
-  phase: 'editing' | 'masking' | 'review' | 'blocked' | 'analyzing' | 'results' | 'error';
+  phase: 'editing' | 'masking' | 'review' | 'blocked' | 'analyzing' | 'results' | 'chat' | 'error';
   masked?: MaskResult;
   ms?: number;
   outcome?: ReviewOutcome;
@@ -50,13 +50,26 @@ export class ReviewSession {
 
   /** After the explicit document approval/result flow, never from raw clauses. */
   openChat(bridge: ChatBridge): ChatConversation {
-    if (this.state.phase !== 'results' || !this.approvedBatch) throw new ChatError('not_approved');
+    if (!['results', 'chat'].includes(this.state.phase) || !this.approvedBatch) throw new ChatError('not_approved');
     try { assertApproved(this.approvedBatch); } catch (error) { throw sanitizeChatError(error); }
     if (this.chat && this.chatBridge === bridge && this.chat.getSnapshot().phase !== 'closed') return this.chat;
     this.closeChat();
     this.chat = new ChatConversation(this.approvedBatch, this.bridge, bridge);
     this.chatBridge = bridge;
     return this.chat;
+  }
+
+  /** Explicit document approval for questions; does not run analysis or any provider. */
+  approveForChat(): void {
+    const current = this.state;
+    if (current.phase !== 'review' || !current.masked?.ok) return;
+    try {
+      this.approvedBatch = approve(current.masked, { reviewed: true });
+      this.update({ ...current, phase: 'chat', error: undefined, outcome: undefined });
+    } catch {
+      this.approvedBatch = undefined;
+      this.update({ ...current, phase: 'error', error: 'The preview is no longer current. Mask and review the contract again.' });
+    }
   }
 
   /** View unmount/reset. Document changes also call this before changing state. */
