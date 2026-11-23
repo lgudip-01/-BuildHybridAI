@@ -1,6 +1,6 @@
 import { CHAT_LIMITS, ChatError, sanitizeChatError, type ApprovedChatContext, type ChatBridge, type ChatReply } from '@clause-guard/core/chat';
 import type { AiBridge, ApprovedBatch } from '@clause-guard/core/types';
-import { approveQuestion, maskQuestion, prepareChatContext, unmaskChatReply, type ChatQuestionPreview } from './chatEngine';
+import { approveQuestion, closeChatContext, maskQuestion, prepareChatContext, unmaskChatReply, type ChatQuestionPreview } from './chatEngine';
 import { assertChatCurrent } from './chatGuard';
 
 /** Display-only values: never accepted as transport input or transport history. */
@@ -108,6 +108,7 @@ export class ChatConversation {
       // A transport cleanup error must not retain display data or expose an SDK
       // error. Local generation invalidation still discards every completion.
     } finally {
+      try { closeChatContext(this.context); } catch { /* Unbound engine/cleanup cannot retain UI state. */ }
       this.update({ phase: 'closed', question: '', messages: Object.freeze([]) });
     }
   }

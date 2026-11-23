@@ -14,6 +14,10 @@ export type MaskedQuestionDraft = {
   readonly text: CleanText;
 };
 export type ApprovedChatQuestion = MaskedQuestionDraft & { readonly __brand: 'approvedChatQuestion' };
+export type ChatQuestionPreview = MaskedQuestionDraft & {
+  readonly reviewWords: readonly string[];
+  readonly needsReview: true;
+};
 export type MaskedChatContent = {
   readonly status: 'answered' | 'insufficient_context';
   readonly answer: string;
@@ -35,6 +39,7 @@ export interface ChatBridge {
 
 export const CHAT_LIMITS = Object.freeze({ question: 2000, turns: 8, history: 20000, answer: 6000, citations: 10, timeoutMs: 30000 });
 const MESSAGES = {
+  privacy_check_failed: 'The local question privacy check could not verify this preview. Rephrase and mask it again.',
   ambiguous_entity: 'This name could refer to more than one entity. Use the full name and review the question again.',
   review_required: 'Review the masked question before approving it.',
   not_approved: 'Chat requires a current question approved by the privacy engine.',

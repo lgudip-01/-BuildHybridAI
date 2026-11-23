@@ -8,7 +8,7 @@ vi.mock('./analysisConfig',()=>({loadAnalysisConfig:mock.config}));
 import { CloudChatBridge } from './cloudChat';
 import { NativeChatBridge } from './nativeChat';
 import { ChatConversation } from './chatFlow';
-import { prepareChatContext, maskQuestion, approveQuestion, unmaskChatReply } from './chatEngine';
+import { prepareChatContext, maskQuestion, approveQuestion, unmaskChatReply, closeChatContext } from './chatEngine';
 import { assertChatApproved, assertChatCurrent, consumeChatQuestion } from './chatGuard';
 
 it('real production boundary cannot authorize a forged ticket or make configuration/model requests', async()=>{
@@ -25,8 +25,9 @@ it('real native boundary and every engine integration seam remain fail closed', 
   await expect(new NativeChatBridge().ask(context,question)).rejects.toMatchObject({code:'not_approved'});
   const batch={docId:'d',clauses:[]};
   expect(()=>prepareChatContext(batch)).toThrow(expect.objectContaining({code:'not_approved'}));
+  expect(()=>closeChatContext(context)).toThrow(expect.objectContaining({code:'not_approved'}));
   const local={} as import('@clause-guard/core/types').AiBridge;
-  const preview={...question,reviewWords:[],needsReview:true};
+  const preview={...question,reviewWords:[],needsReview:true as const};
   await expect(maskQuestion(context,'private raw question',local)).rejects.toMatchObject({code:'not_approved'});
   expect(()=>approveQuestion(context,preview,{reviewed:true})).toThrow(expect.objectContaining({code:'not_approved'}));
   await expect(unmaskChatReply(context,question,{} as import('@clause-guard/core/chat').ChatReply)).rejects.toMatchObject({code:'not_approved'});

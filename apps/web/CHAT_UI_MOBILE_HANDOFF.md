@@ -1,5 +1,12 @@
 # Chat UI and native handoff — November 22, 2026
 
+**Engine-candidate extension:** the separate candidate now implements the real
+privacy-engine APIs in packages/privacy-engine/src/chat.ts. See
+CHAT_ENGINE_CANDIDATE.md for current 140-engine/340-web verification, owner-review
+items and local browser evidence. Production seams/guards remain unbound. The
+initial #34 handoff/counts below are retained as historical context; native chat
+methods and the product view still need delivery.
+
 For @aarushgoel1, @saikamsani30 and @lgudip-01. Extends #34; responds to #13,
 #17, #30, #35 and #36. Chat is the highest development priority. **No live chat
 is enabled.** The missing engine exports and native plugin method are explicit

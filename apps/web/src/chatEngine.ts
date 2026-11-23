@@ -1,11 +1,7 @@
-import { ChatError, type ApprovedChatContext, type ApprovedChatQuestion, type ChatReply, type MaskedQuestionDraft } from '@clause-guard/core/chat';
+import { ChatError, type ApprovedChatContext, type ApprovedChatQuestion, type ChatQuestionPreview, type ChatReply } from '@clause-guard/core/chat';
 import type { AiBridge, ApprovedBatch } from '@clause-guard/core/types';
 
-/** Proposed concrete UI shape for the review-word list confirmed in #13. */
-export type ChatQuestionPreview = MaskedQuestionDraft & {
-  readonly reviewWords: readonly string[];
-  readonly needsReview: boolean;
-};
+export type { ChatQuestionPreview } from '@clause-guard/core/chat';
 
 // Activation seam only. Replace with direct real engine exports after owner
 // delivery/review. No local ticket issuer, vault access or simulated masking.
@@ -20,3 +16,5 @@ export function approveQuestion(_context: ApprovedChatContext, _draft: ChatQuest
 export async function unmaskChatReply(_context: ApprovedChatContext, _question: ApprovedChatQuestion, _reply: ChatReply): Promise<ChatReply> {
   throw new ChatError('not_approved');
 }
+/** Candidate engine cleanup seam; still fails closed pending real binding/review. */
+export function closeChatContext(_context: ApprovedChatContext): void { throw new ChatError('not_approved'); }

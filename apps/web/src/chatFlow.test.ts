@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ChatError, type ApprovedChatContext, type ApprovedChatQuestion, type ChatBridge, type ChatReply } from '@clause-guard/core/chat';
 import type { AiBridge, ApprovedBatch, CleanText } from '@clause-guard/core/types';
-const mock = vi.hoisted(() => ({ prepare: vi.fn(), mask: vi.fn(), approve: vi.fn(), restore: vi.fn(), current: vi.fn() }));
-vi.mock('./chatEngine', () => ({ prepareChatContext: mock.prepare, maskQuestion: mock.mask, approveQuestion: mock.approve, unmaskChatReply: mock.restore }));
+const mock = vi.hoisted(() => ({ prepare: vi.fn(), mask: vi.fn(), approve: vi.fn(), restore: vi.fn(), current: vi.fn(), close: vi.fn() }));
+vi.mock('./chatEngine', () => ({ prepareChatContext: mock.prepare, maskQuestion: mock.mask, approveQuestion: mock.approve, unmaskChatReply: mock.restore, closeChatContext: mock.close }));
 vi.mock('./chatGuard', () => ({ assertChatCurrent: mock.current }));
 import { ChatConversation } from './chatFlow';
 import type { ChatQuestionPreview } from './chatEngine';
@@ -90,6 +90,7 @@ describe('headless UI conversation lifecycle (mocked engine, no authority)', () 
     }
     c.close(); finish(); await work;
     expect(c.getSnapshot()).toEqual({ phase: 'closed', question: '', messages: [] }); expect(bridge.clear).toHaveBeenCalledWith(context);
+    expect(mock.close).toHaveBeenCalledWith(context);
     expect(c.editQuestion('new')).toBe(false); await c.prepare(); await c.approveAndSend(); c.close(); expect(bridge.clear).toHaveBeenCalledOnce();
   });
   it('checks the current engine revision again after asynchronous restoration', async () => {
@@ -108,6 +109,7 @@ describe('headless UI conversation lifecycle (mocked engine, no authority)', () 
   it('still clears restored display state if a transport cleanup throws', async () => {
     const c = conversation(); await c.prepare(); await c.approveAndSend(); bridge.clear.mockImplementationOnce(() => { throw new Error('PRIVATE_CLEANUP_ERROR'); });
     expect(() => c.close()).not.toThrow(); expect(c.getSnapshot()).toEqual({ phase: 'closed', question: '', messages: [] });
+    expect(mock.close).toHaveBeenCalledWith(context);
     expect(c.editQuestion('new')).toBe(false);
   });
 });
