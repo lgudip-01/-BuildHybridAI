@@ -3,9 +3,9 @@ import { beforeEach, expect, it, vi } from 'vitest';
 import type { AI } from 'firebase/ai';
 import type { AiBridge } from '@clause-guard/core/types';
 import { approve, assertApproved } from '@clause-guard/privacy-engine/approval';
-import { mask } from '@clause-guard/privacy-engine/mask';
+import { mask, reviseMask } from '@clause-guard/privacy-engine/mask';
 import { loadVault } from '@clause-guard/privacy-engine/vault';
-import { assertChatCurrent, maskQuestion, prepareChatContext } from '@clause-guard/privacy-engine/chat';
+import { assertChatCurrent, approveQuestion, maskQuestion, prepareChatContext } from '@clause-guard/privacy-engine/chat';
 const sdk = vi.hoisted(() => ({ generate: vi.fn(), factory: vi.fn() }));
 // Unmocked production bindings and REAL engine authority. Only the outbound
 // provider/config calls are mocked in these integration tests.
@@ -126,4 +126,72 @@ it('chat-only document approval rejects an externally stale preview before cloud
   session.approveForChat(); expect(session.getSnapshot().phase).toBe('error');
   expect(() => session.openChat(new CloudChatBridge({app:{}} as AI))).toThrow();
   expect(sdk.factory).not.toHaveBeenCalled(); expect(sdk.generate).not.toHaveBeenCalled();
+});
+
+
+it('manual changes revoke prepared chat and require fresh approval with PRIVATE restoration', async () => {
+  const session = new ReviewSession(bridge, 'Lucia Martinez must use code bluebird and pay $100.');
+  await session.mask(); session.approveForChat();
+  const cloud = new CloudChatBridge({ app: {} } as AI), old = session.openChat(cloud);
+  old.editQuestion('What must Lucia pay?'); await old.prepare();
+  const revision = session.revise({ add: 'bluebird' });
+  expect(old.getSnapshot()).toMatchObject({ phase: 'closed', messages: [], question: '' });
+  await old.approveAndSend(); expect(sdk.factory).not.toHaveBeenCalled();
+  await revision; expect(() => session.openChat(cloud)).toThrow(); session.approveForChat();
+  const current = session.openChat(cloud);
+  current.editQuestion('Does Lucia use bluebird?'); await current.prepare();
+  expect(current.getSnapshot().preview?.text).toContain('[PRIVATE_1]');
+  expect(current.getSnapshot().preview?.text).toContain('[PARTY_A]');
+  sdk.generate.mockResolvedValueOnce(result(JSON.stringify({ status: 'answered', answer: '[PARTY_A] uses [PRIVATE_1].', citations: ['c1'] })));
+  await current.approveAndSend();
+  expect(current.getSnapshot().messages[0]?.answer).toBe('Lucia Martinez uses bluebird.');
+  for (const raw of ['Lucia', 'bluebird', '$100']) expect(sdk.generate.mock.calls[0]![0]).not.toContain(raw);
+});
+
+it('manual edits invalidate engine tickets and undo retains original chat aliases', async () => {
+  const preview = await mask(crypto.randomUUID(), [{id:'c1',index:0,text:'Lucia Martinez uses bluebird.'}], bridge);
+  if (!preview.ok) throw new Error('Expected preview');
+  const context = prepareChatContext(approve(preview, {reviewed:true}));
+  const ticket = approveQuestion(context, await maskQuestion(context, 'Does Lucia use bluebird?', bridge), {reviewed:true});
+  const revising = reviseMask(preview, {add:'bluebird'});
+  expect(() => assertChatCurrent(context, ticket)).toThrow(expect.objectContaining({code:'stale'}));
+  const revised = await revising; if (!revised.ok) throw new Error('Expected revision');
+  const undone = await reviseMask(revised, {unmask:'[PRIVATE_1]'}); if (!undone.ok) throw new Error('Expected undo');
+  const updatedContext = prepareChatContext(approve(undone, {reviewed:true}));
+  expect((await maskQuestion(updatedContext, 'What does Lucia use?', bridge)).text).toContain('[PARTY_A]');
+  expect(updatedContext.clauses[0]!.text).toContain('bluebird');
+  expect(await loadVault(preview.docId)).not.toHaveProperty('[PRIVATE_1]');
+});
+
+it('manual edit during dispatch clears history and discards the late provider result', async () => {
+  const session = await reviewed(), cloud = new CloudChatBridge({app:{}} as AI);
+  const chat = session.openChat(cloud), gate = deferred<ReturnType<typeof result>>();
+  sdk.generate.mockReturnValueOnce(gate.promise);
+  chat.editQuestion('What must Lucia pay?'); await chat.prepare();
+  const pending = chat.approveAndSend(); await vi.waitFor(() => expect(sdk.generate).toHaveBeenCalledOnce());
+  await session.revise({add:'must pay'});
+  gate.resolve(response(sdk.generate.mock.calls[0]![0])); await pending;
+  expect(chat.getSnapshot()).toMatchObject({phase:'closed',question:'',messages:[]});
+  expect(session.getSnapshot()).toMatchObject({phase:'review',outcome:undefined});
+  expect(() => session.openChat(cloud)).toThrow();
+});
+
+it('deletion discards pending chat, isolates vaults and clears manual choices for the next document', async () => {
+  const session = new ReviewSession(bridge,'Lucia Martinez uses bluebird.');
+  await session.mask(); await session.revise({add:'bluebird'}); session.approveForChat();
+  const id = session.docId, cloud = new CloudChatBridge({app:{}} as AI), chat = session.openChat(cloud);
+  const other = await mask(crypto.randomUUID(),[{id:'c1',index:0,text:'Contact other@example.test.'}],bridge);
+  if (!other.ok) throw new Error('Expected other preview');
+  const otherBatch = approve(other,{reviewed:true}), otherVault = await loadVault(other.docId);
+  const gate = deferred<ReturnType<typeof result>>(); sdk.generate.mockReturnValueOnce(gate.promise);
+  chat.editQuestion('What does Lucia use?'); await chat.prepare();
+  const pending = chat.approveAndSend(); await vi.waitFor(()=>expect(sdk.generate).toHaveBeenCalledOnce());
+  const deletion = session.deleteDocument(); expect(chat.getSnapshot()).toMatchObject({phase:'closed',messages:[]});
+  await deletion; gate.resolve(response(sdk.generate.mock.calls[0]![0])); await pending;
+  expect(session.getSnapshot()).toEqual({contract:'',phase:'deleted'});
+  expect(session.docId).not.toBe(id); expect(await loadVault(id)).toBeUndefined();
+  expect(await loadVault(other.docId)).toEqual(otherVault); expect(()=>assertApproved(otherBatch)).not.toThrow();
+  session.edit('Lucia Martinez uses bluebird.'); await session.mask();
+  const next = session.getSnapshot().masked; expect(next).not.toHaveProperty('manuallyEdited');
+  if (next?.ok) expect(next.clauses[0]!.text).toContain('bluebird');
 });

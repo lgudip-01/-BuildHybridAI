@@ -3,6 +3,7 @@ import { beforeEach, expect, it, vi } from 'vitest';
 import type { AI } from 'firebase/ai';
 import type { AiBridge, ApprovedBatch } from '@clause-guard/core/types';
 import { approve, assertApproved } from '@clause-guard/privacy-engine/approval';
+import * as vault from '@clause-guard/privacy-engine/vault';
 import { mask } from '@clause-guard/privacy-engine/mask';
 
 const sdk = vi.hoisted(() => ({ generate: vi.fn(), factory: vi.fn() }));
@@ -31,6 +32,49 @@ beforeEach(() => {
   vi.clearAllMocks(); sdk.generate.mockReset();
   sdk.factory.mockImplementation(() => ({ generateContent: sdk.generate }));
   sdk.generate.mockImplementation(async (prompt: string) => response(prompt));
+});
+
+it('reports clause reads in order, including a failed read, and waits for approval', async () => {
+  const first = deferred();
+  const second = deferred();
+  const started = deferred();
+  const advanced = deferred();
+  const analyze = vi.fn();
+  const onDevice = vi.fn()
+    .mockImplementationOnce(async () => { started.resolve(); await first.promise; throw new Error(); })
+    .mockImplementationOnce(async () => {
+      advanced.resolve();
+      await second.promise;
+      return JSON.stringify({ type: 'other', entities: [] });
+    });
+  const session = new ReviewSession({ onDeviceStatus: async () => 'available', onDevice, analyze }, contract);
+  const counts: number[] = [];
+  session.subscribe(() => {
+    const { finishedClauseReads } = session.getSnapshot();
+    if (finishedClauseReads !== undefined) counts.push(finishedClauseReads);
+  });
+  const pending = session.mask();
+  await started.promise;
+  expect(session.getSnapshot()).toMatchObject({ phase: 'masking', finishedClauseReads: 0 });
+  first.resolve();
+  await advanced.promise;
+  expect(session.getSnapshot()).toMatchObject({ phase: 'masking', finishedClauseReads: 1 });
+  await session.analyzeReviewed();
+  second.resolve();
+  await pending;
+  expect(counts).toEqual([0, 1, 2]);
+  expect(session.getSnapshot()).toMatchObject({ phase: 'review', masked: { ok: true, needsReview: true } });
+  expect(session.getSnapshot().finishedClauseReads).toBeUndefined();
+  expect(analyze).not.toHaveBeenCalled();
+});
+
+it('omits model-read progress when masking with patterns alone', async () => {
+  const session = new ReviewSession(bridge, contract);
+  const counts = new Set<number | undefined>();
+  session.subscribe(() => counts.add(session.getSnapshot().finishedClauseReads));
+  await session.mask();
+  expect(counts).toEqual(new Set([undefined]));
+  expect(session.getSnapshot().phase).toBe('review');
 });
 
 it('does not analyze until real masking is complete and the user explicitly approves', async () => {
@@ -141,4 +185,53 @@ it('shows all clauses as unavailable without inventing a source when all request
   expect(state.outcome?.ranOn).toBeUndefined();
   expect(JSON.stringify(state)).not.toContain('INTERNAL_ERROR_SENTINEL');
   expect(sdk.generate).toHaveBeenCalledTimes(2);
+});
+
+it('requires fresh approval after local review edits, reapplies manual masks, and restores only on device', async () => {
+  const session = new ReviewSession(bridge, 'Reference bluebird.\n\nNotify bluebird.');
+  await session.mask();
+  const before = session.getSnapshot().masked!;
+  if (!before.ok) throw new Error('Unexpected block');
+  const old = approve(before, { reviewed: true });
+  const pending = session.revise({ add: 'bluebird' });
+  expect(() => assertApproved(old)).toThrow(expect.objectContaining({ code: 'stale' }));
+  expect(session.edit('replacement')).toBe(false);
+  await session.analyzeReviewed();
+  await pending;
+  expect(session.getSnapshot().masked).toMatchObject({ ok: true, manuallyEdited: true });
+  await session.mask();
+  session.edit('Reference bluebird.\n\nNotify bluebird tomorrow.');
+  await session.mask();
+  expect(sdk.generate).not.toHaveBeenCalled();
+  await session.analyzeReviewed();
+  expect(sdk.generate).toHaveBeenCalledTimes(2);
+  for (const [payload] of sdk.generate.mock.calls) {
+    expect(payload).toContain('[PRIVATE_1]');
+    expect(payload).not.toContain('bluebird');
+  }
+  expect(session.getSnapshot().outcome?.restored[1]?.explanation).toContain('bluebird');
+});
+
+it('retains the document identity on deletion failure and permits a clean retry', async () => {
+  const session = new ReviewSession(bridge, contract);
+  await session.mask();
+  const id = session.docId;
+  const remove = vi.spyOn(vault, 'deleteVault').mockRejectedValueOnce(new Error('storage unavailable'));
+  try {
+    await session.deleteDocument();
+    expect(session.docId).toBe(id);
+    expect(session.getSnapshot()).toMatchObject({ contract, phase: 'error', error: expect.stringContaining('again') });
+    expect(await vault.loadVault(id)).toBeDefined();
+    const retry = session.deleteDocument();
+    expect(session.edit('replacement')).toBe(false);
+    await session.deleteDocument();
+    await retry;
+    expect(remove).toHaveBeenCalledTimes(2);
+    expect(session.getSnapshot()).toEqual({ contract: '', phase: 'deleted' });
+    expect(session.docId).not.toBe(id);
+    expect(await vault.loadVault(id)).toBeUndefined();
+    expect(session.edit('A new document.')).toBe(true);
+  } finally {
+    remove.mockRestore();
+  }
 });

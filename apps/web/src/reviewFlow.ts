@@ -1,38 +1,41 @@
-import type { AiBridge, Analysis, AnalyzeResult, ApprovedBatch, Clause, ClauseFailure, MaskResult } from '@clause-guard/core/types';
+import type { AiBridge, Analysis, AnalyzeResult, ApprovedBatch, ClauseFailure, MaskResult } from '@clause-guard/core/types';
 import { ChatError, sanitizeChatError, type ChatBridge } from '@clause-guard/core/chat';
-import { mask } from '@clause-guard/privacy-engine/mask';
+import { mask, reviseMask } from '@clause-guard/privacy-engine/mask';
+import { InvalidReviewEdit, type ReviewEdit } from '@clause-guard/privacy-engine/manualReview';
 import { approve, assertApproved } from '@clause-guard/privacy-engine/approval';
+import { deleteVault } from '@clause-guard/privacy-engine/vault';
 import { unmask } from '@clause-guard/privacy-engine/unmask';
 import { ChatConversation } from './chatFlow';
+import { splitClauses } from './clauses';
 
 export type ReviewOutcome = { restored: Analysis[]; failed: ClauseFailure[]; ranOn?: 'cloud' | 'device' };
 export type ReviewSnapshot = {
   contract: string;
-  phase: 'editing' | 'masking' | 'review' | 'blocked' | 'analyzing' | 'results' | 'chat' | 'error';
+  phase: 'editing' | 'masking' | 'review' | 'revising' | 'blocked' | 'analyzing' | 'results' | 'chat' | 'deleting' | 'deleted' | 'error';
+  finishedClauseReads?: number;
   masked?: MaskResult;
   ms?: number;
   outcome?: ReviewOutcome;
   error?: string;
 };
 
-export function splitClauses(text: string): Clause[] {
-  return text.split(/\n\s*\n/).map(part => part.trim()).filter(Boolean)
-    .map((text, index) => ({ id: `c${index + 1}`, index, text }));
-}
-
 export function reviewBusy(snapshot: ReviewSnapshot): boolean {
-  return snapshot.phase === 'masking' || snapshot.phase === 'analyzing';
+  return snapshot.phase === 'masking' || snapshot.phase === 'revising' || snapshot.phase === 'analyzing' || snapshot.phase === 'deleting';
 }
 
 /** UI lifecycle only. The privacy engine remains the sole approval authority. */
 export class ReviewSession {
-  readonly docId = crypto.randomUUID();
+  private documentId = crypto.randomUUID();
+  get docId() { return this.documentId; }
   private state: ReviewSnapshot;
   private listeners = new Set<() => void>();
   private revision = 0;
   private approvedBatch?: ApprovedBatch;
   private chat?: ChatConversation;
   private chatBridge?: ChatBridge;
+  // Keep manual protections for this document through edits and repeat scans.
+  // A value may already be covered by the automatic scan and have no manual token.
+  private manualValues = new Map<string, string | undefined>();
 
   constructor(private readonly bridge: AiBridge, contract: string) {
     this.state = { contract, phase: 'editing' };
@@ -91,6 +94,24 @@ export class ReviewSession {
     return true;
   }
 
+  async deleteDocument(): Promise<void> {
+    if (reviewBusy(this.state) || this.state.phase === 'deleted') return;
+    const { contract } = this.state;
+    this.closeChat();
+    this.approvedBatch = undefined;
+    this.revision += 1;
+    this.update({ contract, phase: 'deleting' });
+    try {
+      await deleteVault(this.docId);
+    } catch {
+      this.update({ contract, phase: 'error', error: 'Deletion could not finish. Try deleting this document again.' });
+      return;
+    }
+    this.manualValues.clear();
+    this.documentId = crypto.randomUUID();
+    this.update({ contract: '', phase: 'deleted' });
+  }
+
   async mask(): Promise<void> {
     if (reviewBusy(this.state)) return;
     const clauses = splitClauses(this.state.contract);
@@ -102,11 +123,51 @@ export class ReviewSession {
     this.update({ contract, phase: 'masking' });
     try {
       const start = performance.now();
-      const result = await mask(this.docId, clauses, this.bridge);
+      let result = await mask(this.docId, clauses, this.bridge, finishedClauseReads => {
+        if (revision === this.revision) this.update({ contract, phase: 'masking', finishedClauseReads });
+      });
+      const reapplied = new Map<string, string | undefined>();
+      for (const value of this.manualValues.keys()) {
+        if (!result.ok) break;
+        try {
+          result = await reviseMask(result, { add: value });
+          if (result.ok) reapplied.set(value, result.ledger.at(-1)!.placeholder);
+        } catch (error) {
+          if (!(error instanceof InvalidReviewEdit)) throw error;
+          reapplied.set(value, undefined);
+        }
+      }
+      if (result.ok) this.manualValues = reapplied;
       if (revision !== this.revision) return;
       this.update({ contract, phase: result.ok ? 'review' : 'blocked', masked: result, ms: performance.now() - start });
     } catch {
       if (revision === this.revision) this.update({ contract, phase: 'error', error: 'Masking could not finish. Try masking again before analysis.' });
+    }
+  }
+
+  async revise(edit: ReviewEdit): Promise<void> {
+    const current = this.state;
+    if (!['review', 'chat', 'results'].includes(current.phase) || !current.masked?.ok) return;
+    this.closeChat();
+    this.approvedBatch = undefined;
+    const revision = this.revision;
+    this.update({ ...current, outcome: undefined, phase: 'revising', error: undefined });
+    try {
+      const masked = await reviseMask(current.masked, edit);
+      if (revision !== this.revision) return;
+      if (masked.ok) {
+        if ('add' in edit) this.manualValues.set(edit.add.trim(), masked.ledger.at(-1)!.placeholder);
+        else {
+          for (const [value, token] of this.manualValues) {
+            if (token === edit.unmask) this.manualValues.delete(value);
+          }
+        }
+      }
+      this.update({ ...current, outcome: undefined, masked, phase: masked.ok ? 'review' : 'blocked', error: undefined });
+    } catch (error) {
+      if (revision !== this.revision) return;
+      if (error instanceof InvalidReviewEdit) this.update({ ...current, phase: 'review', outcome: undefined, error: error.message });
+      else this.update({ contract: current.contract, phase: 'error', error: 'The preview could not be updated. Mask the current document again.' });
     }
   }
 
