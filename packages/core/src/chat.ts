@@ -35,6 +35,7 @@ export interface ChatBridge {
 
 export const CHAT_LIMITS = Object.freeze({ question: 2000, turns: 8, history: 20000, answer: 6000, citations: 10, timeoutMs: 30000 });
 const MESSAGES = {
+  ambiguous_entity: 'This name could refer to more than one entity. Use the full name and review the question again.',
   review_required: 'Review the masked question before approving it.',
   not_approved: 'Chat requires a current question approved by the privacy engine.',
   stale: 'This conversation is no longer current. Start a new conversation.',
