@@ -1,12 +1,13 @@
 import type { AiBridge, Clause, ClauseType, MaskResult } from '@clause-guard/core/types';
-import { isCurrent, seal, startRun, type Run } from './approval';
+import { ApprovalError, isCurrent, seal, startRun, type Run, type ChatMaskSnapshot } from './approval';
 import { leakCheck } from './leakCheck';
 import { dedupeEntities, findOccurrences, normalize, resolveOverlaps, separateCoordinatedNames, toEntity, type Candidate, type Entity } from './merge';
 import { readClause } from './onDevice';
 import { PlaceholderRegistry } from './placeholders';
 import { findDefinedTerms, findNames, findPatterns, looksLikePersonName, type Span } from './regex';
-import { saveVault } from './vault';
+import { loadVault, saveVault } from './vault';
 import { chatSnapshot } from './chatSnapshot';
+import { applyManualMasks, editList, type ManualMask, type ReviewEdit, type SuccessfulMask } from './manualReview';
 
 /**
  * Masks every clause of one document and leak-checks the result.
@@ -14,8 +15,12 @@ import { chatSnapshot } from './chatSnapshot';
  * and each clause carries its type when the on-device model could classify it.
  * Use one `docId` per document: each call makes every earlier result and approval for it stale.
  * The result is frozen; pass it to approve() unchanged.
+ * During model reads, reports how many clause reads have finished (including failed reads).
+ * The final count precedes the document-wide privacy checks.
  */
-export async function mask(docId: string, clauses: Clause[], bridge: AiBridge): Promise<MaskResult> {
+export async function mask(
+  docId: string, clauses: Clause[], bridge: AiBridge, onReadProgress?: (finished: number) => void,
+): Promise<MaskResult> {
   // Before the first await, so an older batch can't be sent while this run is still masking, even if it fails.
   const run = startRun(docId);
   const ids = clauses.map((c) => c.id);
@@ -35,6 +40,7 @@ export async function mask(docId: string, clauses: Clause[], bridge: AiBridge): 
   const rulePatterns: Span[] = [];
   const byModel: Entity[] = [];
   const types: (ClauseType | undefined)[] = [];
+  if (useModel) onReadProgress?.(0);
   for (const clause of clauses) {
     const names = findNames(clause.text, true);
     const named = names.map(spanToEntity);
@@ -51,6 +57,7 @@ export async function mask(docId: string, clauses: Clause[], bridge: AiBridge): 
       needsReview = true;
       types.push(undefined);
     }
+    onReadProgress?.(types.length);
   }
   // Complete rule-derived short forms before checking coverage. The same entity
   // objects are in ruleNames and found, so only aliases of a rule-matched name
@@ -100,11 +107,13 @@ export async function mask(docId: string, clauses: Clause[], bridge: AiBridge): 
     return { id: clause.id, text };
   });
 
-  const check = leakCheck(drafts, [...registry.values(), ...entities.flatMap((e) => e.variants)]);
+  const sensitive = [...registry.values(), ...entities.flatMap((e) => e.variants)];
+  const check = leakCheck(drafts, sensitive);
   if (!check.ok) return seal({ ok: false, docId, leaks: check.leaks }, run);
 
   await saveVaultInOrder(run, registry.entries());
-  return seal(
+  const snapshot = chatSnapshot(registry.entries(), coordinated.entities, entities);
+  const result = seal<SuccessfulMask>(
     {
       ok: true,
       docId,
@@ -113,28 +122,69 @@ export async function mask(docId: string, clauses: Clause[], bridge: AiBridge): 
       needsReview,
     },
     run,
-    chatSnapshot(registry.entries(), coordinated.entities, entities),
+    snapshot,
   );
+  reviews.set(result, { run, base: result, sensitive, manual: [], snapshot });
+  return result;
 }
 
-const vaultWrites = new Map<string, Promise<void>>();
+type ReviewState = { run: Run; base: SuccessfulMask; sensitive: string[]; manual: ManualMask[]; snapshot: ChatMaskSnapshot };
+const reviews = new WeakMap<SuccessfulMask, ReviewState>();
 
-/**
- * Saves one run's vault after any earlier write for the same document, and only if no newer run has started.
- * So when runs overlap, an older one finishing last can never overwrite the newest vault.
- */
-function saveVaultInOrder(run: Run, entries: Record<string, string>): Promise<void> {
-  const previous = vaultWrites.get(run.docId) ?? Promise.resolve();
-  const write = previous
-    .catch(() => undefined)
-    .then(async () => {
-      if (isCurrent(run)) await saveVault(run.docId, entries);
-    });
-  vaultWrites.set(run.docId, write);
-  void write.finally(() => {
-    if (vaultWrites.get(run.docId) === write) vaultWrites.delete(run.docId);
-  }).catch(() => undefined);
-  return write;
+function currentReview(result: SuccessfulMask): ReviewState {
+  const state = reviews.get(result);
+  if (!state) throw new ApprovalError('not_approved', 'A genuine masked preview is required.');
+  if (!isCurrent(state.run)) throw new ApprovalError('stale', 'Mask the current document again.');
+  return state;
+}
+
+/** Local inspection only. Never substitute the revealed value into an approved batch. */
+export async function revealReviewValue(result: SuccessfulMask, placeholder: string): Promise<string> {
+  currentReview(result);
+  if (!result.ledger.some(entry => entry.placeholder === placeholder)) throw new Error('Unknown placeholder.');
+  const entries = await loadVault(result.docId);
+  currentReview(result);
+  if (!entries || !Object.hasOwn(entries, placeholder)) throw new Error('Saved value unavailable.');
+  return entries[placeholder]!;
+}
+
+/** Revise a genuine preview locally, without another inference call or reusing its approval. */
+export async function reviseMask(result: SuccessfulMask, edit: ReviewEdit): Promise<MaskResult> {
+  const { base, sensitive, manual, snapshot } = currentReview(result);
+  const next = editList(result, manual, edit);
+  const run = startRun(result.docId);
+  const { drafts, ledger } = applyManualMasks(base, next);
+  const checked = leakCheck(drafts, [...sensitive, ...next.map(m => m.value)]);
+  if (!checked.ok) return seal({ ok: false, docId: result.docId, leaks: checked.leaks }, run);
+  const entries = await loadVault(run.docId);
+  if (!isCurrent(run)) throw new ApprovalError('stale', 'Mask the current document again.');
+  if (!entries) throw new Error('Saved values unavailable.');
+  for (const m of manual) delete entries[m.placeholder];
+  for (const m of next) entries[m.placeholder] = m.value;
+  await saveVaultInOrder(run, entries);
+  if (!isCurrent(run)) throw new ApprovalError('stale', 'Mask the current document again.');
+  // A revised document is a fresh run: preserve automatic aliases and add manual
+  // values to its RAM-only chat snapshot, without exposing the vault in the batch.
+  const revisedSnapshot = chatSnapshot(entries, [], []);
+  const aliases = new Map(snapshot.aliases.map(a => [normalize(a.value), a]));
+  for (const alias of revisedSnapshot.aliases) {
+    const previous = aliases.get(normalize(alias.value));
+    aliases.set(normalize(alias.value), previous ? {
+      ...alias, tokens: [...new Set([...previous.tokens, ...alias.tokens])],
+      ...(previous.uncertain && { uncertain: true }),
+    } : alias);
+  }
+  const updated = seal<SuccessfulMask>({
+    ...base, manuallyEdited: true, ledger,
+    clauses: checked.clauses.map((clause, i) => ({ ...base.clauses[i]!, text: clause.text })),
+  }, run, { entries: revisedSnapshot.entries, aliases: [...aliases.values()] });
+  reviews.set(updated, { run, base, sensitive, manual: next, snapshot });
+  return updated;
+}
+
+/** Only current runs may enqueue a save. The vault orders it with same-document saves and deletions. */
+async function saveVaultInOrder(run: Run, entries: Record<string, string>): Promise<void> {
+  if (isCurrent(run)) await saveVault(run.docId, entries);
 }
 
 /** " 77 willow lane " for "77 Willow Lane,": lowercase words between spaces, so one value can be found inside another. */

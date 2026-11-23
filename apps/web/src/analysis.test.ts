@@ -335,7 +335,7 @@ describe('approved web analysis', () => {
     mocks.generate.mockResolvedValueOnce(output('c1', source, bad)).mockResolvedValueOnce(output('c2', source));
     const result = await new WebBridge(ai).analyze(b);
     expect(result.results).toEqual([answer('c2')]);
-    expect(result.failed).toEqual([{ clauseId: 'c1', reason: 'invalid_response', detail: 'The explanation used guarantee terms not established by this clause. Review the source wording before retrying.' }]);
+    expect(result.failed).toEqual([{ clauseId: 'c1', ranOn: source === 'in_cloud' ? 'cloud' : 'device', reason: 'invalid_response', detail: 'The explanation used guarantee terms not established by this clause. Review the source wording before retrying.' }]);
     expect(JSON.stringify(result)).not.toContain('all future obligations');
     expect(mocks.generate).toHaveBeenCalledTimes(2);
   });
@@ -390,7 +390,7 @@ describe('approved web analysis', () => {
     mocks.generate.mockResolvedValueOnce(output('c1', 'in_cloud', { ...answer(), questions: ['Ask [PARTY_C].'] })).mockResolvedValueOnce(output('c2'));
     const result = await new WebBridge(ai).analyze(batch());
     expect(result.results.map(r => r.clauseId)).toEqual(['c2']);
-    expect(result.failed).toEqual([{ clauseId: 'c1', reason: 'unknown_placeholder', detail: expect.any(String) }]);
+    expect(result.failed).toEqual([{ clauseId: 'c1', ranOn: 'cloud', reason: 'unknown_placeholder', detail: expect.any(String) }]);
   });
   it.each(['in_cloud', 'on_device'].flatMap(source =>
     (['explanation', 'redline', 'questions'] as const).map(field => ({source, field}))))(
@@ -433,6 +433,7 @@ describe('approved web analysis', () => {
     mocks.generate.mockResolvedValueOnce(output('wrong')).mockRejectedValueOnce(new Error('secret internal detail')).mockResolvedValueOnce(output('c3'));
     const result = await new WebBridge(ai).analyze(batch(3));
     expect(result.failed.map(f => f.reason)).toEqual(['invalid_response', 'model_error']);
+    expect(result.failed.map(f => f.ranOn)).toEqual(['cloud', undefined]);
     expect(JSON.stringify(result)).not.toContain('secret internal detail');
     expect(mocks.generate).toHaveBeenCalledTimes(3);
   });
@@ -451,7 +452,7 @@ describe('approved web analysis', () => {
     mocks.generate.mockResolvedValueOnce(output('c1')).mockResolvedValueOnce(output('c2', 'on_device'));
     const result = await new WebBridge(ai).analyze(batch());
     expect(result.ranOn).toBe('cloud'); expect(result.results).toHaveLength(1);
-    expect(result.failed[0]!.reason).toBe('invalid_response');
+    expect(result.failed[0]).toMatchObject({ reason: 'invalid_response', ranOn: 'device' });
   });
   it('throws stale approval after an awaited call and blocks all later sends', async () => {
     const b = batch();

@@ -1,4 +1,4 @@
-import type { Analysis, AnalyzeResult, ApprovedBatch, ClauseFailure } from '@clause-guard/core/types';
+import type { Analysis, AnalyzeResult, ApprovedBatch, ClauseFailure, ExecutionSource } from '@clause-guard/core/types';
 import {
   clausePlaceholders, ANALYSIS_JSON_SCHEMA, AnalysisValidationError,
   validateAnalysis, validateBatch, applyCommercialRedlineGuard, validateExplanationGrounding,
@@ -51,6 +51,7 @@ export async function analyzeApproved(ai: AI, batch: ApprovedBatch): Promise<Ana
     // After that, pin this batch to that source: no mixed-source badge or duplicate retries.
     const mode = ranOn === 'cloud' ? InferenceMode.ONLY_IN_CLOUD
       : ranOn === 'device' ? InferenceMode.ONLY_ON_DEVICE : config.deviceFallbackEnabled ? InferenceMode.PREFER_IN_CLOUD : InferenceMode.ONLY_IN_CLOUD;
+    let source: ExecutionSource | undefined;
     try {
       const signal = AbortSignal.timeout(60_000);
       const signatoryReview = sourceQuotedSignatoryReview(clause.text);
@@ -86,16 +87,16 @@ export async function analyzeApproved(ai: AI, batch: ApprovedBatch): Promise<Ana
         id: clause.id, ...(clause.type && { type: clause.type }), text: clause.text,
       }))).response;
       assertApproved(batch);
-      const source = response.inferenceSource === InferenceSource.IN_CLOUD ? 'cloud'
+      source = response.inferenceSource === InferenceSource.IN_CLOUD ? 'cloud'
         : response.inferenceSource === InferenceSource.ON_DEVICE ? 'device' : undefined;
       if (!source || (ranOn && source !== ranOn)) {
-        failed.push({ clauseId: clause.id, reason: 'invalid_response', detail: 'The model did not confirm the expected execution source.' });
+        failed.push({ clauseId: clause.id, reason: 'invalid_response', detail: 'The model did not confirm the expected execution source.', ...(source && { ranOn: source }) });
         continue;
       }
       ranOn = source;
       let text: string;
       try { text = response.text(); } catch {
-        failed.push({ clauseId: clause.id, reason: 'invalid_response', detail: 'The model returned no usable text.' });
+        failed.push({ clauseId: clause.id, reason: 'invalid_response', detail: 'The model returned no usable text.', ranOn: source });
         continue;
       }
       // Validate first: withheld drafts must not hide invented tokens or bad JSON.
@@ -110,8 +111,8 @@ export async function analyzeApproved(ai: AI, batch: ApprovedBatch): Promise<Ana
       // Stale approval must abort the entire batch, including when a model call rejected.
       assertApproved(batch);
       failed.push(error instanceof AnalysisValidationError
-        ? { clauseId: clause.id, reason: error.reason, detail: error.message }
-        : { clauseId: clause.id, reason: 'model_error', detail: 'The model request could not be completed.' });
+        ? { clauseId: clause.id, reason: error.reason, detail: error.message, ...(source && { ranOn: source }) }
+        : { clauseId: clause.id, reason: 'model_error', detail: 'The model request could not be completed.', ...(source && { ranOn: source }) });
     }
   }
   assertApproved(batch);
