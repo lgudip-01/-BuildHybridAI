@@ -90,24 +90,9 @@ export async function mask(docId: string, clauses: Clause[], bridge: AiBridge): 
   );
 }
 
-const vaultWrites = new Map<string, Promise<void>>();
-
-/**
- * Saves one run's vault after any earlier write for the same document, and only if no newer run has started.
- * So when runs overlap, an older one finishing last can never overwrite the newest vault.
- */
-function saveVaultInOrder(run: Run, entries: Record<string, string>): Promise<void> {
-  const previous = vaultWrites.get(run.docId) ?? Promise.resolve();
-  const write = previous
-    .catch(() => undefined)
-    .then(async () => {
-      if (isCurrent(run)) await saveVault(run.docId, entries);
-    });
-  vaultWrites.set(run.docId, write);
-  void write.finally(() => {
-    if (vaultWrites.get(run.docId) === write) vaultWrites.delete(run.docId);
-  }).catch(() => undefined);
-  return write;
+/** Only current runs may enqueue a save. The vault orders it with same-document saves and deletions. */
+async function saveVaultInOrder(run: Run, entries: Record<string, string>): Promise<void> {
+  if (isCurrent(run)) await saveVault(run.docId, entries);
 }
 
 function spanToEntity(span: Span): Entity {

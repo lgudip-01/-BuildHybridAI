@@ -133,6 +133,14 @@ export function App({ bridge }: { bridge: AiBridge & { downloadModel(onProgress:
             placeholder="Paste a contract. Each paragraph separated by a blank line is one clause."
           />
           <div className="pane-foot">
+            <button className="ghost" disabled={busy || review.phase === 'deleted'} onClick={() => {
+              if (window.confirm('Delete this document and its saved values from this device?')) {
+                setActive(null);
+                void session.deleteDocument();
+              }
+            }}>Delete this document</button>
+            {review.phase === 'deleting' && <span className="meta" role="status">Deleting document…</span>}
+            {review.phase === 'deleted' && <span className="meta" role="status">Document and saved values deleted from this device.</span>}
             <kbd className="shortcut">Ctrl Enter</kbd>
             {busy && <span id="review-busy-hint" className="meta">Editing is locked until this review finishes.</span>}
             <button className="primary" onClick={() => void session.mask()} disabled={busy || progress !== null || clauses.length === 0}>
@@ -149,7 +157,8 @@ export function App({ bridge }: { bridge: AiBridge & { downloadModel(onProgress:
           </div>
           <div className="pane-body">
             {downloadError && <div className="banner" data-tone="warn" role="alert"><p>{downloadError}</p></div>}
-            <Output run={run} active={active} onActive={setActive} />
+            {review.phase !== 'deleting' && review.phase !== 'deleted' &&
+              <Output run={run} active={active} onActive={setActive} />}
             {review.error && <div className="banner review-actions" data-tone="warn" role="alert"><p>{review.error}</p></div>}
             {review.phase === 'review' && (
               <div className="review-actions">

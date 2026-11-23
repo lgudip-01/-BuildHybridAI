@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import type { AiBridge, ApprovedBatch, Clause, MaskResult } from '@clause-guard/core/types';
 import { approve, assertApproved } from './approval';
 import { mask } from './mask';
-import { loadVault } from './vault';
+import { deleteVault, loadVault } from './vault';
 
 type Masked = Extract<MaskResult, { ok: true }>;
 
@@ -142,6 +142,20 @@ describe('mask', () => {
     expect(stored).not.toContain('alice@example.test');
     expect(() => approve(old, { reviewed: true })).toThrow(code('stale'));
     expect(() => assertApproved(approve(newer, { reviewed: true }))).not.toThrow();
+  });
+
+  it('prevents a slow mask from recreating a deleted vault or an approvable result', async () => {
+    let release!: () => void;
+    const gate = new Promise<void>(resolve => { release = resolve; });
+    const pending = mask('doc-delete', contract('late@example.test'), {
+      ...noModel, onDeviceStatus: async () => { await gate; return 'unavailable'; },
+    });
+    await deleteVault('doc-delete');
+    release();
+    const result = await pending;
+    if (!result.ok) throw new Error('Unexpected masking failure');
+    expect(() => approve(result, { reviewed: true })).toThrow(code('stale'));
+    expect(await loadVault('doc-delete')).toBeUndefined();
   });
 
   it('refuses clauses without a unique, non-empty id', async () => {

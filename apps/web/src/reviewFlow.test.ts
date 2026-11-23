@@ -3,6 +3,7 @@ import { beforeEach, expect, it, vi } from 'vitest';
 import type { AI } from 'firebase/ai';
 import type { AiBridge, ApprovedBatch } from '@clause-guard/core/types';
 import { approve, assertApproved } from '@clause-guard/privacy-engine/approval';
+import * as vault from '@clause-guard/privacy-engine/vault';
 import { mask } from '@clause-guard/privacy-engine/mask';
 
 const sdk = vi.hoisted(() => ({ generate: vi.fn(), factory: vi.fn() }));
@@ -141,4 +142,28 @@ it('shows all clauses as unavailable without inventing a source when all request
   expect(state.outcome?.ranOn).toBeUndefined();
   expect(JSON.stringify(state)).not.toContain('INTERNAL_ERROR_SENTINEL');
   expect(sdk.generate).toHaveBeenCalledTimes(2);
+});
+
+it('retains the document identity on deletion failure and permits a clean retry', async () => {
+  const session = new ReviewSession(bridge, contract);
+  await session.mask();
+  const id = session.docId;
+  const remove = vi.spyOn(vault, 'deleteVault').mockRejectedValueOnce(new Error('storage unavailable'));
+  try {
+    await session.deleteDocument();
+    expect(session.docId).toBe(id);
+    expect(session.getSnapshot()).toMatchObject({ contract, phase: 'error', error: expect.stringContaining('again') });
+    expect(await vault.loadVault(id)).toBeDefined();
+    const retry = session.deleteDocument();
+    expect(session.edit('replacement')).toBe(false);
+    await session.deleteDocument();
+    await retry;
+    expect(remove).toHaveBeenCalledTimes(2);
+    expect(session.getSnapshot()).toEqual({ contract: '', phase: 'deleted' });
+    expect(session.docId).not.toBe(id);
+    expect(await vault.loadVault(id)).toBeUndefined();
+    expect(session.edit('A new document.')).toBe(true);
+  } finally {
+    remove.mockRestore();
+  }
 });
