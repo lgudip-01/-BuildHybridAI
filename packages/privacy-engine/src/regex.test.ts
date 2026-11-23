@@ -42,6 +42,44 @@ describe('findPatterns', () => {
     expect(spans).toContainEqual(['ACCOUNT', '123-45-6789']);
   });
 
+  it('finds card expiry dates and security codes', () => {
+    const spans = found('Card 4111 1111 1111 1111 exp 09/29 CVV 123. Expiration date: 11/2027, CVC: 4821.');
+    expect(spans).toContainEqual(['ACCOUNT', '4111 1111 1111 1111']);
+    expect(spans).toContainEqual(['DATE', '09/29']);
+    expect(spans).toContainEqual(['ACCOUNT', '123']);
+    expect(spans).toContainEqual(['DATE', '11/2027']);
+    expect(spans).toContainEqual(['ACCOUNT', '4821']);
+  });
+
+  it('finds web addresses, IP addresses and handles', () => {
+    const spans = found(
+      'Log in at https://portal.acme-corp.com/u/jsmith, see www.acme-corp.com or acme-corp.io. ' +
+        'Access from 192.168.10.24 only. Message @jsmith or write to jsmith (at) acme.com or j.smith [at] acme [dot] co.',
+    );
+    expect(spans).toContainEqual(['URL', 'https://portal.acme-corp.com/u/jsmith']);
+    expect(spans).toContainEqual(['URL', 'www.acme-corp.com']);
+    expect(spans).toContainEqual(['URL', 'acme-corp.io']);
+    expect(spans).toContainEqual(['IP', '192.168.10.24']);
+    expect(spans).toContainEqual(['HANDLE', '@jsmith']);
+    expect(spans).toContainEqual(['EMAIL', 'jsmith (at) acme.com']);
+    expect(spans).toContainEqual(['EMAIL', 'j.smith [at] acme [dot] co']);
+  });
+
+  it.each([
+    ['signed on the third of May, 2026', 'third of May, 2026'],
+    ['effective the twenty-first day of June, 2027', 'twenty-first day of June, 2027'],
+    ['due May the 3rd, 2026', 'May the 3rd, 2026'],
+  ])('finds the date written in words in %j', (text, value) => {
+    expect(found(text)).toContainEqual(['DATE', value]);
+  });
+
+  it('finds UK and Canadian postcodes on their own', () => {
+    expect(found('Post it to SW1A 2AA or K1A 0B1.')).toEqual([
+      ['ADDRESS', 'SW1A 2AA'],
+      ['ADDRESS', 'K1A 0B1'],
+    ]);
+  });
+
   it('leaves contract terms the cloud model needs', () => {
     expect(found('Within 30 days under Section 1.2.10, interest accrues at 5% per month for 2 years.')).toEqual([]);
   });
@@ -121,6 +159,39 @@ describe('findNames', () => {
     expect(names('3. Service Levels. Uptime is reported to Maria Lopez.\n4. Data Protection: see the policy.', true)).toEqual([
       ['NAME', 'Maria Lopez'],
     ]);
+  });
+
+  it('reads names with accents', () => {
+    const text = 'Zoë Ångström signs. José García witnesses for Société Générale S.A.\nBy: Łukasz Wróbel';
+    expect(names(text, false)).toEqual([
+      ['ORG', 'Société Générale S.A.'],
+      ['PERSON', 'Łukasz Wróbel'],
+    ]);
+    expect(names(text, true)).toEqual(expect.arrayContaining([
+      ['NAME', 'Zoë Ångström'],
+      ['NAME', 'José García'],
+    ]));
+    expect(names('Call Dr. Müller.', false)).toEqual([['PERSON', 'Dr. Müller']]);
+  });
+
+  it('finds a full address with a UK postcode', () => {
+    expect(names('Deliver to 10 Downing Street, London SW1A 2AA.', false)).toEqual([
+      ['ADDRESS', '10 Downing Street, London SW1A 2AA'],
+    ]);
+  });
+
+  it('finds names in capitals in a signature block, but not headings', () => {
+    const block = 'IN WITNESS WHEREOF, the parties sign below.\nJOHN SMITH\nACME HOLDINGS LLC\nBy: ________\nMARÍA JOSÉ PÉREZ';
+    expect(names(block, true)).toEqual([
+      ['ORG', 'ACME HOLDINGS LLC'],
+      ['PERSON', 'JOHN SMITH'],
+      ['PERSON', 'MARÍA JOSÉ PÉREZ'],
+    ]);
+    expect(names('SERVICE LEVELS\nUptime is measured monthly.', true)).toEqual([]);
+  });
+
+  it('treats the labels of ID numbers as vocabulary', () => {
+    expect(names('Passport No. X1234567 and Social Security Number 123-45-6789 are on file.', true)).toEqual([]);
   });
 
   it('adds capitalized phrases only in broad mode', () => {
