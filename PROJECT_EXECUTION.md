@@ -1293,3 +1293,55 @@ No teammate response or engine export had arrived at this checkpoint. Original
 primary/source branches remain preserved. After full publication verification,
 the primary checkout may move to a new local branch at this tested handoff; never
 reset or overwrite the old browser/local histories.
+
+## November 22: genuine engine candidate for the chat dependency
+
+- [x] Fetch refs/read current #13/#17/#30/#34/#35/#36 comments: no new engine/native
+  delivery or teammate reply. Full Xcode is still unavailable; do not claim an iOS build.
+- [x] Isolate from published #34 at 0ab24d8; preserve primary checkout and all
+  existing branches. Implement real engine authority/snapshots/variant masking,
+  append-only session tokens, per-question review, atomic consume and local restore.
+- [x] Keep production seams and guards rejecting. Add only a typed cleanup seam;
+  no bridge/UI issuer, no vault read/write for chat, no document mask on a question.
+- [x] Preserve/fix the two initial masking regressions and the actual-Nano
+  party-label issue. Pre-correction commit b0a4a22 and local failure logs remain.
+- [x] Final automated checks: 140 engine + 340 web tests, engine/core typechecks,
+  web production typecheck/build pass. Seven web cases use REAL engine authority
+  with only provider/config/binding mocked. Diagnostic is absent from build output.
+- [x] Complete the frozen corrected local-only Chrome synthetic matrix on
+  d2ac4ec: eight expected outcomes; nine actual Prompt API completions, zero
+  failed. Inspect document/question previews, verify one-use/replay locally,
+  preserve both runs in CHAT_ENGINE_BROWSER_EVIDENCE.json, close context/tab
+  and stop only the agent-owned 5176 server. No cloud answer/network-capture claim.
+- [x] Publish separate stacked draft #37 (base #34); source/evidence match
+  fetched e098ae7 apart from this final tracker update. Tag Likhil/Aarush/Sai
+  in the PR and #13 (7092173315). Full-tree/root verification follows in the
+  final PR checkpoint; production seams/guards still reject all chat.
+- [ ] Owner-reviewed real binding, native methods/product view, full six-sample
+  payload/answer/privacy checks, current zero-cost/App Check verification and phones.
+
+No cloud model call, Firebase activation/configuration, deployment, billing,
+payment/trial, IAM or enforcement change. Local Prompt API uses only an already
+available device model with no Firebase transport or model download. The candidate
+worktree is /private/tmp/clauseguard-chat-engine-20261122. See
+CHAT_ENGINE_CANDIDATE.md for precise limits, rephrasing behavior and review gates.
+
+Corrected browser checkpoint completed November 23 at 12:00 AM Eastern.
+Known parties remain PARTY_A/B; new Sam/Ada use PERSON_1/2. Shared surname and
+invented-token cases block, while full names, street prefix and injection-data
+masking preserve expected identities. Main and #34 remain unchanged; separate
+engine-candidate publication and reviewer handoff follow. No real cloud call.
+
+Separate candidate + #35 (6cf643e) + #36 (628c44e) compatibility check: clean
+local merges, 353 web tests and production typecheck/build pass. The >500 kB
+redesign chunk advisory remains visible. No Swift/Kotlin/native SDK build, phone,
+main or #32/#33 integration acceptance is inferred. All temporary worktrees and
+original branches are preserved.
+
+Engine-candidate handoff: https://github.com/lgudip-01/-BuildHybridAI/pull/37 .
+The dependency is now review/adoption and real direct binding of implemented
+engine APIs, not waiting for an engine implementation from scratch. Candidate
+remains isolated on codex/chat-engine-candidate-20261122; primary checkout is
+still the preserved #34 UI handoff on codex/chat-ui-ready-20261122. No source
+was copied over teammate work or merged to main. Local/browser histories and
+all original failure evidence are retained. No live cloud chat is enabled.
