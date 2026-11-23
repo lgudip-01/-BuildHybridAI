@@ -884,3 +884,31 @@ tree matches fetched 559820d except this tracker completion. The old failed-run
 checkboxes above are historical; the user's newer 10/10 request and v2 sequence
 supersede their planned focused/publish-before-full ordering. Broader Gate A
 remains open. No additional model send followed the successful full-lease run.
+
+## November 23: native chat method candidate
+
+This isolated branch starts at #35 (6cf643e); #37–#39 shared engine/bindings/UI
+remain separate dependencies, not missing implementations. Primary and all
+teammate branches stay intact. See the native plugin NATIVE_CHAT_HANDOFF.md.
+
+- [x] Recheck #35/#39/#17 comments and refs; no new teammate native chat delivery.
+- [x] Add Swift/Kotlin stateless chat methods and independent unconditional native
+  release stops before configuration/provider work; preserve existing analysis.
+- [x] Cross-platform envelope/history/schema/size validation: 45 Swift and 39
+  Kotlin checks pass. Swift 6 strict concurrency and plugin syntax parse pass.
+- [x] Shared #39 prompt/model/limit parity; clean apply to full isolated integration.
+- [x] Document failure corrections, SDK/toolchain limits and owner build handoff.
+- [x] Publish draft #40 stacked on #35; fetched 362b6e4 matches all tested
+  source/fixtures/handoff files. Final tracker upload/full-tree check follows.
+- [ ] Full native SDK builds, native WebView stop check and real phones. Missing
+  full Xcode/Swift 6.2.3, Java 21 and Android SDK prevent those claims on this Mac.
+- [ ] Owner review/adoption, private config delivery endpoint, current zero-cost/
+  App Check verification and bounded live acceptance before any release.
+
+No model/cloud call, activation, deployment, payment, billing, IAM or enforcement
+change. Both JS and native release blocks remain; chat is not released.
+
+Native candidate review: https://github.com/lgudip-01/-BuildHybridAI/pull/40 .
+Aarush tagged for SDK builds, native WebView blocked-call evidence and adoption;
+these are concrete remaining platform checks, not a new implementation request.
+Full integrated native source is preserved locally at de3bc38; no main merge.
