@@ -1222,3 +1222,74 @@ still require author review/adoption and retest. The engine coverage correction
 changes the review flag; it does not automatically discover the intentionally
 missed name or certify fully redacted input. Keep actual chat activation, main
 acceptance, real browser/Nano checks and phone evidence as separate open gates.
+
+## November 22: teammate requests, native chat and UI handoff
+
+- [x] Inspect both project locations/current Git state; fetch all refs and read
+  new PRs, issue comments, review timelines and direct mentions. Preserve local
+  graphs and all teammate branches. New work: #35 native analysis, #36 redesign.
+- [x] Respond to Aarush's #17 request: verify current Spark/no-linked-billing
+  state and official no-payment pricing; register Android/iOS app.clauseguard;
+  download and validate both SDK configs outside Git. Ask Aarush for a direct
+  delivery address/channel in #17 (7091242882); never post files/debug tokens publicly.
+- [x] Review #35 at 6cf643e: 191 web + 94 engine tests and web build pass; accept
+  one-masked-clause native interface. Flag iOS localizedDescription raw-path
+  logging/rejection to Aarush (7091360009). No real native/model run claimed.
+- [x] Inspect #36 at 628c44e; preserve Workbench ownership, flag absolute privacy
+  claims and reduced-motion smooth-scroll fallback. No visual/merge approval.
+- [x] Move chatbot to top development priority; request concrete engine exports
+  from Likhil and coordinate Aarush/Sai in #13 (7091268965).
+- [x] Share the guarded dispatcher between web/native; add native cloud-only TS
+  adapter, UI conversation store and genuine approved-batch ReviewSession hook.
+  No fake ticket registry, document-question remask, raw/history overload or
+  production mock answer. Engine seams and guards continue to reject all chat.
+- [x] Test per-question approval, native projection/source/timeout, immutable
+  masked-vs-display history, stale/close races, exact batch handoff, and closing
+  before document edits/remasks including a failed remask. Preserve any test/
+  build failures as local verification evidence; final full counts follow.
+- [x] Publish verified implementation/handoff at fetched e9f1239 and tag owners
+  in #13 (7091553991). Source/contracts match the tested local tree. Final
+  root upload/full-tree verification is reported in the #34 checkpoint.
+- [ ] Aarush supplies a private delivery endpoint; send only the requested native
+  config files. Native App Check/debug/release registration remains separate.
+- [ ] Likhil supplies real engine APIs/variants; owner-reviewed binding and actual
+  privacy/payload checks before enabling chat. Swift/Kotlin chat methods, UI view
+  binding, live six-sample answers and phone evidence remain separate gates.
+
+No deployment, live model call, payment, trial, billing linkage, enforcement
+reduction or IAM grant. New work is isolated from original primary checkout at
+/private/tmp/clauseguard-chat-mobile-20261122. See CHAT_UI_MOBILE_HANDOFF.md for
+concrete UI/native contracts, tested scope and remaining delivery requirements.
+
+Final local verification: 331 web + 94 engine tests, core typecheck and web
+production typecheck/build pass. New coverage is 35 cases beyond the initial
+296-test adapter. An early test-only mock typing error was corrected before the
+final typecheck; focused runtime checks had passed. Source commit 1ed7bea plus
+#35 (6cf643e) and #36 (628c44e) merges cleanly in a separate local checkout and
+passes 344 web tests and production typecheck/build. Its >500 kB chunk advisory
+is retained. #32/#33 are excluded; prior failure/candidate evidence is untouched.
+This is no claim about actual engine masking, native SDK builds, phones, live
+answers, main or deployment. PR #34 remains draft and chat is disabled.
+
+Final self-review found one additional lifecycle issue before handoff: an external
+remask during local question preparation left previous restored messages visible
+in phase error. A new regression failed against 1ed7bea (log preserved at
+/private/tmp/clauseguard-chat-stale-history-before.log). Stale/wrong-session
+failures now close/clear the conversation, including stale response restoration;
+cleanup exceptions still clear display state and cannot expose SDK error text.
+A throwing-cleanup control is included. Final source/combined counts supersede
+the earlier 331/344 checkpoint after the justified correction rerun.
+
+Final corrected verification: **333 web + 94 unchanged engine tests**, core
+typecheck and production typecheck/build pass. The isolated corrected #35/#36
+combination passes **346 web tests and production typecheck/build**. These final
+counts supersede 331/344. The only new cloud resources are the requested native
+app registrations; there was no inference, deployment, billing or IAM change.
+
+Verified owner replies: #17 native configs/private delivery (7091242882), #35
+native interface and raw-error review (7091360009), #36 integration/copy/motion
+review (7091379482), and #13 concrete chat UI/native/engine handoff (7091553991).
+No teammate response or engine export had arrived at this checkpoint. Original
+primary/source branches remain preserved. After full publication verification,
+the primary checkout may move to a new local branch at this tested handoff; never
+reset or overwrite the old browser/local histories.
