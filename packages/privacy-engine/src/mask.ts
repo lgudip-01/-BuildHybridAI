@@ -13,8 +13,12 @@ import { saveVault } from './vault';
  * and each clause carries its type when the on-device model could classify it.
  * Use one `docId` per document: each call makes every earlier result and approval for it stale.
  * The result is frozen; pass it to approve() unchanged.
+ * During model reads, reports how many clause reads have finished (including failed reads).
+ * The final count precedes the document-wide privacy checks.
  */
-export async function mask(docId: string, clauses: Clause[], bridge: AiBridge): Promise<MaskResult> {
+export async function mask(
+  docId: string, clauses: Clause[], bridge: AiBridge, onReadProgress?: (finished: number) => void,
+): Promise<MaskResult> {
   // Before the first await, so an older batch can't be sent while this run is still masking, even if it fails.
   const run = startRun(docId);
   const ids = clauses.map((c) => c.id);
@@ -31,6 +35,7 @@ export async function mask(docId: string, clauses: Clause[], bridge: AiBridge): 
   // The same on-device call also gives each clause its type, which the cloud uses but masking never needs.
   const found: Entity[] = [];
   const types: (ClauseType | undefined)[] = [];
+  if (useModel) onReadProgress?.(0);
   for (const clause of clauses) {
     found.push(...findNames(clause.text, true).map(spanToEntity));
     if (!useModel) continue;
@@ -42,6 +47,7 @@ export async function mask(docId: string, clauses: Clause[], bridge: AiBridge): 
       needsReview = true;
       types.push(undefined);
     }
+    onReadProgress?.(types.length);
   }
   // A defined short form, as in Northwind Analytics, Inc. ("Northwind"), is masked like the full name.
   for (const term of clauses.flatMap((c) => findDefinedTerms(c.text))) {
