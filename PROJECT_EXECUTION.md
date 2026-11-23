@@ -1433,7 +1433,7 @@ These branches remain unchanged; this release does not claim their acceptance.
 - [x] Keep manual protections for deletion retry; clear them for the next document.
 - [x] 395 web + 163 engine tests, core/engine typechecks and production build pass.
 - [x] Real Nano progress/manual reveal/undo/chat-preview check; desktop and actual 430px layout.
-- [ ] Publish the complete integration tree and notify owners; verify published source.
+- [x] Publish #45 complete source dcb2a3c, exact full-tree match; tag owners.
 - [ ] Hosting-only update and production smoke after current no-billing verification.
 - [ ] Native #40 SDK builds, App Check and physical-device acceptance remain separate.
 
