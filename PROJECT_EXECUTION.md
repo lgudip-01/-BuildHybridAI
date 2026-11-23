@@ -1390,3 +1390,35 @@ No cloud/model call, deployment, payment, billing or enforcement/IAM change.
 Product chat view review: https://github.com/lgudip-01/-BuildHybridAI/pull/39 .
 Aarush/Sai tagged for view/redesign adoption; Likhil tagged for engine review.
 Native plugin chat methods and live release/phone checks remain unfinished.
+
+
+## November 23: functional web chat release
+
+- [x] Preserve primary/ZIP folders and teammate branches; use an isolated #39-based release.
+- [x] Adopt reviewed masking coverage corrections; retain real approval authority.
+- [x] Direct masked-document chat approval, per-question review, source links and stale recovery.
+- [x] Verify Spark/no billing, existing Developer API and enforced App Check; no configuration changes.
+- [x] Real cloud answers across six public samples and normal product flow; retain provider failures.
+- [x] Validate all 18 captured body snapshots against projection/raw-fixture checks (includes duplicates).
+- [x] Final 355 web + 158 engine tests and production typecheck/build pass.
+- [x] Publish #44 tested runtime source (78b0bb2); Hosting-only deployment succeeded.
+- [x] Actual production-origin cloud answer and #chat-source-c1 target verified.
+- [ ] Adopt verified flow into teammate UI/import/progress branches without overwriting them.
+- [ ] Native #40 full SDK builds, App Check and real-device acceptance; mobile chat stays disabled.
+
+Details/evidence: apps/web/WEB_CHAT_RELEASE_20261123.md and
+apps/web/WEB_CHAT_LIVE_EVIDENCE_20261123.json. Earlier release_pending notes above
+are historical: web dispatch is now enabled in this candidate; native remains stopped.
+
+Release review: https://github.com/lgudip-01/-BuildHybridAI/pull/44 .
+Hosted demo: https://clause-guard-hackathon.web.app . Production smoke used only
+synthetic Lucia/Example Services/$250/30-day text, with Nano masking, genuine
+document/question approval, real cloud response and local detail restoration.
+The source citation resolves to the exact approved masked clause.
+
+New teammate work was read at this checkpoint: #41 (42dfdcc) masking progress,
+#42 (16b6f00) manual mask/reveal/undo and per-clause source, #43 (a9f8149) document
+deletion with storage/approval races. No new discussion comments in these PRs.
+Next integration must invalidate chat on manual changes/deletion, clear per-
+document choices, preserve source provenance, and port controls into #36 Workbench.
+These branches remain unchanged; this release does not claim their acceptance.
