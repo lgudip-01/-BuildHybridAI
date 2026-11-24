@@ -6,6 +6,72 @@ preserving analysis, on-device execution, App Check, vault, chat methods and
 policies. The functional shared web/engine/UI stack is published separately
 through #47; this native-only candidate does not replace that release.
 
+## November 24 config-bundling integration
+
+Aarush formally approved and built #53/df580d7 with the real iOS SDK in Debug
+and Release. His 47 Swift policy, 24 actual-source guard and four error-boundary
+checks pass, including old-source negative controls. SwiftPM compiled the new
+helper in both configurations and he inspected its linked Debug symbols and
+Release object/model strings. This closes #53's changed-Swift build gate:
+https://github.com/lgudip-01/-BuildHybridAI/pull/53#pullrequestreview-6043495175 .
+It does not establish actual SDK modelVersion, device or cloud acceptance.
+
+He also supplied 0ec857df575fe13983458350858b0f2df839b21b in #35. The iOS project
+had no resource reference/build phase for GoogleService-Info.plist, so putting
+it in the documented folder did not make it available to Firebase. This isolated
+follow-up to #53 carries his exact project-file change with original authorship
+and the cherry-pick provenance retained locally. No Swift/provider code changes.
+
+The phase runs after Resources on every build, copies the ignored plist when
+present and removes a stale bundled copy when absent. This supports no-config
+builds and prevents an old build product retaining a previous configuration.
+Aarush reports an upstream Debug simulator build passing without config and
+bundling a placeholder file when present; that is his upstream evidence, not a
+new SDK build on this combined revision.
+
+Fresh local verification:
+
+- The pre-fix #53 project fails because the config-copy phase is absent.
+- The actual phase is parsed from project.pbxproj and executed unchanged against
+  an isolated synthetic project/build tree, never the real config files.
+- Eight checks pass: phase scheduling/shell syntax, missing-file success, exact
+  copy through paths with spaces, replacement, stale removal, repeatable cleanup
+  preserving neighboring metadata/bundles, copy-error propagation, and ignored/
+  untracked Android/iOS config paths. plutil project syntax validation passes.
+- The Xcode project file exactly matches Aarush's 0ec857d version. Swift source,
+  source guards, release stops, Android, dependencies and current model unchanged.
+  Their prior checks remain credited; they are not claimed freshly rerun here.
+
+```sh
+python3 apps/mobile/checkIOSConfigBundling.py
+plutil -lint apps/mobile/ios/App/App.xcodeproj/project.pbxproj
+```
+
+Dhruv confirms he privately sent the two prepared config files. Delivery/receipt
+has not been independently confirmed. Their local metadata was verified against
+the existing project and app.clauseguard identifiers, without printing values.
+Keep the files ignored; do not upload them to a public issue/PR or build artifact.
+
+Placement after receipt:
+
+- Android: apps/mobile/android/app/google-services.json
+- iOS: apps/mobile/ios/App/App/GoogleService-Info.plist
+
+Aarush's next bounded check: use this exact combined revision for an iOS build
+with the supplied config, then inspect the built app bundle locally for the
+expected plist/project/app identifiers. Report presence/match only, never file
+contents or keys. Confirm no-config/stale-output behavior if a previous build
+product exists. This verifies Xcode's real build context and script sandboxing,
+which the local shell harness cannot establish. No unchanged Swift-policy or
+Android build matrix is requested. Do not start cloud inference until current
+no-billing/no-cost eligibility and App Check prerequisites are verified.
+
+This native-only branch does not replace #50/#52's shared UI/core stack. Aarush
+reported a local #52 + #48 combination with 606 tests and simulator/emulator
+masking, but an eventual combined source revision must retain #53's guard and
+this bundling fix. #54's new phone top-bar/model-status changes are separate
+pending review; preserve them rather than overwrite those files from this branch.
+
 ## November 24 source-confirmation follow-up
 
 Aarush completed the #48/294ca23 SDK rerun: 45 Swift policy checks, four iOS
