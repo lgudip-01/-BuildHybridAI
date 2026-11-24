@@ -38,6 +38,9 @@ const PATTERNS: Pattern[] = [
     re: /(?<!(?:Sections?|Clause|Article|§)\s*)(?<![\d.])(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]\d)(?:\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}(?!\d|\.\d)/g,
   },
 
+  // A grouped numeric amount/quantity is sensitive even without a currency marker.
+  // Keep ordinary deadlines/section numbers and embedded identifier fragments intact.
+  { kind: 'AMOUNT', re: /(?<![\p{L}\p{N}_.,])\d{1,3}(?:,\d{3})+(?:\.\d+)?(?![\p{L}\p{N}_]|[.,]\d)/gu },
   { kind: 'AMOUNT', re: new RegExp(`(?:US|CA|AU|C|A)?[$€£¥₹]\\s?${NUM}${SCALE}`, 'gi') },
   { kind: 'AMOUNT', re: new RegExp(`\\b${CURRENCY_CODE}\\s?${NUM}${SCALE}`, 'gi') },
   { kind: 'AMOUNT', re: new RegExp(`(?<![\\w.])${NUM}${SCALE}\\s?(?:${CURRENCY_CODE}|${CURRENCY_WORD})\\b`, 'gi') },

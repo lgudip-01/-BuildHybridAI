@@ -1451,3 +1451,34 @@ was approved for this hosted acceptance; no automatic retries or provider switch
 Next: final release review/adoption against main and extension/mobile surfaces,
 then #40 full native SDK/device acceptance. Current web integration is functional,
 not waiting for missing chat implementation. Native chat remains disabled.
+
+
+## November 23: reported lowercase and currency-free number misses
+
+- [x] Reproduce the report; preserve failing regression evidence locally.
+- [x] Remove chat's extra capitalization restriction after case-insensitive known-alias matching.
+- [x] Retain shared-name ambiguity, word boundaries and explicit document/question approval.
+- [x] Mask standalone comma-grouped numeric values without requiring a currency marker.
+- [x] Keep bare numbers separate from currency values, restoring their exact entered spelling.
+- [x] Verify provider body/history projection excludes Acme and 12,500 (mocked provider).
+- [x] 396 web + 173 engine tests, engine typecheck and production build pass.
+- [x] Real local Chrome preview: Does acme pay 12,500? becomes Does PARTY_A pay AMOUNT_2, with bracketed tokens.
+- [x] Publish #46 on #45; source 7029038 exactly matches the tested runtime tree.
+- [x] Verify no billing account and complete Hosting-only deployment.
+- [x] Confirm the exact question preview on the hosted production origin after verifying current bundle.
+
+Fix review: https://github.com/lgudip-01/-BuildHybridAI/pull/46 .
+Known company variants Acme/acme/ACME/aCmE and lowercase known first names now
+mask without relying on new model detections. Comma-grouped values such as
+12,500 and 1,234,567.89 are masked in both documents and questions. Ordinary
+deadlines/section numbers and embedded identifier fragments remain unchanged.
+This is not a claim of detecting every previously unknown lowercase proper noun.
+No actual cloud question was approved for this fix verification; real masking
+uses ONLY_ON_DEVICE. No payment, billing, API, IAM or App Check changes.
+Teammate branch updates 17d1ab0/5cac809 remain preserved for later integration.
+
+Hosted verification completed: `Does acme pay 12,500?` previews as
+`Does [PARTY_A] pay [AMOUNT_2]?` before any send. Initial tab loaded the older
+index-BEUXnVKD bundle and reproduced the old rejection; a normal refresh loaded
+the deployed index-DJtNrnDw bundle and the exact reported case passed. Existing
+open tabs need a refresh to load this fix. No cloud question was approved.
