@@ -1,7 +1,7 @@
 # Main-targeted web release candidate — November 24, 2026
 
 This candidate consolidates the tested web stack for review against `main`.
-Review: https://github.com/lgudip-01/-BuildHybridAI/pull/50 (draft pending owner adoption).
+Review: https://github.com/lgudip-01/-BuildHybridAI/pull/50 (ready for owner review; coordinated merge pending).
 It starts from #49 at `8d28c4e05958d4c10863ad3d3a40ffeef544e652`, which already
 contains main and #31 ancestry. No synthetic merge or replacement of teammate
 branches is needed. Runtime, dependencies and Hosting configuration are unchanged
