@@ -307,3 +307,14 @@ describe('reported case and currency-free question misses', () => {
     expect(draft.text).toBe('Does acmeology last 30 days under section 12.5?');
   });
 });
+
+
+it('masks plain 12500 in questions without inferring currency and keeps it out of the document vault', async () => {
+  const d = await document('Acme Corp must pay $12,500.', []);
+  const draft = await maskQuestion(d.context,'Does acme pay 12500?',local([],false));
+  expect(draft.text).not.toMatch(/acme|12500/i);
+  const q=approveQuestion(d.context,draft,{reviewed:true});consumeChatQuestion(d.context,q);
+  const token=draft.text.match(/\[AMOUNT_\d+\]/)![0];
+  expect((await unmaskChatReply(d.context,q,reply(d.context,q,`The question says ${token}.`))).answer).toBe('The question says 12500.');
+  expect(await loadVault(d.docId)).toEqual(d.vault);
+});

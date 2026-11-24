@@ -210,3 +210,13 @@ it('does not partially mask an identifier or decimal/section suffix as a grouped
     expect(findPatterns(text).filter(s=>s.kind==='AMOUNT')).toEqual([]);
   }
 });
+
+
+it.each(['12500','12500.50','99999','1250000'])('masks a plain numeric value %s without grouping or currency', value => {
+  expect(findPatterns(`Value ${value} is private.`)).toEqual(expect.arrayContaining([expect.objectContaining({kind:'AMOUNT',value})]));
+});
+it('does not confuse plain numeric values with word interiors, years, deadlines or section decimals', () => {
+  for (const text of ['record12500A','2026','30 days','section 12.50000','1.12500.3']) {
+    expect(findPatterns(text).filter(s=>s.kind==='AMOUNT')).toEqual([]);
+  }
+});
