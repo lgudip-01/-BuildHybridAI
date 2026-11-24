@@ -29,7 +29,7 @@
   --danger: #b5412f; /* brick */
   --danger-soft: rgb(181 65 47 / 0.1);
 
-  --nav-bg: rgb(250 246 240 / 0.78);
+  --nav-bg: rgb(250 246 240 / 0.95);
   --orb-a: rgb(217 166 107 / 0.3);
   --orb-b: rgb(111 78 55 / 0.14);
   --shadow: 0 30px 70px -34px rgb(43 29 20 / 0.35);
@@ -78,7 +78,7 @@
     --danger: #e0705c;
     --danger-soft: rgb(224 112 92 / 0.12);
 
-    --nav-bg: rgb(26 18 13 / 0.74);
+    --nav-bg: rgb(26 18 13 / 0.94);
     --orb-a: rgb(217 166 107 / 0.18);
     --orb-b: rgb(111 78 55 / 0.4);
     --shadow: 0 30px 80px -30px rgb(0 0 0 / 0.65);
@@ -1157,3 +1157,7 @@ button:disabled {
 .mask-controls label { display: grid; gap: 4px; min-width: 0; }
 .mask-controls input, .mask-controls select { max-width: 100%; font: inherit; color: inherit; background: var(--panel); border: 1px solid var(--line); border-radius: 4px; padding: 6px; }
 .mask-controls p { flex-basis: 100%; margin: 0; overflow-wrap: anywhere; }
+
+/* Section headings receive navigation focus without becoming Tab stops. */
+h1[tabindex='-1']:focus,
+h2[tabindex='-1']:focus { outline: none; }
