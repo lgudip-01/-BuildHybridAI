@@ -294,14 +294,15 @@ function ModelStatus(props: { status: DisplayStatus; progress: number | null; on
   );
 }
 
-function Output(props: { run: Run | null; active: string | null; onActive: (p: string | null) => void }) {
+export function Output(props: { run: Run | null; active: string | null; onActive: (p: string | null) => void }) {
   const { run, active, onActive } = props;
 
   if (!run) {
     return (
       <div className="empty">
-        <p className="empty-title">Nothing has left this device.</p>
-        <p>Mask the contract to see exactly what the cloud model would receive. Names, amounts, dates, addresses and accounts are replaced with placeholders first.</p>
+        {/* Shown again after a document is deleted or replaced, so it can't claim nothing was ever sent. */}
+        <p className="empty-title">Nothing is sent until you approve.</p>
+        <p>Mask the contract to see exactly what the cloud model would receive. Detected names, amounts, dates, addresses and account numbers are replaced with placeholders first.</p>
       </div>
     );
   }
