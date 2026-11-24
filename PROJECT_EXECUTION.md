@@ -1773,7 +1773,9 @@ new cloud run is needed; #50 main merge and #48 SDK/device gates remain pending.
   saikamsani30 for UI/navigation. Earlier tags alone were not formal requests.
 - [x] Correct #50 description and candidate notes: owner review/merge remains
   pending, but the source candidate no longer needs to be held as draft.
-- [ ] Publish the updated notes in #51 and verify the fetched documentation tree.
+- [x] Publish updated notes in #51; fetched 0dea7e4 matches the full local
+  documentation tree. Only Markdown differs from #50; the final tracker-only
+  checkpoint is compared again before finishing.
 
 The GitHub connector still rejects write access, so the authorized signed-in
 GitHub page completed the handoff. No security access was broadened to fix it.
