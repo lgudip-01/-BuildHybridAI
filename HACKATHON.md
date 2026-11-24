@@ -1,6 +1,6 @@
 # #BuildHybridAI 2026: rules and requirements
 
-A summary of the hackathon's [overview](https://firebasehybridaihackathon.devpost.com/), [official rules](https://firebasehybridaihackathon.devpost.com/rules) and [resources](https://firebasehybridaihackathon.devpost.com/resources) pages, as read on November 17, 2026. The official rules on Devpost win wherever this file differs. The last section tracks where Clause Guard stands against each requirement.
+A summary of the hackathon's [overview](https://firebasehybridaihackathon.devpost.com/), [official rules](https://firebasehybridaihackathon.devpost.com/rules) and [resources](https://firebasehybridaihackathon.devpost.com/resources) pages, as summarized on November 17, 2026. The submission deadline was rechecked on November 24; the implementation table below was refreshed separately from current source and repository evidence. The official rules on Devpost win wherever this file differs. The last section tracks where Clause Guard stands against each requirement.
 
 ## Key dates
 
@@ -101,24 +101,34 @@ $30,000 in total.
 - **Docs:** Firebase AI Logic overview, hybrid inference concepts and setup, hybrid prompting, the production checklist (App Check, Remote Config, Firestore, Authentication), and the guides for web, Android and iOS. All are linked from the Resources page.
 - **Firebase Agent Skills,** for coding agents such as Antigravity, Claude Code, Codex and Cursor.
 - **Help:** the #BuildHybridAI channel on the Devpost Discord, including #hackathon-help.
-- **Free tier:** text inference with Firebase AI Logic is free within usage limits. Image generation and other billed models need a Google Account Quota request.
+- **Project cost constraint:** organizer quota offers do not authorize a paid account, billing link, trial, overages or payment details. This project uses only currently verified no-billing/no-cost options; stop at quota limits. We have not verified or activated an advanced-feature quota account.
 
 ## Where Clause Guard stands
 
-As of November 17, 2026. Stage one is pass or fail, so every unchecked **required** item below can disqualify the submission.
+As of November 24, 2026. Main is still `65152ce`; the hosted tested web stack is
+consolidated for main adoption in [PR #50](https://github.com/lgudip-01/-BuildHybridAI/pull/50).
+Status reflects branch/deployment evidence, not an assertion that every feature
+has merged or every submission requirement is complete.
 
-| Requirement | Status | Owner |
+| Requirement | Verified state and remaining work | Owner |
 | --- | --- | --- |
-| Firebase AI Logic imported and called at runtime (required) | Done: `apps/web/src/webBridge.ts` runs Gemini Nano through `getGenerativeModel` and `generateContent` | Likhil Gudipati |
-| Hybrid inference: on-device with cloud fallback (core of the challenge) | On-device masking works; the cloud call `analyze()` is still a stub | Dhruv Vyas |
-| App Check (required by Firebase AI Logic) | Not in the code yet | Dhruv Vyas |
-| Web (Chrome) app runs | Done: on the six sample contracts, Gemini Nano masks 70/70 values and keeps 34/34 terms | Likhil Gudipati, Sai Nagadheeraj Kamsani |
-| Android and iOS apps (Grand Prize consideration) | Scaffold and iOS project merged; native AI calls not done | Aarush Goel |
-| Public repo with an open source license shown in About (required) | Done: public, MIT | Team |
-| Instructions to run the project in the repo (required) | Done: "Run it locally" in the README | Likhil Gudipati |
-| Hosted web app to test (encouraged) | Not started (Firebase Hosting) | Dhruv Vyas |
-| Demo video, 3 minutes or less, public on YouTube, English (required) | Not started | Varun Akella |
-| Devpost text description and platform selection (required) | Not started | Varun Akella |
-| All five members added to the Devpost project (required) | Not confirmed | Varun Akella |
-| Every member confirms eligibility | Not confirmed | Team |
-| Last commit before Nov 30, 2:00 PM PT | Plan to freeze the repo the morning of Nov 30 | Team |
+| Firebase AI Logic runtime calls | Web `WebBridge` and analyzer/chat invoke Firebase AI Logic, with raw extraction restricted to on-device calls and approved masked cloud requests | Dhruv / Likhil |
+| Hybrid analysis | Web cloud analysis and guarded preliminary device fallback exercised on fictional fixtures; historical six-sample 60/60 branch matrix retained; actual merged-main matrix still pending | Dhruv |
+| App Check | Web initialization and enforced production provider exercised; native release providers are in separate candidate code, real-device attestation still pending | Dhruv / Aarush |
+| Web app and masked chat | Hosted document/chat flow, approval, restoration and citations verified on bounded cases; no general legal-accuracy or perfect-masking claim | Dhruv / Sai / Likhil |
+| Android / iOS | c9acf60 SDK builds and simulator/emulator stops reported by Aarush; combined #48 SDK rerun, real devices, native cloud flow and attestation pending | Aarush / Dhruv |
+| Extension | Initial Manifest V3 scaffold is still an owner dependency; side-panel runtime acceptance pending | Project owner / Sai |
+| Public repository and license | Public repository with MIT license; preserve public source/assets and reproducible setup | Team |
+| Setup instructions | README links the current hosted demo, exact candidate and Firebase setup; main adoption remains pending | Dhruv / team |
+| Hosted demo | [Live web app](https://clause-guard-hackathon.web.app), no visitor Console/debug-token setup; local model availability and free quota still apply | Dhruv |
+| Public English demo video, at most three minutes | Completion/link not verified; show only platforms and behaviors actually demonstrated | Varun / team |
+| Devpost description and platform selection | Completion not verified; native/extension claims must match runtime evidence | Varun / team |
+| All team members added | Not verified | Representative / team |
+| Eligibility | Sai explicitly confirmed in #30; all-member confirmation remains unverified. Each member must review the official rules | Each member |
+| Source freeze before deadline | Pending coordinated adoption, actual-main acceptance and submission freeze | Team |
+
+See [RELEASE_CANDIDATE_20261124.md](RELEASE_CANDIDATE_20261124.md) for source heads,
+checks and adoption order, and [DEMO_READINESS.md](apps/web/DEMO_READINESS.md) for
+historical results, failures and limitations. Preparation does not complete the
+submission; legal acceptance and final Devpost submission remain with the user/
+team representative. No purchase, trial or paid quota is authorized.
