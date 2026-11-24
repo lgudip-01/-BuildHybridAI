@@ -14,7 +14,7 @@ function masked(modelReadClauses: number | undefined, clauseCount = 3, needsRevi
 const run = (result: Masked) => ({ result, ms: 5 });
 
 describe('on-device status pill', () => {
-  it('stops saying ready once a run shows the model never read a clause', () => {
+  it('stops saying ready when a run has no complete usable clause read', () => {
     expect(displayStatus('available', run(masked(0)))).toBe('failed');
   });
 
@@ -35,9 +35,16 @@ describe('on-device status pill', () => {
 });
 
 describe('review banner', () => {
-  it('says "patterns only" and "didn\'t run" only when the model read nothing', () => {
+  it('reports no usable clause read without claiming the model was never called', () => {
     expect(reviewTitle(masked(0))).toMatch(/patterns only/);
-    expect(reviewReason(masked(0))).toMatch(/didn't run/);
+    expect(reviewReason(masked(0))).toMatch(/did not return a usable read of any clause/);
+    expect(reviewReason(masked(0))).not.toMatch(/didn't run/);
+  });
+
+  it('does not invent model coverage for an older result without the optional count', () => {
+    expect(reviewTitle(masked(undefined))).not.toMatch(/patterns only/);
+    expect(reviewReason(masked(undefined))).toMatch(/Model coverage was not recorded/);
+    expect(reviewReason(masked(undefined))).not.toMatch(/didn't run|found names/);
   });
 
   it('gives the count when the model read some clauses', () => {
@@ -49,6 +56,7 @@ describe('review banner', () => {
 
   it('explains unconfirmed names when the model read every clause', () => {
     expect(reviewReason(masked(3))).not.toMatch(/didn't run/);
-    expect(reviewReason(masked(3))).toMatch(/found names the patterns couldn’t confirm/);
+    expect(reviewReason(masked(3))).toMatch(/usable read of every clause/);
+    expect(reviewReason(masked(3))).toMatch(/names still need confirmation/);
   });
 });

@@ -340,6 +340,28 @@ describe('mask', () => {
       expect(result.needsReview).toBe(true);
     });
 
+    it('does not count a clause when a later chunk fails after an earlier model call succeeded', async () => {
+      let calls = 0;
+      const bridge: AiBridge = { ...fakeBridge([]), onDevice: async () => {
+        calls++;
+        if (calls === 2) throw new Error('Synthetic second chunk failure');
+        return '{"entities":[],"type":"other"}';
+      } };
+      const text = 'Payment is due upon receipt. '.repeat(100);
+      const result = await mask('doc-read-incomplete-chunk', [{ id: 'c1', index: 0, text }], bridge);
+      if (!result.ok) throw new Error('blocked');
+      expect(calls).toBe(2);
+      expect(result.modelReadClauses).toBe(0);
+      expect(result.needsReview).toBe(true);
+    });
+
+    it('does not count an unusable model response as a complete read', async () => {
+      const result = await mask('doc-read-invalid', clauses, fakeBridge([], { answer: '{"type":"other"}' }));
+      if (!result.ok) throw new Error('blocked');
+      expect(result.modelReadClauses).toBe(0);
+      expect(result.needsReview).toBe(true);
+    });
+
     it('every clause when the model works, including when review is still needed', async () => {
       const texts = ['Globex shall indemnify Initech.', 'Payment is due on receipt.'];
       const result = await mask('doc-read-all', texts.map((text, index) => ({ id: `c${index + 1}`, index, text })), fakeBridge([
