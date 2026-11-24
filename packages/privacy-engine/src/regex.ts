@@ -78,6 +78,11 @@ const PATTERNS: Pattern[] = [
     group: 1,
   },
 
+  // Plain values of five or more digits can be amounts or private quantities
+  // without commas/currency. Earlier account rules retain their kind on ties.
+  // Four-digit years and ordinary durations/section decimals are left intact.
+  { kind: 'AMOUNT', re: /(?<![\p{L}\p{N}_.,])\d{5,}(?:\.\d+)?(?![\p{L}\p{N}_]|[.,]\d)/gu },
+
   // UK and Canadian postcodes, at the end of a street address or on their own: "SW1A 2AA", "K1A 0B1".
   { kind: 'ADDRESS', re: /\b[A-Z]{1,2}\d[A-Z\d]?\s?\d[A-Z]{2}\b/g },
   { kind: 'ADDRESS', re: /\b[A-Z]\d[A-Z]\s?\d[A-Z]\d\b/g },
