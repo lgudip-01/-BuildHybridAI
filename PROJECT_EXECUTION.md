@@ -1845,3 +1845,29 @@ Preserve owner branches; publication is not native release authorization.
 Review follow-up: https://github.com/lgudip-01/-BuildHybridAI/pull/56 .
 Packaging evidence: https://github.com/lgudip-01/-BuildHybridAI/pull/55#pullrequestreview-6046758729 .
 Android evidence: https://github.com/lgudip-01/-BuildHybridAI/pull/48#issuecomment-7143275410 .
+
+
+## Disable mobile bridge payload logs — November 24, 2026
+
+- [x] Inspect latest #56 comments (no owner response yet), current refs/config and
+  installed Android/iOS Capacitor logging paths before changes.
+- [x] Set shared loggingBehavior=none; no platform override or private config edit.
+- [x] Reproduce old missing config failure and enabled bridge payload logging.
+- [x] Execute both unmodified bridge assets in DEBUG with synthetic transports:
+  disabled logging suppresses request/result/error payloads and retains callbacks.
+- [x] Real local cap copy ios/android on a clean tracked-native fixture succeeds;
+  generated configs retain logging disabled and app identity. Seven harness groups
+  pass. No SDK/model/network/provider call or native build claimed.
+- [x] Record reproduction, inspected native mapping and bounded owner log check in
+  apps/mobile/BRIDGE_LOGGING_20261124.md; preserve all branches and real configs.
+- [x] Publish config/harness/handoff as ready-for-review #57, stacked on #56;
+  formally request Aarush check. Fetched 0f9471c matches all three mobile files;
+  final complete-tree verification follows this tracker upload.
+
+Remaining gate for this fix: native Debug runtime flag/logcat/Xcode check with
+synthetic markers, not real contracts or inference. #55 configured packaging and
+Android sample cloud evidence stay credited; #56 review and Likhil shared-field
+review remain open. Next independent step: isolated UI/native stack reconciliation
+with this logging setting retained. No main merge or native release authorization.
+
+Logging review: https://github.com/lgudip-01/-BuildHybridAI/pull/57 .
