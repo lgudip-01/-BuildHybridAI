@@ -1,6 +1,6 @@
 # Clause Guard execution checklist
 
-Current checkpoint: November 22, 2026 (America/New_York).
+Current checkpoint: November 23, 2026 (America/New_York).
 Historical increments follow; the latest increment controls the active gate.
 Current gate: A, branch acceptance complete within documented scope; maintainer
 review/merge and the issue #30 main verification remain open.
@@ -893,6 +893,36 @@ supersede their planned focused/publish-before-full ordering. Broader Gate A
 remains open. No additional model send followed the successful full-lease run.
 
 
+<!-- Preserved #40 checkpoint; its build-status boxes are historical and superseded by the current roadmap below. -->
+## November 23: native chat method candidate
+
+This isolated branch starts at #35 (6cf643e); #37–#39 shared engine/bindings/UI
+remain separate dependencies, not missing implementations. Primary and all
+teammate branches stay intact. See the native plugin NATIVE_CHAT_HANDOFF.md.
+
+- [x] Recheck #35/#39/#17 comments and refs; no new teammate native chat delivery.
+- [x] Add Swift/Kotlin stateless chat methods and independent unconditional native
+  release stops before configuration/provider work; preserve existing analysis.
+- [x] Cross-platform envelope/history/schema/size validation: 45 Swift and 39
+  Kotlin checks pass. Swift 6 strict concurrency and plugin syntax parse pass.
+- [x] Shared #39 prompt/model/limit parity; clean apply to full isolated integration.
+- [x] Document failure corrections, SDK/toolchain limits and owner build handoff.
+- [x] Publish draft #40 stacked on #35; fetched 362b6e4 matches all tested
+  source/fixtures/handoff files. Final tracker upload/full-tree check follows.
+- [ ] Full native SDK builds, native WebView stop check and real phones. Missing
+  full Xcode/Swift 6.2.3, Java 21 and Android SDK prevent those claims on this Mac.
+- [ ] Owner review/adoption, private config delivery endpoint, current zero-cost/
+  App Check verification and bounded live acceptance before any release.
+
+No model/cloud call, activation, deployment, payment, billing, IAM or enforcement
+change. Both JS and native release blocks remain; chat is not released.
+
+Native candidate review: https://github.com/lgudip-01/-BuildHybridAI/pull/40 .
+Aarush tagged for SDK builds, native WebView blocked-call evidence and adoption;
+these are concrete remaining platform checks, not a new implementation request.
+Full integrated native source is preserved locally at de3bc38; no main merge.
+
+
 ## Near-perfect quality bar and remaining sample increment — November 20
 
 User preference is saved in AGENTS.md. Aim for near-perfect execution while
@@ -1521,7 +1551,7 @@ history. Main is still 65152ce; no main merge or teammate branch rewrite occurre
 
 ### Next work we can do independently, in order
 
-1. **Native source safety reconciliation (Cloud AI + Aarush).** Integrate Aarush's
+1. **Native source safety reconciliation (Cloud AI + Aarush) — source COMPLETE; merged SDK rerun pending.** Integrate Aarush's
    5cac809 into an isolated #40-based candidate. It fixes our earlier #35 finding:
    iOS onDevice must return a fixed message and log only the error type, because
    localizedDescription can echo raw contract text. Preserve the registered chat
@@ -1531,7 +1561,7 @@ history. Main is still 65152ce; no main merge or teammate branch rewrite occurre
    Checklist: compare both heads; preserve both implementations; no raw error
    detail in logs/rejections; policy/type checks; concrete owner handoff.
 
-2. **Carry latest accessibility/mobile UI corrections into our deployed stack.**
+2. **Carry latest accessibility/mobile UI corrections into our deployed stack — COMPLETE in #49 and Hosting; owner review pending.**
    #36 now has c10eaab (review/storage wording and reduced-motion auto scrolling),
    05ac38e (nearly opaque Android-safe top bar), and f11094e (focus transfer after
    Try it/How it works). Our #45 already contains softened wording and progress,
@@ -1589,3 +1619,83 @@ history. Main is still 65152ce; no main merge or teammate branch rewrite occurre
 
 No credentials/config files were published, no payment/billing/API/IAM/App Check
 settings changed, and no real user document was deleted during this work.
+
+
+## Native error safety reconciliation — completed source step
+
+- [x] Refresh native refs/comments; retain primary checkout and all worktrees.
+- [x] Isolated merge of #40/c9acf60 and #35/5cac809; both parent histories retained.
+- [x] Only runtime delta from #40: iOS onDevice logs the error type in DEBUG and
+  rejects with the fixed message `On-device generation failed.`; provider error
+  text is neither interpolated nor passed through this handler.
+- [x] Registered Swift/Kotlin chat methods, policies and independent native stops
+  remain unchanged. Current shared native JS stop is inspected and retained.
+- [x] Executable regression extracts the actual onDevice catch body and captures
+  its exact NSLog formatting and reject expression. Two synthetic echoing-error
+  types run in release/debug: 4 checks pass, Swift 6 complete strict concurrency.
+- [x] Old #40 source fails the rejection regression. A log-only unsafe fixture
+  separately checks that the DEBUG log path is detected; failure evidence stays
+  local. No real contract, Firebase SDK, provider or Capacitor call is involved.
+- [x] 45 Swift policy checks, 39 Kotlin/JVM checks, shared prompt/model/limit parity
+  and Swift plugin/helper syntax parsing pass. Safety patch applies cleanly to
+  the earlier full native integration; source is preserved for adoption.
+- [x] Publish #48 native source/harness/handoff at 77b77ef, matching tested files;
+  tag Aarush for full SDK verification on the newly merged revision.
+- [ ] Full iOS Debug/Release + Android SDK builds on the merged source. Existing
+  c9acf60 owner build/simulator stop evidence remains credited, but does not
+  certify the newly merged source.
+
+This native-only branch is stacked on #40 and carries the latest execution
+tracker from #47 for continuity; it does not replace the deployed web stack.
+No Hosting deployment, model calls, Firebase/config/IAM/App Check changes or paid
+services. Native chat remains disabled. Next independent task: carry the latest
+navigation-focus/reduced-motion/nav corrections into the deployed UI stack.
+
+Native safety integration review: https://github.com/lgudip-01/-BuildHybridAI/pull/48 .
+Aarush was asked for a changed-revision SDK build because this is the first
+combination of 5cac809 and #40's chat methods. The requested checks and commands
+are concrete in NATIVE_CHAT_HANDOFF.md; no new implementation is required from
+him for this source fix. Final whole-tree publication verification follows.
+
+
+## Navigation accessibility adoption — 2026-11-23
+
+- [x] Inspect both original folders, preserve local work, and refresh remote refs and
+  owner comments before editing. Isolated candidate starts from #47/cae2985.
+- [x] Carry exact scroller/Hero/HowItWorks source from #36/f11094e; apply only the
+  reviewed nav opacity and programmatic-heading focus CSS to the integrated styles.
+  Keep the #45–#47 import/manual-mask/delete/chat/numeric fixes intact.
+- [x] Reproduce the missing behavior first: 4 of 6 focus tests fail on old helper.
+  All 6 pass after the fix; all 402 web tests and the production build pass.
+- [x] Actual desktop Chrome: Enter on nav Try it focuses the Workbench heading;
+  subsequent Tab reaches Import PDF or Word. Nav How it works and hero Try it
+  also focus their destination heading. No model question was sent.
+- [x] Actual DevTools phone viewport: innerWidth and document scrollWidth both 430.
+  With reduced motion emulated before reload, actual hero/nav activation focuses
+  the Workbench/How headings. The reduced-motion query is true. Automated tests
+  separately verify immediate auto scrolling and next focus order. DevTools
+  prevents automated key input in this environment, so phone activation is through
+  Chrome's accessibility controls; the keyboard proof above is desktop only.
+- [x] Restore the test tab to normal motion, no device emulation, 1512-pixel width.
+- [x] Publish the reviewed runtime candidate at 3899456 to a branch stacked on
+  #47; fetched web source exactly matches the tested files. #49 tags Sai/Aarush
+  for review of the carried #36 corrections. Whole-tree comparison is the final
+  publication gate after this tracker upload.
+- [x] Fresh Cloud Console check: this project has no linked billing account.
+  Official Firebase Spark pricing still requires no payment method. Hosting-only
+  deployment completed; hosted script index-_zRnRsvX.js matches the production
+  build. Real hosted Enter activation passes for nav Try it/How and hero Try it;
+  subsequent Tab reaches Import PDF or Word. No question/model call was sent.
+
+This web branch includes the native tracker for continuity, not #48's native
+source changes. Native SDK rerun and physical-device acceptance remain separate.
+Next independent roadmap step: prepare the exact main-based release candidate
+for coordinated adoption and the subsequent bounded six-sample cloud acceptance.
+
+Navigation adoption review: https://github.com/lgudip-01/-BuildHybridAI/pull/49 .
+Verified deployment: https://clause-guard-hackathon.web.app .
+Spark pricing checked 2026-11-24: https://firebase.google.com/pricing .
+The initial deployment command failed locally because the prior temporary CLI
+installation had missing dependencies. Restored the same official firebase-tools
+15.37.0 from the local npm cache and completed the deployment; no paid service,
+payment information or billing account was created or linked.
