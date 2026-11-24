@@ -129,6 +129,12 @@ p {
   margin: 0;
 }
 
+/* A heading that receives focus from a nav action is a landing point, not a control: no focus ring. */
+h1[tabindex='-1']:focus,
+h2[tabindex='-1']:focus {
+  outline: none;
+}
+
 button {
   font: inherit;
   cursor: pointer;

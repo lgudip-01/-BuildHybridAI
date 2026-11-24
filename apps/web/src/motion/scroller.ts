@@ -44,9 +44,24 @@ export function useScroller(): void {
   }, []);
 }
 
-/** Smooth-scrolls to a CSS selector such as '#try'. Falls back to the browser's own scroll. */
+/**
+ * Scrolls to a CSS selector such as '#try' and moves keyboard focus into that section, so the next Tab continues
+ * from there instead of from the button that was pressed. Scrolling is smooth, or immediate when the user prefers
+ * reduced motion. Focus goes to the section's heading (made programmatically focusable), or to the section itself.
+ */
 export function scrollToTarget(selector: string): void {
+  const target = document.querySelector<HTMLElement>(selector);
+  if (!target) return;
   if (scroller) scroller.scrollTo(selector, { offset: -72, duration: 1.2 });
   // Without the scroller (reduced motion, or before it starts) jump straight there, as the user asked for less motion.
-  else document.querySelector(selector)?.scrollIntoView({ behavior: prefersReducedMotion() ? 'auto' : 'smooth' });
+  else target.scrollIntoView({ behavior: prefersReducedMotion() ? 'auto' : 'smooth' });
+  focusSection(target);
+}
+
+function focusSection(section: HTMLElement): void {
+  const heading = section.querySelector<HTMLElement>('h1, h2') ?? section;
+  // -1 makes it focusable from script without adding it to the Tab order.
+  if (!heading.hasAttribute('tabindex')) heading.setAttribute('tabindex', '-1');
+  // The scroll is already under way; focusing must not start a second, jumpy one.
+  heading.focus({ preventScroll: true });
 }
