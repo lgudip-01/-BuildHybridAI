@@ -42,9 +42,11 @@ export type LedgerEntry = { placeholder: string; kind: EntityKind; clauseIds: st
 export type Leak = { clauseId: string; snippet: string; reason: string };
 
 export type MaskResult =
-  // needsReview: masking ran without the on-device model, so the user must approve the text before it is sent.
+  // needsReview: the user must approve the text before it is sent. Set when the on-device model didn't read every
+  // clause, and also when it did but found names the patterns can't confirm.
+  // modelReadClauses: how many clauses the on-device model actually read (0 when it didn't run or every call failed).
   // docId: the document this run masked. Pass the result to approve() unchanged; it is frozen.
-  | { ok: true; docId: string; clauses: MaskedClause[]; ledger: LedgerEntry[]; needsReview: boolean; manuallyEdited?: true }
+  | { ok: true; docId: string; clauses: MaskedClause[]; ledger: LedgerEntry[]; needsReview: boolean; modelReadClauses?: number; manuallyEdited?: true }
   | { ok: false; docId: string; leaks: Leak[] };
 
 export type Analysis = {

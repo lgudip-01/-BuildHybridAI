@@ -625,7 +625,8 @@ button {
 }
 
 .status[data-state='downloadable'] .dot,
-.status[data-state='downloading'] .dot {
+.status[data-state='downloading'] .dot,
+.status[data-state='failed'] .dot {
   background: var(--warn);
 }
 

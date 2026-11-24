@@ -30,6 +30,8 @@ export async function mask(
 
   const useModel = (await bridge.onDeviceStatus()) === 'available';
   let needsReview = !useModel;
+  // Reported so the UI can tell "the model didn't run" apart from "the model ran but found something to check".
+  let modelReadClauses = 0;
 
   // Names are collected across the whole contract first, so a name the model
   // spots in one clause is also masked in clauses where it missed it.
@@ -53,6 +55,7 @@ export async function mask(
       found.push(...reading.entities);
       byModel.push(...reading.entities);
       types.push(reading.type);
+      modelReadClauses++;
     } catch {
       needsReview = true;
       types.push(undefined);
@@ -120,6 +123,7 @@ export async function mask(
       clauses: check.clauses.map((clause, i) => (types[i] ? { ...clause, type: types[i] } : clause)),
       ledger: registry.ledger(),
       needsReview,
+      modelReadClauses,
     },
     run,
     snapshot,

@@ -26,9 +26,13 @@ Name: Michael Chen, CEO, Acme Corp`;
 // iPhones use Apple's built-in model; Chrome and Android use Gemini Nano.
 const MODEL_NAME = Capacitor.getPlatform() === 'ios' ? 'Apple Intelligence' : 'Gemini Nano';
 
-const STATUS_LABEL: Record<OnDeviceStatus | 'checking', string> = {
+// 'failed': the platform reported the model ready, but the last masking run couldn't use it.
+type DisplayStatus = OnDeviceStatus | 'checking' | 'failed';
+
+const STATUS_LABEL: Record<DisplayStatus, string> = {
   checking: 'Checking on-device model',
   available: `${MODEL_NAME} ready`,
+  failed: `${MODEL_NAME} didn't run`,
   downloadable: `${MODEL_NAME} not downloaded`,
   downloading: `${MODEL_NAME} downloading`,
   unavailable: `${MODEL_NAME} unavailable`,
@@ -148,7 +152,7 @@ export function Workbench({ bridge, chatBridge }: { chatBridge?: ChatBridge; bri
       <header className="bench-head">
         <p className="eyebrow">Try it</p>
         <h2 className="section-title">Mask a real contract, right here.</h2>
-        <ModelStatus status={status} progress={progress} onDownload={download} disabled={busy} />
+        <ModelStatus status={displayStatus(status, run)} progress={progress} onDownload={download} disabled={busy} />
       </header>
 
       {status === 'unavailable' && (
@@ -240,7 +244,34 @@ export function Workbench({ bridge, chatBridge }: { chatBridge?: ChatBridge; bri
   );
 }
 
-function ModelStatus(props: { status: OnDeviceStatus | 'checking'; progress: number | null; onDownload: () => void; disabled: boolean }) {
+/**
+ * "Ready" is the platform's claim, not proof: Apple can report the model available and then fail every call
+ * (seen on the iOS simulator). Once a masking run falls back to patterns, stop saying ready.
+ */
+export function displayStatus(status: OnDeviceStatus | 'checking', run: Run | null): DisplayStatus {
+  return status === 'available' && run?.result.ok && run.result.modelReadClauses === 0 ? 'failed' : status;
+}
+
+type Masked = Extract<MaskResult, { ok: true }>;
+
+/** Unknown (an older result without the count) is treated as "didn't run", the cautious reading. */
+const modelRan = (result: Masked) => (result.modelReadClauses ?? 0) > 0;
+
+export function reviewTitle(result: Masked): string {
+  return modelRan(result) ? 'Check the masked text before sending.' : 'Masked with patterns only. Review before sending.';
+}
+
+export function reviewReason(result: Masked): string {
+  const read = result.modelReadClauses ?? 0;
+  const total = result.clauses.length;
+  if (read === 0) return "The on-device model didn't run, so a name used without a title or company suffix can slip through.";
+  if (read < total) {
+    return `The on-device model read ${read} of ${total} clauses. In the others, a name used without a title or company suffix can slip through.`;
+  }
+  return 'The on-device model found names the patterns couldn’t confirm. Check that each one is masked everywhere it appears.';
+}
+
+function ModelStatus(props: { status: DisplayStatus; progress: number | null; onDownload: () => void; disabled: boolean }) {
   const { status, progress, onDownload } = props;
   if (progress !== null) {
     return (
@@ -308,10 +339,9 @@ function Output(props: { run: Run | null; active: string | null; onActive: (p: s
         <div className="banner" data-tone="warn">
           <TriangleAlert size={18} strokeWidth={1.75} aria-hidden />
           <div>
-            <p className="banner-title">Masked with patterns only. Review before sending.</p>
+            <p className="banner-title">{reviewTitle(result)}</p>
             <p>
-              The on-device model didn't run, so a name used without a title or company suffix can slip through. Took{' '}
-              <span className="num">{Math.round(ms)} ms</span>.
+              {reviewReason(result)} Took <span className="num">{Math.round(ms)} ms</span>.
             </p>
           </div>
         </div>
