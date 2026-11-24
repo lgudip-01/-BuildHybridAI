@@ -26,13 +26,13 @@ Name: Michael Chen, CEO, Acme Corp`;
 // iPhones use Apple's built-in model; Chrome and Android use Gemini Nano.
 const MODEL_NAME = Capacitor.getPlatform() === 'ios' ? 'Apple Intelligence' : 'Gemini Nano';
 
-// 'failed': the platform reported the model ready, but the last masking run couldn't use it.
+// 'failed': the last masking run returned no complete usable clause read.
 type DisplayStatus = OnDeviceStatus | 'checking' | 'failed';
 
 const STATUS_LABEL: Record<DisplayStatus, string> = {
   checking: 'Checking on-device model',
   available: `${MODEL_NAME} ready`,
-  failed: `${MODEL_NAME} didn't run`,
+  failed: `${MODEL_NAME}: no complete read`,
   downloadable: `${MODEL_NAME} not downloaded`,
   downloading: `${MODEL_NAME} downloading`,
   unavailable: `${MODEL_NAME} unavailable`,
@@ -254,17 +254,15 @@ export function displayStatus(status: OnDeviceStatus | 'checking', run: Run | nu
 
 type Masked = Extract<MaskResult, { ok: true }>;
 
-/** Unknown (an older result without the count) is treated as "didn't run", the cautious reading. */
-const modelRan = (result: Masked) => (result.modelReadClauses ?? 0) > 0;
-
 export function reviewTitle(result: Masked): string {
-  return modelRan(result) ? 'Check the masked text before sending.' : 'Masked with patterns only. Review before sending.';
+  return result.modelReadClauses === 0 ? 'Masked with patterns only. Review before sending.' : 'Check the masked text before sending.';
 }
 
 export function reviewReason(result: Masked): string {
-  const read = result.modelReadClauses ?? 0;
+  const read = result.modelReadClauses;
+  if (read === undefined) return 'Model coverage was not recorded for this result. Check names and other sensitive details before sending.';
   const total = result.clauses.length;
-  if (read === 0) return "The on-device model didn't run, so a name used without a title or company suffix can slip through.";
+  if (read === 0) return "The on-device model did not return a usable read of any clause, so a name used without a title or company suffix can slip through.";
   if (read < total) {
     return `The on-device model read ${read} of ${total} clauses. In the others, a name used without a title or company suffix can slip through.`;
   }
