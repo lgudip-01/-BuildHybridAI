@@ -1,10 +1,10 @@
 # Native chat candidate — November 23, 2026
 
-Based directly on Aarush's #35 (`feat/android-project`, 6cf643e), not the older
-plugin skeleton inherited by the chat UI branches. Preserve the #35 analysis,
-on-device, App Check and vault implementations. This candidate adds only native
-chat methods, policies and local tests. Shared engine/bindings/UI remain in
-#37/#38/#39 and must be adopted together; this branch does not replace those.
+The original native candidate is based on Aarush's #35 at 6cf643e. This safety
+integration combines #40/c9acf60 with his #35/5cac809 raw-error correction,
+preserving analysis, on-device execution, App Check, vault, chat methods and
+policies. The functional shared web/engine/UI stack is published separately
+through #47; this native-only candidate does not replace that release.
 
 ## Implemented, still blocked
 
@@ -62,15 +62,43 @@ production policies already rejected it); strict Swift 6 then rejected a stored
 Any schema (fixed with fresh computed schema and Sendable serialized request).
 No concurrency checks were disabled and no @unchecked Sendable was introduced.
 
-## Full native verification remains OPEN
+## Platform verification: baseline complete, merged revision awaiting SDK rerun
 
-This Mac still has Command Line Tools, not full Xcode, Swift 6.0.3 rather than the
-#35 Firebase hybrid requirement 6.2.3, Java 17 rather than #35's Java 21, and no
-Android SDK. No app compilation, linkage, simulator, actual Capacitor invocation,
-App Check token or phone evidence is claimed. JVM org.json tests do not substitute
-for Android platform parsing/SDK integration. Run both platform builds on the
-owner's configured toolchains, verify SDK imports and modelVersion values, then
-exercise the native stop in a real WebView before considering release work.
+Aarush supplied full-toolchain evidence for #40/c9acf60: iOS Debug/Release builds,
+45 Swift policy checks, Android debug APK/release Kotlin compile, and real WebView
+release_pending results on the iOS simulator and Pixel 8/API 37 Android emulator.
+The stops ran before provider work without Firebase config/network calls. See:
+
+- https://github.com/lgudip-01/-BuildHybridAI/pull/40#issuecomment-7114221884
+- https://github.com/lgudip-01/-BuildHybridAI/pull/40#issuecomment-7114733068
+
+The current isolated branch merges that candidate with Aarush's 5cac809 raw-error
+safety fix from #35. Both histories and all native chat methods/policies/stops are
+preserved. The only runtime delta from #40 is the iOS onDevice catch: DEBUG logs
+only the error type; JavaScript gets `On-device generation failed.` without the
+provider's localizedDescription, which may echo raw contract text.
+
+The actual catch body is executed by tests/native-chat/checkOnDeviceError.py in
+Swift 6 with complete strict concurrency. Only NSLog's sink is renamed to capture
+its exact format/arguments; the debug conditional and rejection expression are
+extracted unchanged from the real plugin. NSError and LocalizedError fixtures
+both echo synthetic private-looking text. Release/debug checks pass (4 total).
+The previous plugin fails on its rejection; an unsafe-log-only fixture separately
+exercises the DEBUG log failure. This is a focused error-boundary regression, not
+Capacitor/Firebase SDK linkage, model execution or complete SDK logging proof.
+
+Fresh local checks also pass: 45 Swift policy, 39 Kotlin/JVM policy, shared #47
+prompt/model/limit parity and Swift plugin/helper syntax parse. Android policy,
+Swift chat policy and AnalysisSupport are byte-identical to #40. The safety patch
+applies cleanly to the previous full native integration. Current shared #47 JS
+native release stop was inspected; it remains unconditional.
+
+This Mac still has Command Line Tools/Swift 6.0.3/Java 17, not Aarush's full native
+toolchain. Ask him to build this exact merged revision in iOS Debug/Release and
+Android, and confirm the same pre-provider WebView stop if needed. This request
+is for changed source; the completed c9acf60 builds are not being requested again.
+Real phones/tablets, native attestation and actual native cloud answers remain
+open. Do not remove either release stop based on compilation/policy checks alone.
 
 Existing native configs are still private/ignored in the original primary
 checkout; nothing is uploaded here. Private delivery to Aarush awaits a direct
@@ -106,3 +134,15 @@ node --experimental-transform-types apps/mobile/plugins/clause-guard-ai/tests/na
 - [Firebase Android ONLY_IN_CLOUD and source configuration](https://firebase.google.com/docs/ai-logic/hybrid/android/configuration-options)
 - [Capacitor 8.6.0 Swift call options](https://github.com/ionic-team/capacitor/blob/8.6.0/ios/Capacitor/Capacitor/CAPPluginCall.h)
 - [Capacitor 8.6.0 Android call data](https://github.com/ionic-team/capacitor/blob/8.6.0/android/capacitor/src/main/java/com/getcapacitor/PluginCall.java)
+
+## Reproduce the error-boundary regression
+
+From repository root with Python 3 and local Swift available:
+
+```sh
+python3 apps/mobile/plugins/clause-guard-ai/tests/native-chat/checkOnDeviceError.py
+```
+
+An optional plugin path argument can check a preserved earlier source file.
+The script compiles/runs only temporary synthetic harnesses; it does not use
+Capacitor, Firebase, credentials, model calls, account setup or network access.
