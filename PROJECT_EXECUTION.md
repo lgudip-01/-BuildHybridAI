@@ -1482,3 +1482,110 @@ Hosted verification completed: `Does acme pay 12,500?` previews as
 index-BEUXnVKD bundle and reproduced the old rejection; a normal refresh loaded
 the deployed index-DJtNrnDw bundle and the exact reported case passed. Existing
 open tabs need a refresh to load this fix. No cloud question was approved.
+
+
+## Current roadmap after November 23 repository review
+
+This section supersedes earlier pending-status notes, without deleting their
+history. Main is still 65152ce; no main merge or teammate branch rewrite occurred.
+
+### Immediate masking report — completed
+
+- [x] Reproduce plain `12500` as five failing engine regressions before the fix.
+- [x] Mask ungrouped standalone values of five or more digits, including `12500.50`.
+- [x] Preserve account-rule precedence, ordinary years/deadlines, section decimals,
+  identifier boundaries, explicit approval and exact local restoration.
+- [x] Extend real-engine/mock-provider history checks to `12500`; no raw value in
+  the projected contract/question/history and no question-map writes to the vault.
+- [x] 396 web + 179 engine tests, engine typecheck and production build pass.
+- [x] Publish/deploy runtime b9d4dfa; freshly confirm no billing account.
+- [x] Current production bundle index-Bt36sZKb previews `Does acme pay 12500?` as
+  `Does [PARTY_A] pay [AMOUNT_2]?`. No cloud question was approved for verification.
+
+### New evidence: what is already done
+
+- [x] Sai approved both requested panel fixes in #44 at 1a21116. His independent
+  rerun passed 513 tests; this is UI/automated acceptance, not new cloud/phone proof.
+  https://github.com/lgudip-01/-BuildHybridAI/pull/44#pullrequestreview-6029942434
+- [x] Sai approved the combined Workbench controls/source rendering in #45 at
+  2252c91, reporting 558 tests. Do not request these same UI fixes again.
+  His formal approving review was verified through the reviews API.
+- [x] Aarush reports #40/c9acf60 iOS Debug/Release SDK builds, 45 strict Swift
+  policy checks, Android debug APK/release Kotlin compile and both WebView stops.
+  iOS simulator returned release_pending in 35 ms; Android Pixel 8/API 37 emulator
+  returned it in 38 ms, before provider work, with no Firebase config/network.
+  https://github.com/lgudip-01/-BuildHybridAI/pull/40#issuecomment-7114221884
+  https://github.com/lgudip-01/-BuildHybridAI/pull/40#issuecomment-7114733068
+- [x] The original 39 Kotlin/JVM policy checks were already run locally for #40;
+  Aarush's note that he did not rerun them does not undo that existing evidence.
+
+### Next work we can do independently, in order
+
+1. **Native source safety reconciliation (Cloud AI + Aarush).** Integrate Aarush's
+   5cac809 into an isolated #40-based candidate. It fixes our earlier #35 finding:
+   iOS onDevice must return a fixed message and log only the error type, because
+   localizedDescription can echo raw contract text. Preserve the registered chat
+   methods, native policies, native release stop and JS stop. Verify the merged
+   source and relevant policy regressions; request a full SDK rerun only for the
+   newly reconciled source, not another run of unchanged c9acf60.
+   Checklist: compare both heads; preserve both implementations; no raw error
+   detail in logs/rejections; policy/type checks; concrete owner handoff.
+
+2. **Carry latest accessibility/mobile UI corrections into our deployed stack.**
+   #36 now has c10eaab (review/storage wording and reduced-motion auto scrolling),
+   05ac38e (nearly opaque Android-safe top bar), and f11094e (focus transfer after
+   Try it/How it works). Our #45 already contains softened wording and progress,
+   but not the latest focus/nav corrections. Reconcile the remaining changes,
+   retaining imports/manual controls/deletion/chat. Test keyboard activation,
+   document.activeElement inside the target, subsequent Tab order, reduced motion,
+   desktop/phone widths, native scrolling and no approval/provider regressions.
+   Sai explicitly asked to carry this into #45 in his #36 review; code is now
+   available, while his formal design approval has not yet been refreshed.
+   https://github.com/lgudip-01/-BuildHybridAI/pull/36
+   https://github.com/lgudip-01/-BuildHybridAI/commit/f11094e
+
+3. **Main-based release adoption and cloud acceptance (Cloud AI + engine owners).**
+   Prepare a reviewable exact combination of #31 and the reviewed engine/UI/chat
+   stack, including the numeric fixes. Preserve main until coordinated review and
+   merge. After the actual main merge, run bounded six-sample cloud checks from
+   that exact main tree, then deploy it. Existing branch/deployment successes do
+   not satisfy #30's explicitly main-based requirement. Keep source/payload and
+   answer-quality failures visible; no paid fallback or unbounded retry loops.
+
+### Work requiring a teammate/device or infrastructure response
+
+4. **Native App Check and physical-device acceptance.** Simulators/emulators and
+   SDK builds above are complete for c9acf60. Still open: native Firebase config
+   delivery through an owner-approved private channel, real App Attest/Play
+   Integrity runtime, real phone/tablet masking/source/payload checks and native
+   cloud answers. The published local/mobile-with-redesign branch at fa39214
+   combines mobile + latest design + 5cac809; it does not supply #40's chat methods
+   or our full #45/#46 engine/UI stack. Inspect/reconcile rather than replacing it.
+   Our Mac was freshly rechecked: Command Line Tools, Swift 6.0.3, Java 17; full
+   SDK validation remains with Aarush's verified toolchain. Native chat stays
+   disabled until current no-cost/App Check/privacy/runtime checks actually pass.
+
+5. **Extension scaffold dependency (Sai/project owner); our role is the cloud
+   boundary.** Sai reports his #9/#25 side-panel tasks blocked by the initial
+   Manifest V3 package. Main contains no extension manifest/package, and no
+   extension branch appeared in the refreshed remote inventory. Ask the project
+   owner to assign/link the scaffold. Once present, we verify the shared masked
+   dispatcher, explicit approval/history, extension-origin attestation/no-cost
+   setup and side-panel integration; do not ask Sai to implement the cloud engine
+   again or label the hosted web demo blocked by this separate surface.
+   https://github.com/lgudip-01/-BuildHybridAI/issues/30#issuecomment-7114563182
+
+### Ownership/next-action interpretation
+
+- Directly addressed to us: Aarush's #40 results; we acknowledge completed builds
+  and reconcile the newer iOS safety fix instead of repeating the old request.
+- Shared release responsibility: Sai's #44/#45 approvals and #36 focus request;
+  update acceptance status and carry available fixes into the deployment branch.
+- Primarily Sai/Aarush: design sign-off, mobile layout/device testing and extension
+  scaffold/UI. We supply cloud integration and coordinate dependencies.
+- Varun/team: eligibility, demo video/submission and quota-account request in #30.
+  Do not request a trial/credit/billing-linked quota account under the zero-cost
+  policy. No payment or new external service is authorized by teammate comments.
+
+No credentials/config files were published, no payment/billing/API/IAM/App Check
+settings changed, and no real user document was deleted during this work.
