@@ -306,6 +306,71 @@ describe('mask', () => {
     expect(result.needsReview).toBe(false);
     expect(result.clauses[0]!.text).toContain('[PARTY_A]');
     expect(result.clauses.map((c) => c.type)).toEqual([undefined, undefined]);
+    // The model still read both clauses, even though it gave no usable type.
+    expect(result.modelReadClauses).toBe(2);
+  });
+
+  describe('reports how many clauses the on-device model read', () => {
+    const failing = (failOn: (call: number) => boolean): AiBridge => {
+      const working = fakeBridge(model);
+      let call = 0;
+      return { ...working, onDevice: async (prompt, schema) => {
+        if (failOn(call++)) throw new Error('On-device generation failed.');
+        return working.onDevice(prompt, schema);
+      } };
+    };
+
+    it('0 when the platform has no model', async () => {
+      const result = await mask('doc-read-none', clauses, fakeBridge([], { status: 'unavailable' }));
+      if (!result.ok) throw new Error('blocked');
+      expect(result.modelReadClauses).toBe(0);
+    });
+
+    it('0 when the platform says the model is ready but every call fails', async () => {
+      const result = await mask('doc-read-fail', clauses, failing(() => true));
+      if (!result.ok) throw new Error('blocked');
+      expect(result.modelReadClauses).toBe(0);
+      expect(result.needsReview).toBe(true);
+    });
+
+    it('counts only the clauses that succeeded when some calls fail', async () => {
+      const result = await mask('doc-read-partial', clauses, failing(call => call === 1));
+      if (!result.ok) throw new Error('blocked');
+      expect(result.modelReadClauses).toBe(1);
+      expect(result.needsReview).toBe(true);
+    });
+
+    it('does not count a clause when a later chunk fails after an earlier model call succeeded', async () => {
+      let calls = 0;
+      const bridge: AiBridge = { ...fakeBridge([]), onDevice: async () => {
+        calls++;
+        if (calls === 2) throw new Error('Synthetic second chunk failure');
+        return '{"entities":[],"type":"other"}';
+      } };
+      const text = 'Payment is due upon receipt. '.repeat(100);
+      const result = await mask('doc-read-incomplete-chunk', [{ id: 'c1', index: 0, text }], bridge);
+      if (!result.ok) throw new Error('blocked');
+      expect(calls).toBe(2);
+      expect(result.modelReadClauses).toBe(0);
+      expect(result.needsReview).toBe(true);
+    });
+
+    it('does not count an unusable model response as a complete read', async () => {
+      const result = await mask('doc-read-invalid', clauses, fakeBridge([], { answer: '{"type":"other"}' }));
+      if (!result.ok) throw new Error('blocked');
+      expect(result.modelReadClauses).toBe(0);
+      expect(result.needsReview).toBe(true);
+    });
+
+    it('every clause when the model works, including when review is still needed', async () => {
+      const texts = ['Globex shall indemnify Initech.', 'Payment is due on receipt.'];
+      const result = await mask('doc-read-all', texts.map((text, index) => ({ id: `c${index + 1}`, index, text })), fakeBridge([
+        { text: 'Globex', kind: 'organization', party: true },
+      ]));
+      if (!result.ok) throw new Error(JSON.stringify(result.leaks));
+      expect(result.needsReview).toBe(true);
+      expect(result.modelReadClauses).toBe(2);
+    });
   });
 
   it('gives a defined short form and a first name the placeholder of the full name, but leaves the word "will"', async () => {

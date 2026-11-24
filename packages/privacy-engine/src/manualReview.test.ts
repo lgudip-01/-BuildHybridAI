@@ -20,10 +20,12 @@ async function document() {
 
 it('adds across clauses, preserves automatic masks and types, and undoes exact original spelling', async () => {
   const initial = await document();
+  expect(initial.modelReadClauses).toBe(2);
   const batch = approve(initial);
   const pending = reviseMask(initial, { add: 'bluebird' });
   expect(() => assertApproved(batch)).toThrow(expect.objectContaining({ code: 'stale' }));
   const edited = success(await pending);
+  expect(edited.modelReadClauses).toBe(2);
   expect(edited.clauses[0]).toMatchObject({ type: 'other', text: 'code [PRIVATE_2]. Send to [EMAIL_1]. Literal [PRIVATE_1].' });
   expect(edited.ledger.at(-1)).toEqual({ placeholder: '[PRIVATE_2]', kind: 'PRIVATE', clauseIds: ['c1','c2'] });
   expect(() => approve(edited)).toThrow(expect.objectContaining({ code: 'review_required' }));
@@ -31,6 +33,7 @@ it('adds across clauses, preserves automatic masks and types, and undoes exact o
   expect(JSON.stringify(approve(edited,{ reviewed:true }))).not.toContain('demo@example.test');
   const second = success(await reviseMask(edited, { add: 'passphrase' }));
   const undone = success(await reviseMask(second, { unmask: '[PRIVATE_2]' }));
+  expect(undone.modelReadClauses).toBe(2);
   expect(undone.clauses[0]).toEqual(initial.clauses[0]);
   expect(undone.clauses[1]!.text).toBe('use BLUEBIRD with the [PRIVATE_3].');
   expect(await loadVault(undone.docId)).toEqual({ '[EMAIL_1]': 'demo@example.test', '[PRIVATE_3]': 'passphrase' });

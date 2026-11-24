@@ -26,9 +26,13 @@ Name: Michael Chen, CEO, Acme Corp`;
 // iPhones use Apple's built-in model; Chrome and Android use Gemini Nano.
 const MODEL_NAME = Capacitor.getPlatform() === 'ios' ? 'Apple Intelligence' : 'Gemini Nano';
 
-const STATUS_LABEL: Record<OnDeviceStatus | 'checking', string> = {
+// 'failed': the last masking run returned no complete usable clause read.
+type DisplayStatus = OnDeviceStatus | 'checking' | 'failed';
+
+const STATUS_LABEL: Record<DisplayStatus, string> = {
   checking: 'Checking on-device model',
   available: `${MODEL_NAME} ready`,
+  failed: `${MODEL_NAME}: no complete read`,
   downloadable: `${MODEL_NAME} not downloaded`,
   downloading: `${MODEL_NAME} downloading`,
   unavailable: `${MODEL_NAME} unavailable`,
@@ -148,7 +152,7 @@ export function Workbench({ bridge, chatBridge }: { chatBridge?: ChatBridge; bri
       <header className="bench-head">
         <p className="eyebrow">Try it</p>
         <h2 className="section-title">Mask a real contract, right here.</h2>
-        <ModelStatus status={status} progress={progress} onDownload={download} disabled={busy} />
+        <ModelStatus status={displayStatus(status, run)} progress={progress} onDownload={download} disabled={busy} />
       </header>
 
       {status === 'unavailable' && (
@@ -240,7 +244,32 @@ export function Workbench({ bridge, chatBridge }: { chatBridge?: ChatBridge; bri
   );
 }
 
-function ModelStatus(props: { status: OnDeviceStatus | 'checking'; progress: number | null; onDownload: () => void; disabled: boolean }) {
+/**
+ * "Ready" is the platform's claim, not proof: Apple can report the model available and then fail every call
+ * (seen on the iOS simulator). Once a masking run falls back to patterns, stop saying ready.
+ */
+export function displayStatus(status: OnDeviceStatus | 'checking', run: Run | null): DisplayStatus {
+  return status === 'available' && run?.result.ok && run.result.modelReadClauses === 0 ? 'failed' : status;
+}
+
+type Masked = Extract<MaskResult, { ok: true }>;
+
+export function reviewTitle(result: Masked): string {
+  return result.modelReadClauses === 0 ? 'Masked with patterns only. Review before sending.' : 'Check the masked text before sending.';
+}
+
+export function reviewReason(result: Masked): string {
+  const read = result.modelReadClauses;
+  if (read === undefined) return 'Model coverage was not recorded for this result. Check names and other sensitive details before sending.';
+  const total = result.clauses.length;
+  if (read === 0) return "The on-device model did not return a usable read of any clause, so a name used without a title or company suffix can slip through.";
+  if (read < total) {
+    return `The on-device model read ${read} of ${total} clauses. In the others, a name used without a title or company suffix can slip through.`;
+  }
+  return 'The on-device model returned a usable read of every clause. Some names still need confirmation; check that each is masked everywhere it appears.';
+}
+
+function ModelStatus(props: { status: DisplayStatus; progress: number | null; onDownload: () => void; disabled: boolean }) {
   const { status, progress, onDownload } = props;
   if (progress !== null) {
     return (
@@ -265,14 +294,15 @@ function ModelStatus(props: { status: OnDeviceStatus | 'checking'; progress: num
   );
 }
 
-function Output(props: { run: Run | null; active: string | null; onActive: (p: string | null) => void }) {
+export function Output(props: { run: Run | null; active: string | null; onActive: (p: string | null) => void }) {
   const { run, active, onActive } = props;
 
   if (!run) {
     return (
       <div className="empty">
-        <p className="empty-title">Nothing has left this device.</p>
-        <p>Mask the contract to see exactly what the cloud model would receive. Names, amounts, dates, addresses and accounts are replaced with placeholders first.</p>
+        {/* Shown again after a document is deleted or replaced, so it can't claim nothing was ever sent. */}
+        <p className="empty-title">Nothing is sent until you approve.</p>
+        <p>Mask the contract to see exactly what the cloud model would receive. Detected names, amounts, dates, addresses and account numbers are replaced with placeholders first.</p>
       </div>
     );
   }
@@ -308,10 +338,9 @@ function Output(props: { run: Run | null; active: string | null; onActive: (p: s
         <div className="banner" data-tone="warn">
           <TriangleAlert size={18} strokeWidth={1.75} aria-hidden />
           <div>
-            <p className="banner-title">Masked with patterns only. Review before sending.</p>
+            <p className="banner-title">{reviewTitle(result)}</p>
             <p>
-              The on-device model didn't run, so a name used without a title or company suffix can slip through. Took{' '}
-              <span className="num">{Math.round(ms)} ms</span>.
+              {reviewReason(result)} Took <span className="num">{Math.round(ms)} ms</span>.
             </p>
           </div>
         </div>

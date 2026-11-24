@@ -29,7 +29,8 @@
   --danger: #b5412f; /* brick */
   --danger-soft: rgb(181 65 47 / 0.1);
 
-  --nav-bg: rgb(250 246 240 / 0.95);
+  /* Opaque: Android WebView ignores backdrop-filter, so any translucency shows the page through the bar. */
+  --nav-bg: var(--bg);
   --orb-a: rgb(217 166 107 / 0.3);
   --orb-b: rgb(111 78 55 / 0.14);
   --shadow: 0 30px 70px -34px rgb(43 29 20 / 0.35);
@@ -78,7 +79,7 @@
     --danger: #e0705c;
     --danger-soft: rgb(224 112 92 / 0.12);
 
-    --nav-bg: rgb(26 18 13 / 0.94);
+    --nav-bg: var(--bg);
     --orb-a: rgb(217 166 107 / 0.18);
     --orb-b: rgb(111 78 55 / 0.4);
     --shadow: 0 30px 80px -30px rgb(0 0 0 / 0.65);
@@ -624,7 +625,8 @@ button {
 }
 
 .status[data-state='downloadable'] .dot,
-.status[data-state='downloading'] .dot {
+.status[data-state='downloading'] .dot,
+.status[data-state='failed'] .dot {
   background: var(--warn);
 }
 
