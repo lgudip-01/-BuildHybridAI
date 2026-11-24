@@ -1551,7 +1551,7 @@ history. Main is still 65152ce; no main merge or teammate branch rewrite occurre
 
 ### Next work we can do independently, in order
 
-1. **Native source safety reconciliation (Cloud AI + Aarush) — source COMPLETE; merged SDK rerun pending.** Integrate Aarush's
+1. **Native source safety reconciliation (Cloud AI + Aarush) — source and #48 SDK rerun COMPLETE; physical-device acceptance pending.** Integrate Aarush's
    5cac809 into an isolated #40-based candidate. It fixes our earlier #35 finding:
    iOS onDevice must return a fixed message and log only the error type, because
    localizedDescription can echo raw contract text. Preserve the registered chat
@@ -1561,7 +1561,7 @@ history. Main is still 65152ce; no main merge or teammate branch rewrite occurre
    Checklist: compare both heads; preserve both implementations; no raw error
    detail in logs/rejections; policy/type checks; concrete owner handoff.
 
-2. **Carry latest accessibility/mobile UI corrections into our deployed stack.**
+2. **Carry latest accessibility/mobile UI corrections into our deployed stack — COMPLETE in #49 and Hosting; owner review pending.**
    #36 now has c10eaab (review/storage wording and reduced-motion auto scrolling),
    05ac38e (nearly opaque Android-safe top bar), and f11094e (focus transfer after
    Try it/How it works). Our #45 already contains softened wording and progress,
@@ -1574,7 +1574,7 @@ history. Main is still 65152ce; no main merge or teammate branch rewrite occurre
    https://github.com/lgudip-01/-BuildHybridAI/pull/36
    https://github.com/lgudip-01/-BuildHybridAI/commit/f11094e
 
-3. **Main-based release adoption and cloud acceptance (Cloud AI + engine owners).**
+3. **Main-based release adoption and cloud acceptance (Cloud AI + engine owners) — candidate preparation COMPLETE; owner merge and actual-main acceptance pending.**
    Prepare a reviewable exact combination of #31 and the reviewed engine/UI/chat
    stack, including the numeric fixes. Preserve main until coordinated review and
    merge. After the actual main merge, run bounded six-sample cloud checks from
@@ -1641,9 +1641,10 @@ settings changed, and no real user document was deleted during this work.
   the earlier full native integration; source is preserved for adoption.
 - [x] Publish #48 native source/harness/handoff at 77b77ef, matching tested files;
   tag Aarush for full SDK verification on the newly merged revision.
-- [ ] Full iOS Debug/Release + Android SDK builds on the merged source. Existing
-  c9acf60 owner build/simulator stop evidence remains credited, but does not
-  certify the newly merged source.
+- [x] Full iOS Debug/Release + Android SDK builds on #48/294ca23 were reported
+  by Aarush November 24. His 45 Swift + four error-boundary checks also passed.
+  This closes that changed-source build gate; physical-device/cloud acceptance
+  remains separate. Later Swift changes need their own changed-revision build.
 
 This native-only branch is stacked on #40 and carries the latest execution
 tracker from #47 for continuity; it does not replace the deployed web stack.
@@ -1656,3 +1657,184 @@ Aarush was asked for a changed-revision SDK build because this is the first
 combination of 5cac809 and #40's chat methods. The requested checks and commands
 are concrete in NATIVE_CHAT_HANDOFF.md; no new implementation is required from
 him for this source fix. Final whole-tree publication verification follows.
+
+
+## Navigation accessibility adoption — 2026-11-23
+
+- [x] Inspect both original folders, preserve local work, and refresh remote refs and
+  owner comments before editing. Isolated candidate starts from #47/cae2985.
+- [x] Carry exact scroller/Hero/HowItWorks source from #36/f11094e; apply only the
+  reviewed nav opacity and programmatic-heading focus CSS to the integrated styles.
+  Keep the #45–#47 import/manual-mask/delete/chat/numeric fixes intact.
+- [x] Reproduce the missing behavior first: 4 of 6 focus tests fail on old helper.
+  All 6 pass after the fix; all 402 web tests and the production build pass.
+- [x] Actual desktop Chrome: Enter on nav Try it focuses the Workbench heading;
+  subsequent Tab reaches Import PDF or Word. Nav How it works and hero Try it
+  also focus their destination heading. No model question was sent.
+- [x] Actual DevTools phone viewport: innerWidth and document scrollWidth both 430.
+  With reduced motion emulated before reload, actual hero/nav activation focuses
+  the Workbench/How headings. The reduced-motion query is true. Automated tests
+  separately verify immediate auto scrolling and next focus order. DevTools
+  prevents automated key input in this environment, so phone activation is through
+  Chrome's accessibility controls; the keyboard proof above is desktop only.
+- [x] Restore the test tab to normal motion, no device emulation, 1512-pixel width.
+- [x] Publish the reviewed runtime candidate at 3899456 to a branch stacked on
+  #47; fetched web source exactly matches the tested files. #49 tags Sai/Aarush
+  for review of the carried #36 corrections. Whole-tree comparison is the final
+  publication gate after this tracker upload.
+- [x] Fresh Cloud Console check: this project has no linked billing account.
+  Official Firebase Spark pricing still requires no payment method. Hosting-only
+  deployment completed; hosted script index-_zRnRsvX.js matches the production
+  build. Real hosted Enter activation passes for nav Try it/How and hero Try it;
+  subsequent Tab reaches Import PDF or Word. No question/model call was sent.
+
+This web branch includes the native tracker for continuity, not #48's native
+source changes. Native SDK rerun and physical-device acceptance remain separate.
+Next independent roadmap step: prepare the exact main-based release candidate
+for coordinated adoption and the subsequent bounded six-sample cloud acceptance.
+
+Navigation adoption review: https://github.com/lgudip-01/-BuildHybridAI/pull/49 .
+Verified deployment: https://clause-guard-hackathon.web.app .
+Spark pricing checked 2026-11-24: https://firebase.google.com/pricing .
+The initial deployment command failed locally because the prior temporary CLI
+installation had missing dependencies. Restored the same official firebase-tools
+15.37.0 from the local npm cache and completed the deployment; no paid service,
+payment information or billing account was created or linked.
+
+
+## Main-targeted web release candidate — November 24, 2026
+
+- [x] Refresh main/owner refs and discussions; main remains 65152ce.
+- [x] Prove #49 already contains main and #31; preserve the tested runtime tree
+  instead of replacing corrected engine/import/Workbench files with older heads.
+- [x] Create isolated codex/main-release-candidate-20261124 from 8d28c4e.
+- [x] 402 web + 179 engine tests, all three workspace typechecks, nine isolated
+  Firebase checks and production build pass. Entry script exactly matches the
+  existing deployed build. No fresh live/browser/model check is claimed here.
+- [x] Document source provenance, retained fixes, exact checks and owner adoption
+  order in RELEASE_CANDIDATE_20261124.md. No native runtime source is included.
+- [x] Publish the main-targeted candidate as draft #50, base main. Fetched
+  403c8f3 matches the complete checked local tree; Likhil and Sai are tagged for
+  coordinated source/navigation adoption review. The final tracker-only upload
+  is verified again before finishing.
+- [ ] Coordinated owner review/merge. No agent merge of main.
+- [ ] Actual merged-main six-sample cloud acceptance and Hosting verification,
+  after refreshed no-cost/billing/App Check prerequisites. Historical branch
+  evidence does not satisfy this gate.
+
+The independent preparation step is complete and published. Subsequent main
+acceptance depends on coordinated source adoption. No action is needed from the
+user for candidate preparation. Native #48 SDK/physical-device and extension
+scaffold dependencies remain tracked separately.
+
+Consolidated main adoption PR: https://github.com/lgudip-01/-BuildHybridAI/pull/50 .
+This is a reviewable web candidate, not a main merge or mobile release. The
+complete earlier stacked history is preserved; no local/remote ref was reset.
+
+
+## Release documentation alignment — November 24, 2026
+
+- [x] Refresh #50/#48/owner discussions and main: no new review/merge; actual-main
+  cloud acceptance remains gated. Local full Xcode/Android SDK are still absent.
+- [x] Independently inspect README, HACKATHON, Firebase setup, current entry paths
+  and existing release evidence without additional inference/deployment.
+- [x] Correct README privacy absolutes, native/extension availability, Remote
+  Config status and missing hosted demo instructions. Link the exact candidate.
+- [x] Replace the November 17 implementation table that called analyze a stub,
+  App Check absent and Hosting unstarted; retain unverified submission gates.
+- [x] Recheck the official deadline; retain the older rules summary as historical
+  rather than claiming a complete new eligibility/legal review.
+- [x] Make setup preserve existing env files and require fresh no-cost/billing
+  verification before model calls; do not encourage unnecessary inference reruns.
+- [x] Check all 17 local Markdown link destinations; compare claims with current
+  source, official deadline and recorded evidence. All four changed files are
+  Markdown only; no runtime tests need repeating for this documentation change.
+- [x] Publish the reviewed docs as ready-for-review #51, stacked on #50.
+  Fetched a55c0f0 exactly matches the reviewed local tree; final tracker-only
+  publication is checked again before finishing.
+
+This is independent documentation work while main adoption awaits owner review.
+No runtime, dependency, environment, deployment or cloud/security setting change.
+Next gated Cloud AI task remains the six-sample run on actual merged main.
+
+Documentation review: https://github.com/lgudip-01/-BuildHybridAI/pull/51 .
+Project owner tagged for coordinated adoption. No duplicate owner request or
+new cloud run is needed; #50 main merge and #48 SDK/device gates remain pending.
+
+
+## Formal release review handoff — November 24, 2026
+
+- [x] Refresh main, #48/#49/#50/#51 and owner comments: no new review or merge.
+- [x] Compare the unchanged #50 tree with its tested local candidate; existing
+  402 web/179 engine, nine Firebase, typecheck/build evidence still applies.
+  No repeated model run or test matrix is justified by a metadata-only handoff.
+- [x] Mark #50 ready for review after its candidate checks passed. This changes
+  review status only; no source, branch protection, permissions or main merge.
+- [x] GitHub confirms formal reviewer requests to lgudip-01 for engine/cloud and
+  saikamsani30 for UI/navigation. Earlier tags alone were not formal requests.
+- [x] Correct #50 description and candidate notes: owner review/merge remains
+  pending, but the source candidate no longer needs to be held as draft.
+- [x] Publish updated notes in #51; fetched 0dea7e4 matches the full local
+  documentation tree. Only Markdown differs from #50; the final tracker-only
+  checkpoint is compared again before finishing.
+
+The GitHub connector still rejects write access, so the authorized signed-in
+GitHub page completed the handoff. No security access was broadened to fix it.
+The next functional gate is owner review/coordinated merge, followed by exact-main
+six-sample cloud/content/restoration acceptance after fresh no-cost and App Check
+checks. Native #48 combined SDK and physical-device gates remain separate.
+No user action is required for this handoff. No inference/deployment or charges.
+
+
+## Independent native analysis parity — November 24, 2026
+
+- [x] Identify useful source work while #50 review/main acceptance is pending.
+- [x] Compare #48 adapter with #50 shared policy and preserve both source trees.
+- [x] Reproduce six missing bounded-policy/provenance checks on the old adapter.
+- [x] Correct the isolated adapter without wiring NativeBridge or enabling chat.
+- [x] 25 targeted checks, full 427 web tests, all three workspace typechecks and
+  production build pass; genuine engine authority/remask behavior is exercised.
+- [x] All 63 production output files remain byte-identical to #50's build.
+- [x] Record precise source provenance, adoption order and runtime/SDK limits in
+  apps/web/NATIVE_ANALYSIS_PARITY_20261124.md. No engine or native SDK source changed.
+- [x] Publish source/tests/handoff as ready-for-review #52 and formally request
+  Aarush review. Fetched ee68e8d matches the four tested source/handoff files.
+  Final whole-tree publication verification follows this tracker upload.
+
+Next independent source task: tighten/review the iOS native analysis execution-
+source confirmation against the already stricter native chat policy. This can
+be prepared with local source/fixtures while owner SDK/physical-device gates
+remain pending. Native release stays disabled; #50 review and actual-main cloud
+acceptance are not advanced by mocked native responses. No charges/model calls.
+
+Native adapter review: https://github.com/lgudip-01/-BuildHybridAI/pull/52 .
+No native release or additional SDK/model run is claimed by this source candidate.
+
+
+## Aarush review/build reconciliation and iOS source guard — November 24
+
+- [x] Verify Aarush's formal #52 approval and reported 606 tests/typecheck/build.
+  Credit his empty/whitespace-reply check; its wording nit is nonblocking.
+- [x] Credit #48/294ca23 iOS Debug/Release, Android debug APK/release compile,
+  45 Swift policy and four error-boundary checks. Existing WebView stop and
+  local Kotlin policy results remain credited; no unchanged rerun requested.
+- [x] Reproduce iOS analysis accepting blank/unknown cloud model versions.
+- [x] Tighten analysis source confirmation and strict end-of-input matching;
+  retain fixed model, providers, native chat stop and both platform histories.
+- [x] 24 actual-source-guard checks and 47 Swift policy checks pass; old source
+  and old matcher negative controls fail. Contract parity and Swift parse pass.
+- [x] Document exact source/build evidence and the remaining iOS-only SDK check
+  in apps/mobile/plugins/clause-guard-ai/NATIVE_CHAT_HANDOFF.md.
+- [x] Publish the source/test/handoff follow-up as #53, stacked on #48, and
+  formally request Aarush review of the changed iOS revision. Fetched 813d413
+  matches all six native source/test/handoff files; final whole-tree verification
+  follows this tracker upload.
+
+The next native build gate targets this new Swift source, not the completed
+#48 baseline. Android is unchanged. Physical devices, runtime attestation, native
+cloud answers and approved private config delivery remain open. No main merge,
+provider call, deployment, payment, billing or security setting change occurred.
+
+New iOS source-confirmation review: https://github.com/lgudip-01/-BuildHybridAI/pull/53 .
+Aarush’s #48 builds and #52 approval remain credited; no extra Android build or
+unchanged release-stop check is requested. Full native release remains gated.

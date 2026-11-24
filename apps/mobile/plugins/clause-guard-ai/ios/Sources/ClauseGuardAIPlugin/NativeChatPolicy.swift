@@ -86,6 +86,6 @@ enum NativeChatPolicy {
     /// The SDK's cloud modelVersion must identify the requested Gemini model.
     /// Empty, on-device and unrelated values are not cloud confirmation.
     static func confirmsCloud(_ version: String) -> Bool {
-        version == model || version.range(of: "^" + NSRegularExpression.escapedPattern(for: model) + "-[0-9]{3}$", options: .regularExpression) != nil
+        version == model || version.range(of: "^" + NSRegularExpression.escapedPattern(for: model) + "-[0-9]{3}\\z", options: .regularExpression) != nil
     }
 }

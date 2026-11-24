@@ -19,7 +19,7 @@ final class ClauseGuardAppCheckFactory: NSObject, AppCheckProviderFactory {
 }
 
 enum AnalysisSupport {
-    static let deviceModelVersion = "apple-foundation-models-system-language-model"
+    static let deviceModelVersion = NativeAnalysisSource.deviceModelVersion
 
     /// Sets up App Check, then Firebase. Returns false when GoogleService-Info.plist is missing: Firebase's
     /// configure() would crash without it, so cloud analysis stays unavailable instead.
@@ -80,8 +80,8 @@ enum AnalysisSupport {
         }
         let response = try await session.respond(to: prompt)
         // Do not trust the request: confirm which model really answered.
-        let answeredByDevice = response.rawResponse.modelVersion == deviceModelVersion
-        guard answeredByDevice == (source == "device") else { throw AnalysisError.wrongSource }
+        guard NativeAnalysisSource.confirms(source: source, model: model, version: response.rawResponse.modelVersion)
+        else { throw AnalysisError.wrongSource }
         return response.content
     }
 }
