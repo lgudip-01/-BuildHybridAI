@@ -1,5 +1,6 @@
 {
   "appId": "app.clauseguard",
   "appName": "Clause Guard",
-  "webDir": "../web/dist"
+  "webDir": "../web/dist",
+  "loggingBehavior": "none"
 }
