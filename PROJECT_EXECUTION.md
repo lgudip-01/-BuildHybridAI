@@ -1574,7 +1574,7 @@ history. Main is still 65152ce; no main merge or teammate branch rewrite occurre
    https://github.com/lgudip-01/-BuildHybridAI/pull/36
    https://github.com/lgudip-01/-BuildHybridAI/commit/f11094e
 
-3. **Main-based release adoption and cloud acceptance (Cloud AI + engine owners).**
+3. **Main-based release adoption and cloud acceptance (Cloud AI + engine owners) — candidate preparation COMPLETE; owner merge and actual-main acceptance pending.**
    Prepare a reviewable exact combination of #31 and the reviewed engine/UI/chat
    stack, including the numeric fixes. Preserve main until coordinated review and
    merge. After the actual main merge, run bounded six-sample cloud checks from
@@ -1699,3 +1699,26 @@ The initial deployment command failed locally because the prior temporary CLI
 installation had missing dependencies. Restored the same official firebase-tools
 15.37.0 from the local npm cache and completed the deployment; no paid service,
 payment information or billing account was created or linked.
+
+
+## Main-targeted web release candidate — November 24, 2026
+
+- [x] Refresh main/owner refs and discussions; main remains 65152ce.
+- [x] Prove #49 already contains main and #31; preserve the tested runtime tree
+  instead of replacing corrected engine/import/Workbench files with older heads.
+- [x] Create isolated codex/main-release-candidate-20261124 from 8d28c4e.
+- [x] 402 web + 179 engine tests, all three workspace typechecks, nine isolated
+  Firebase checks and production build pass. Entry script exactly matches the
+  existing deployed build. No fresh live/browser/model check is claimed here.
+- [x] Document source provenance, retained fixes, exact checks and owner adoption
+  order in RELEASE_CANDIDATE_20261124.md. No native runtime source is included.
+- [ ] Publish the main-targeted candidate and verify the complete fetched tree.
+- [ ] Coordinated owner review/merge. No agent merge of main.
+- [ ] Actual merged-main six-sample cloud acceptance and Hosting verification,
+  after refreshed no-cost/billing/App Check prerequisites. Historical branch
+  evidence does not satisfy this gate.
+
+The independent preparation step is complete locally; publication is its final
+gate. Subsequent main acceptance depends on coordinated source adoption, not on
+another implementation request to the user. Native #48 SDK/physical-device and
+extension scaffold dependencies remain tracked separately.
