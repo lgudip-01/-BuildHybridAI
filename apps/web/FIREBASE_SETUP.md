@@ -1,20 +1,39 @@
 # Firebase web setup
 
-This setup supports tonight's browser integration. The web app still calls
-`initAI()`; that function now initializes App Check before Firebase AI Logic.
+The web app calls `initAI()`, which initializes App Check before Firebase AI Logic.
+Visitors to the [hosted demo](https://clause-guard-hackathon.web.app) do not need
+these developer setup steps or a debug token. The combined source candidate is
+[PR #50](https://github.com/lgudip-01/-BuildHybridAI/pull/50); default main is behind
+the hosted release until coordinated adoption.
+
 Native Android/iOS setup remains in the native plugins. The extension document
 can reuse this initializer, but extension App Check has not been tested yet.
+
+## 0. Confirm no-cost prerequisites
+
+Before cloud inference, deployment or provider/API activation, verify current
+pricing and the actual project's billing state. Our existing project is
+`clause-guard-hackathon`; its no-linked-billing state was observed November 24,
+not guaranteed indefinitely. Use only verified no-cost options requiring no
+payment method or billing account. Never link billing, upgrade, start a trial,
+request billable quota or enable overages. Stop at the no-cost limit.
+
+[Firebase pricing](https://firebase.google.com/pricing) and
+[Cloud Billing for the existing project](https://console.cloud.google.com/billing/linkedaccount?project=clause-guard-hackathon)
+are reference checks, not instructions to activate or purchase anything. Ask the
+project owner for existing configuration/access when necessary; do not create
+another account or accept legal agreements on their behalf.
 
 ## 1. Configure your local copy
 
 Use Node 24 LTS. From the repository root:
 
 ```sh
-npm ci
-cp apps/web/.env.example apps/web/.env.local
+npm ci --ignore-scripts --no-audit --no-fund
 ```
 
-If `.env.local` already exists, keep it; do not overwrite your existing values.
+If `.env.local` already exists, keep it. Only when it is absent, copy
+`apps/web/.env.example` to `apps/web/.env.local`; never overwrite existing values.
 Fill in the three Firebase fields from Firebase Console → Project settings →
 Your apps → the registered web app. These are Firebase web configuration values,
 not a Gemini Developer API key. Never put a service-account key or Gemini key
@@ -68,8 +87,8 @@ Expected: `CLOUD_TEST_PASSED`, `appCheck: 'verified'`, and `ranOn: 'cloud'`.
 The fixture already uses `[PARTY_A]` and `[PARTY_B]`. The test uses
 `ONLY_IN_CLOUD`, verifies the SDK's actual inference source, and validates the
 JSON and placeholder allowlist. Its 30-second request timeout prevents an
-unbounded generation wait. It uses `gemini-3.5-flash-lite`, which passed the
-manual connectivity test; this is not a decision about the final analysis model.
+unbounded generation wait. It uses `gemini-3.5-flash-lite`, the current fixed
+analysis/chat model. Historical connectivity success does not verify current pricing, quota or answer quality.
 
 Negative check:
 
@@ -84,8 +103,9 @@ and an error identifying App Check; a generic authorization error is inconclusiv
 This test does not change Firebase settings or revoke a real token.
 
 The positive check and an App Check-specific 401 negative check passed manually
-on Dhruv's development browser before integration. Repeat them on your own
-browser after registering its token. Automated checks use isolated SDK mocks;
+on Dhruv's development browser before integration. Run live checks only when a
+connectivity/enforcement check is needed and the current no-cost prerequisites above pass; do not repeat historical inference
+just to reproduce a green result. Automated checks use isolated SDK mocks;
 they do not replace these live checks.
 
 ## 4. Automated checks
@@ -106,10 +126,12 @@ and sanitized verification errors. No credentials or network are required.
 
 Set `VITE_RECAPTCHA_ENTERPRISE_SITE_KEY` to the website key for the registered
 Enterprise provider and configure its allowed hosting domains. Hosted builds
-require this key and reject a pre-set App Check debug flag. Production App Check
-and hosting still require a real deployment test; a successful build alone does
-not verify attestation. Do not deploy a development server or share debug tokens
-with end users.
+require this key and reject a pre-set App Check debug flag. The current hosted
+web release has bounded production App Check/cloud-flow
+evidence in [WEB_CONTROLS_INTEGRATION_20261123.md](WEB_CONTROLS_INTEGRATION_20261123.md).
+For a changed origin, project or configuration, verify the actual deployed
+attestation again; a successful build alone does not verify it. Do not deploy a
+development server or share debug tokens with end users.
 
 ## Privacy boundary
 
@@ -120,3 +142,12 @@ setup traffic may contact servers; they are not cloud contract analysis.
 An outgoing-request audit of the complete app is still pending. Do not claim
 that a successful masking UI or App Check test proves no contract data left
 the browser.
+
+## 6. Main adoption and deployment
+
+Use [the candidate checklist](../../RELEASE_CANDIDATE_20261124.md) for exact-main
+acceptance and Hosting order. Owner review/merge of #50 is pending. Do not run
+the six-sample matrix against another branch and label it main acceptance.
+Never deploy a development server, local diagnostic page or debug configuration.
+Native configuration and App Attest/Play Integrity acceptance remain separate;
+web provider success does not certify a phone or extension.
