@@ -1,93 +1,100 @@
 # Clause Guard
 
-> Working name. Built for the **#BuildHybridAI 2026** hackathon (Firebase AI Logic).
+Built for **#BuildHybridAI 2026** with Firebase AI Logic.
 
-**Read the fine print before you sign it, and keep the contract private.**
+Clause Guard helps freelancers and small businesses review contracts. It flags
+risks, explains clauses and suggests questions. Detected identifiers are replaced
+on your device, then you inspect the masked preview before approving a cloud
+request. Masking can miss sensitive text; check and manually mask anything missed.
+Results are preliminary assistance and require human review.
 
-Clause Guard reviews contracts before you sign them, on the web, in Chrome, and on Android and iOS. It flags risky clauses, explains them in plain English, suggests edits, and lists questions to ask the other side.
+## Try the web demo
 
-The contract's sensitive details never leave your device. Names, amounts, and dates are masked by the AI model built into your browser or phone. Only the masked text goes to Gemini in the cloud for legal analysis, and the real details are swapped back in on your device.
+Open [Clause Guard](https://clause-guard-hackathon.web.app) in desktop Chrome.
+The hosted app has its own Firebase setup; visitors do not need Console access,
+project configuration or a debug token. Local-model availability depends on the
+browser/device, and cloud requests depend on the project's no-cost quota.
 
-**Who it's for:** founders, freelancers, and small businesses reviewing NDAs and service agreements without a lawyer.
+1. Select **Try it** and use the included fictional contract, or import one of
+   the public [PDF/DOCX fixtures](samples/documents/). Use fictional text for demos.
+2. If the app offers **Download**, select it to download the local model. If the
+   model is unavailable, pattern masking can still prepare a preview; inspect
+   the warning and every clause carefully.
+3. Select **Mask contract**, inspect the exact outgoing text, and use the manual
+   controls to mask missed details. Local reveal does not change outgoing text;
+   undoing a manual mask does change it and requires new approval.
+4. Explicitly approve the inspected document for analysis or chat. Each chat
+   question has its own masking, preview and approval step before sending.
+5. Inspect restored results and source links. A device result is labeled a
+   preliminary scan. Failed or unverified results remain unavailable/needs review.
+   Suggested replacement wording can be withheld for review.
 
-**Why hybrid:** the on-device model keeps the contract private. The cloud model has the reasoning power the on-device model lacks.
+Editing, remasking, manual revisions or document deletion invalidate prior chat
+approval. **Delete this document** asks for confirmation and clears that
+application document's local saved values and review/chat state. It does not
+remove an original file from your computer or erase provider-side records.
+If quota is exhausted, stop; never upgrade or add billing to continue a demo.
+See [known limitations and release evidence](apps/web/DEMO_READINESS.md).
 
----
+## Release status — November 24, 2026
 
-## Platforms
+The live web app uses the tested #49 stack. [PR #50](https://github.com/lgudip-01/-BuildHybridAI/pull/50)
+consolidates that source for owner review against main; main remains `65152ce`.
+The live deployment is ahead of main. Do not describe historical branch checks
+as the pending six-sample acceptance run on actual merged main.
 
-| Platform | App | On-device model | Cloud model |
-| --- | --- | --- | --- |
-| **Web** (Chrome desktop) | Web app and Chrome extension (side panel) | Gemini Nano 4 | Gemini |
-| **Android** | Mobile app | Gemini Nano 4 | Gemini |
-| **iOS** | Mobile app | Apple Foundation Models | Gemini |
-
-All three run their AI through **Firebase AI Logic**. They share one React interface and one privacy engine. Only a thin AI bridge is written separately for each platform.
-
-**No on-device model?** (an older phone, or a browser without one) Clause Guard still masks with pattern matching. It then shows you the masked text to approve before anything is sent, and it never sends the raw contract.
-
----
-
-## How it works
-
-| Step | What happens | Where |
+| Surface | Verified state | Remaining gate |
 | --- | --- | --- |
-| 1. Load | Upload a PDF or DOCX, capture the contract from a web page (extension), or share a file into the app (mobile) | On device |
-| 2. Split | Break the contract into clauses (plain code) | On device |
-| 3. Classify | Label each clause type (payment, termination, IP, and so on) | On device |
-| 4. Mask | Replace sensitive details with placeholders like `[PARTY_A]` and `[AMOUNT_1]`, using pattern matching plus the on-device model | On device |
-| 5. Leak check | Scan the masked text a second time and block the send if anything slipped through | On device |
-| 6. Analyze | Gemini returns a risk level, explanation, suggested edit, and questions to ask for each clause | Cloud (on device when offline) |
-| 7. Unmask | Put the real details back and show a risk heatmap and clause cards | On device |
+| Web, desktop Chrome | Hosted document flow and masked cloud chat exercised; imports, manual controls, edit invalidation and source links verified on fictional cases | Coordinated main adoption and exact-main six-sample cloud/content acceptance |
+| Android | Separate native candidate has SDK build/emulator release-stop evidence for c9acf60 | Combined #48 SDK rerun, real device, Play Integrity and cloud acceptance |
+| iOS | Separate native candidate has SDK build/simulator release-stop evidence for c9acf60 | Combined #48 SDK rerun, real device, App Attest and cloud acceptance |
+| Chrome extension | Planned side panel; no initial Manifest V3 scaffold in refreshed main | Scaffold, origin/App Check and integrated runtime acceptance |
 
----
+The shared UI targets phone layouts; responsive browser checks do not establish
+native phone acceptance. Native chat remains disabled. See the
+[release adoption checklist](RELEASE_CANDIDATE_20261124.md) and
+[project execution record](PROJECT_EXECUTION.md).
 
-## Security and privacy
+## How Firebase AI Logic is used
 
-Security is the core of the product, not an add-on.
+| Job | Request mode / behavior |
+| --- | --- |
+| Raw contract and question entity extraction | `ONLY_ON_DEVICE`; pattern matching remains local |
+| Approved masked clause analysis | `PREFER_IN_CLOUD` when fallback is enabled, then pin the confirmed source for the batch; strict result validation |
+| Approved masked web chat | `ONLY_IN_CLOUD`, bounded masked history, one-use engine approval and source/citation checks |
 
-- **Masked before it leaves.** Names, organizations, amounts, dates, emails, and account numbers are replaced on your device before any cloud call.
-- **The raw contract can't reach the cloud by accident.** Raw text only goes to on-device-only calls (`ONLY_ON_DEVICE`). It never uses a mode that can quietly fall back to the cloud.
-- **Fail closed.** If the leak check finds anything unmasked, the request is blocked rather than sent.
-- **The real values stay local.** The map from placeholders back to real values is encrypted and stored only on your device. It is never uploaded.
-- **Locked-down cloud access.** Firebase App Check makes sure only our real apps can call the cloud model. It uses reCAPTCHA Enterprise on web, Play Integrity on Android, and App Attest on iOS. The Gemini API key never ships in the app.
-- **Privacy ledger.** The app shows exactly what was masked and what was sent, so you can check it yourself.
-- **Offline mode.** With no connection, the on-device model flags red-flag clauses and nothing is sent anywhere.
+Cloud analysis uses `gemini-3.5-flash-lite` in the verified release. Web Remote
+Config is implemented with validated fixed model/output policy, safe defaults
+and independent kill switches. It is not an arbitrary model selector. Each
+request consumes the available no-cost quota; no automatic model switch or
+application-level retry is enabled.
 
-## Where Firebase AI fits
+Firebase App Check is initialized before AI Logic. Production web uses the
+registered reCAPTCHA Enterprise provider; local development uses a separately
+registered debug token. Native App Attest/Play Integrity runtime acceptance and
+extension-origin checks remain separate. App Check reduces unauthorized use;
+it does not guarantee that every caller or submitted text is safe.
 
-Firebase AI Logic's hybrid inference runs every AI call, with a mode chosen for each job:
-
-| Job | Mode | Why |
-| --- | --- | --- |
-| Find names and organizations, classify clauses | `ONLY_ON_DEVICE` | It sees the raw contract, so it must never go to the cloud |
-| Risk analysis | `PREFER_IN_CLOUD` | The text is already masked. Online it gets Gemini's reasoning, and offline it falls back to the on-device model |
-
-The cloud answer follows a JSON schema, so every clause comes back in the same shape: `{ risk, explanation, redline, questions }`. **App Check** protects every call, and **Firebase Hosting** serves the web app. **Remote Config** (planned) holds the prompts and model names, so they can be tuned without shipping a new app.
-
----
+The restoration map is encrypted in local storage and excluded from the cloud
+request. Request paths project approved masked text rather than raw UI values.
+A leak check blocks detected surviving values; it cannot prove perfect masking.
+App Check exchanges, downloads and other setup traffic may contact servers.
+Existing payload observations cover specified fictional tests, not every network
+endpoint or all possible documents. Offline analysis requires an available local
+model and is preliminary; offline chat and offline cold loading are not claimed.
 
 ## Tech stack
 
-| Area | Tools |
-| --- | --- |
-| Language | TypeScript (shared code), Kotlin (Android bridge), Swift (iOS bridge) |
-| Interface | React and Vite, one UI for the web app, the extension side panel, and both mobile apps |
-| Extension | Chrome extension (Manifest V3, side panel) |
-| Mobile | Capacitor, which wraps the shared React app as an Android app and an iOS app |
-| AI | Firebase AI Logic SDKs for Web, Android, and iOS (hybrid inference) |
-| On-device models | Gemini Nano 4 (Chrome and Android), Apple Foundation Models (iOS) |
-| Cloud model | Gemini (Gemini Developer API) |
-| Security | Firebase App Check, on-device masking and leak check, Web Crypto encryption |
-| Documents | pdf.js (PDF), mammoth.js (DOCX) |
-| Local storage | IndexedDB |
-| Hosting and config | Firebase Hosting, Firebase Remote Config |
+React/Vite and TypeScript share the web interface and privacy engine. Firebase
+AI Logic, App Check, Remote Config and Hosting provide the web AI boundary and
+deployment. IndexedDB/Web Crypto store the local restoration map; pdf.js and
+mammoth read PDF/DOCX locally. Separate Capacitor Swift/Kotlin bridges target
+Apple Foundation Models and Gemini Nano through Firebase AI Logic; their release
+gates are listed above.
 
----
+## Team roles
 
-## Team roles (tentative)
-
-Each role has a one-page overview in [`roles/`](roles/). Read them and pick one.
+Role overviews are in [`roles/`](roles/). Reviewer and backup assignments remain TBD.
 
 | Role | Name | Reviewer and backup | Owns |
 | --- | --- | --- | --- |
@@ -99,38 +106,49 @@ Each role has a one-page overview in [`roles/`](roles/). Read them and pick one.
 
 ---
 
-## Run it locally
+## Run locally
 
-You need Node.js 22 or later, and desktop Chrome on a device that can run Gemini Nano (check `chrome://on-device-internals`).
+Use Node 24 LTS and desktop Chrome. Start from the branch being verified; see
+[PR #50](https://github.com/lgudip-01/-BuildHybridAI/pull/50) for the combined
+candidate instead of assuming the default main branch matches Hosting.
 
-1. Install the dependencies from the repo root:
-   ```bash
-   npm install
-   ```
-2. Copy `apps/web/.env.example` to `apps/web/.env.local`, and fill it in from the Firebase console under **Project settings > Your apps > Web app**.
-3. Start the web app:
-   ```bash
-   npm run dev -w @clause-guard/web
-   ```
-4. Open `http://localhost:5173` in Chrome, click **Download model** the first time, then paste a contract and click **Mask**.
-
-To run the privacy engine's tests:
-
-```bash
-npm test
+```sh
+npm ci --ignore-scripts --no-audit --no-fund
 ```
 
-## Status
+Follow [Firebase web setup](apps/web/FIREBASE_SETUP.md) for the existing no-billing
+project, private local configuration and App Check debug registration. Keep any
+existing environment files. Never put a Gemini/service-account key or App Check
+debug secret into source or a `VITE_*` variable.
 
-In development. Submission due **Nov 30, 2026 at 2 PM PT**. See [HACKATHON.md](HACKATHON.md) for the rules and where each requirement stands.
+```sh
+npm run dev --workspace @clause-guard/web
+```
 
-For local web setup, App Check registration, and synthetic cloud checks, see
-[Firebase web setup](apps/web/FIREBASE_SETUP.md).
+Open the localhost URL Vite prints, and leave that terminal running. Fresh tests
+need no live Firebase project:
 
-## License
+```sh
+npm exec --workspace @clause-guard/web -- vitest run
+npm test --workspace @clause-guard/privacy-engine
+npm run typecheck --workspaces --if-present
+npm run test:firebase --workspace @clause-guard/web
+```
 
-[MIT](LICENSE)
+## Zero-cost operation
 
-## Disclaimer
+This project must use verified no-cost options requiring no payment method or
+billing account. Never link billing, start a trial, enable paid overages, request
+a billable quota account or upgrade when a limit is reached. Verify current
+pricing and the actual project billing state before deployment or cloud calls;
+stop if uncertain. Setup instructions do not authorize payment or acceptance of
+legal agreements on another person's behalf.
 
-Clause Guard helps you understand a contract. It is not legal advice and does not replace a lawyer.
+## Submission and license
+
+The official [hackathon rules](https://firebasehybridaihackathon.devpost.com/rules)
+list the submission deadline as **November 30, 2026, 2 PM Pacific / 5 PM Eastern**
+(deadline rechecked November 24). [HACKATHON.md](HACKATHON.md) separates current
+implementation evidence from outstanding video, submission and platform checks.
+
+[MIT](LICENSE). Clause Guard is not legal advice and does not replace a lawyer.

@@ -1729,3 +1729,27 @@ scaffold dependencies remain tracked separately.
 Consolidated main adoption PR: https://github.com/lgudip-01/-BuildHybridAI/pull/50 .
 This is a reviewable web candidate, not a main merge or mobile release. The
 complete earlier stacked history is preserved; no local/remote ref was reset.
+
+
+## Release documentation alignment — November 24, 2026
+
+- [x] Refresh #50/#48/owner discussions and main: no new review/merge; actual-main
+  cloud acceptance remains gated. Local full Xcode/Android SDK are still absent.
+- [x] Independently inspect README, HACKATHON, Firebase setup, current entry paths
+  and existing release evidence without additional inference/deployment.
+- [x] Correct README privacy absolutes, native/extension availability, Remote
+  Config status and missing hosted demo instructions. Link the exact candidate.
+- [x] Replace the November 17 implementation table that called analyze a stub,
+  App Check absent and Hosting unstarted; retain unverified submission gates.
+- [x] Recheck the official deadline; retain the older rules summary as historical
+  rather than claiming a complete new eligibility/legal review.
+- [x] Make setup preserve existing env files and require fresh no-cost/billing
+  verification before model calls; do not encourage unnecessary inference reruns.
+- [x] Check all 17 local Markdown link destinations; compare claims with current
+  source, official deadline and recorded evidence. All four changed files are
+  Markdown only; no runtime tests need repeating for this documentation change.
+- [ ] Publish the reviewed docs and verify the entire fetched tree.
+
+This is independent documentation work while main adoption awaits owner review.
+No runtime, dependency, environment, deployment or cloud/security setting change.
+Next gated Cloud AI task remains the six-sample run on actual merged main.
