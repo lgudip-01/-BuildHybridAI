@@ -1838,3 +1838,31 @@ provider call, deployment, payment, billing or security setting change occurred.
 New iOS source-confirmation review: https://github.com/lgudip-01/-BuildHybridAI/pull/53 .
 Aarush’s #48 builds and #52 approval remain credited; no extra Android build or
 unchanged release-stop check is requested. Full native release remains gated.
+
+
+## iOS config bundling — November 24, 2026
+
+- [x] Verify Aarush's #53 approval, 47/24/4 checks, and Debug/Release SDK builds.
+  That Swift build gate is now complete; actual source/device/cloud proof is open.
+- [x] Inspect #35/0ec857d and carry its exact Xcode project change into an isolated
+  #53-based branch; preserve author/provenance and all existing worktrees.
+- [x] Execute the actual build-phase script in a synthetic build tree: eight
+  config copy/missing/stale/path/failure/privacy checks pass; old project fails.
+- [x] Validate project syntax and verify config identifiers locally without
+  printing values. No real config is copied into source or published.
+- [x] Record Dhruv's confirmation that he sent both files privately; receipt
+  remains unconfirmed. No email action was taken.
+- [x] Inspect new #54 phone UI/model-status work; preserve it for separate shared
+  core/UI review after this packaging step. Do not overwrite it with native code.
+- [x] Publish source/test/handoff as ready-for-review #55, stacked on #53, and
+  formally request Aarush review. Fetched f052e32 matches all three native files;
+  the complete-tree verification follows this final tracker upload.
+
+Next packaging gate: Aarush confirms receipt and checks a configured iOS build
+product on the combined revision. No cloud requests until current no-cost/App
+Check checks pass. Next independent source review: #54's model-read provenance,
+shared optional field and status/bar changes. #50 owner merge and actual-main
+cloud acceptance, real phones and native attestation remain separate.
+
+Bundling review: https://github.com/lgudip-01/-BuildHybridAI/pull/55 .
+No main merge or configured SDK build is claimed by publication.
