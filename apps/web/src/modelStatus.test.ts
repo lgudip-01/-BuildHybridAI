@@ -56,6 +56,7 @@ describe('review banner', () => {
 
   it('explains unconfirmed names when the model read every clause', () => {
     expect(reviewReason(masked(3))).not.toMatch(/didn't run/);
-    expect(reviewReason(masked(3))).toMatch(/found names the patterns couldn’t confirm/);
+    expect(reviewReason(masked(3))).toMatch(/usable read of every clause/);
+    expect(reviewReason(masked(3))).toMatch(/names still need confirmation/);
   });
 });

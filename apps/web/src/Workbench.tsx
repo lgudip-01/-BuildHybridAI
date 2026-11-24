@@ -266,7 +266,7 @@ export function reviewReason(result: Masked): string {
   if (read < total) {
     return `The on-device model read ${read} of ${total} clauses. In the others, a name used without a title or company suffix can slip through.`;
   }
-  return 'The on-device model found names the patterns couldn’t confirm. Check that each one is masked everywhere it appears.';
+  return 'The on-device model returned a usable read of every clause. Some names still need confirmation; check that each is masked everywhere it appears.';
 }
 
 function ModelStatus(props: { status: DisplayStatus; progress: number | null; onDownload: () => void; disabled: boolean }) {
