@@ -24,7 +24,7 @@ for fixture in cases {
     guard accepted == expected else { fatalError("Native policy mismatch: \(fixture["name"]!)") }
     passed += 1
 }
-for (version, expected) in [(NativeChatPolicy.model, true), (NativeChatPolicy.model + "-001", true), ("", false), ("apple-foundation-models-system-language-model", false), ("unknown-cloud", false), (NativeChatPolicy.model + "-device", false)] {
+for (version, expected) in [(NativeChatPolicy.model, true), (NativeChatPolicy.model + "-001", true), ("", false), ("apple-foundation-models-system-language-model", false), ("unknown-cloud", false), (NativeChatPolicy.model + "-device", false), (NativeChatPolicy.model + "-001\n", false), (NativeChatPolicy.model + "-001\r", false)] {
     guard NativeChatPolicy.confirmsCloud(version) == expected else { fatalError("Unexpected model source acceptance") }
     passed += 1
 }
