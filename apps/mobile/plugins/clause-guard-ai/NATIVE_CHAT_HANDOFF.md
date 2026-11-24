@@ -6,6 +6,74 @@ preserving analysis, on-device execution, App Check, vault, chat methods and
 policies. The functional shared web/engine/UI stack is published separately
 through #47; this native-only candidate does not replace that release.
 
+## November 24 source-confirmation follow-up
+
+Aarush completed the #48/294ca23 SDK rerun: 45 Swift policy checks, four iOS
+error-boundary checks, iOS Debug/Release simulator builds with real Firebase SDK
+and Capacitor 8.6, Android debug APK and release Kotlin compile. Report:
+https://github.com/lgudip-01/-BuildHybridAI/pull/48#issuecomment-7136787733 .
+The unchanged c9acf60 simulator/emulator release-stop and local 39 Kotlin policy
+checks remain credited. No request to repeat those unchanged checks is needed.
+These results close #48's changed-source build gate, not native cloud/device
+acceptance. No Firebase config or provider/network execution occurred.
+
+Aarush also formally approved #52/1a5ed5a after 606 checks (427 web, 179 engine),
+typecheck/build and an empty-native-reply check:
+https://github.com/lgudip-01/-BuildHybridAI/pull/52#pullrequestreview-6042756467 .
+The wording difference for empty replies is nonblocking; the approved adapter
+source remains unchanged. Its approval does not mean that #50, #48 and #52 have
+been combined or that a phone/cloud flow has passed.
+
+This follow-up tightens iOS AnalysisSupport.run's execution-source guard.
+Previously any modelVersion other than the exact Apple device identifier could
+be accepted as cloud, including blank/unknown values. NativeAnalysisSource now
+requires the current fixed reviewed model plus exact cloud version or a three-
+digit revision; device execution requires the known device identifier. Unknown
+requested sources are rejected. The existing shared cloud matcher now uses a
+strict end-of-input anchor so a trailing newline cannot pass as a model revision.
+No request shape, model selection, SDK dependency, timeout, provider setup or
+release stop is changed. SwiftPM already includes the entire source directory.
+
+Fresh local evidence (Swift 6.0.3, Swift 6 complete strict concurrency):
+
+- The original analysis guard fails 14 invalid combinations in the initial
+  22-case matrix. The actual response-source guard is extracted unchanged from
+  AnalysisSupport.run into a synthetic response harness, not reimplemented.
+- The final 24-case matrix passes, including blank/unknown/wrong models, invalid
+  requested source, cloud/device mismatch, exact/three-digit revisions and final
+  CR/LF rejection. The old shared cloud policy separately fails the two final-
+  line-terminator negative controls. Source files are snapshotted before compile.
+- All 47 Swift policy checks pass (the prior 45 plus CR/LF regressions). Native
+  chat still returns release_pending before provider work.
+- Shared prompt/model/limit parity against #52's current core passes. Swift
+  plugin/helper syntax parsing passes. No Kotlin, web/core or dependency change.
+
+Commands from this candidate root:
+
+```sh
+python3 apps/mobile/plugins/clause-guard-ai/tests/native-chat/checkAnalysisSource.py
+swiftc -swift-version 6 -strict-concurrency=complete apps/mobile/plugins/clause-guard-ai/ios/Sources/ClauseGuardAIPlugin/NativeChatPolicy.swift apps/mobile/plugins/clause-guard-ai/tests/native-chat/main.swift -o /tmp/clauseguard-native-policy
+/tmp/clauseguard-native-policy apps/mobile/plugins/clause-guard-ai/tests/native-chat/fixtures.json
+node --experimental-transform-types apps/mobile/plugins/clause-guard-ai/tests/native-chat/checkSharedContract.mjs /path/to/current-shared-core
+```
+
+The fixture runner permits an optional AnalysisSupport source path and optional
+old NativeChatPolicy path for reproducing negative controls; these are test-only.
+It compiles the actual guard and policy, with synthetic metadata and no SDK call.
+This does not prove Firebase returns those identifiers on an actual device.
+An unrecognized real version must fail closed until verified, not be relabeled.
+
+Aarush's next bounded check: iOS Debug/Release simulator builds for this changed
+Swift revision, confirming SwiftPM includes NativeAnalysisSource.swift and the
+new guard links with the real SDK. This is a changed-source iOS build request,
+not another Android build, unchanged WebView stop or six-sample cloud run.
+Private config delivery still requires a designated approved private channel;
+never attach those files to a public issue/PR. Physical-device App Attest/Play
+Integrity and native cloud/content/source acceptance remain pending, after
+current no-cost/billing verification. Native chat remains disabled.
+
+The older sections below retain the native candidate's source/test history.
+
 ## Implemented, still blocked
 
 - Swift registers chat in pluginMethods and implements the method; Kotlin exposes
@@ -62,7 +130,7 @@ production policies already rejected it); strict Swift 6 then rejected a stored
 Any schema (fixed with fresh computed schema and Sendable serialized request).
 No concurrency checks were disabled and no @unchecked Sendable was introduced.
 
-## Platform verification: baseline complete, merged revision awaiting SDK rerun
+## Historical #48 verification and source reconciliation
 
 Aarush supplied full-toolchain evidence for #40/c9acf60: iOS Debug/Release builds,
 45 Swift policy checks, Android debug APK/release Kotlin compile, and real WebView
@@ -72,9 +140,9 @@ The stops ran before provider work without Firebase config/network calls. See:
 - https://github.com/lgudip-01/-BuildHybridAI/pull/40#issuecomment-7114221884
 - https://github.com/lgudip-01/-BuildHybridAI/pull/40#issuecomment-7114733068
 
-The current isolated branch merges that candidate with Aarush's 5cac809 raw-error
+The #48 isolated branch merged that candidate with Aarush's 5cac809 raw-error
 safety fix from #35. Both histories and all native chat methods/policies/stops are
-preserved. The only runtime delta from #40 is the iOS onDevice catch: DEBUG logs
+preserved. For #48, the only runtime delta from #40 was the iOS onDevice catch: DEBUG logs
 only the error type; JavaScript gets `On-device generation failed.` without the
 provider's localizedDescription, which may echo raw contract text.
 
