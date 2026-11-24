@@ -1712,13 +1712,20 @@ payment information or billing account was created or linked.
   existing deployed build. No fresh live/browser/model check is claimed here.
 - [x] Document source provenance, retained fixes, exact checks and owner adoption
   order in RELEASE_CANDIDATE_20261124.md. No native runtime source is included.
-- [ ] Publish the main-targeted candidate and verify the complete fetched tree.
+- [x] Publish the main-targeted candidate as draft #50, base main. Fetched
+  403c8f3 matches the complete checked local tree; Likhil and Sai are tagged for
+  coordinated source/navigation adoption review. The final tracker-only upload
+  is verified again before finishing.
 - [ ] Coordinated owner review/merge. No agent merge of main.
 - [ ] Actual merged-main six-sample cloud acceptance and Hosting verification,
   after refreshed no-cost/billing/App Check prerequisites. Historical branch
   evidence does not satisfy this gate.
 
-The independent preparation step is complete locally; publication is its final
-gate. Subsequent main acceptance depends on coordinated source adoption, not on
-another implementation request to the user. Native #48 SDK/physical-device and
-extension scaffold dependencies remain tracked separately.
+The independent preparation step is complete and published. Subsequent main
+acceptance depends on coordinated source adoption. No action is needed from the
+user for candidate preparation. Native #48 SDK/physical-device and extension
+scaffold dependencies remain tracked separately.
+
+Consolidated main adoption PR: https://github.com/lgudip-01/-BuildHybridAI/pull/50 .
+This is a reviewable web candidate, not a main merge or mobile release. The
+complete earlier stacked history is preserved; no local/remote ref was reset.
