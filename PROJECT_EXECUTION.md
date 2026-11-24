@@ -1,6 +1,13 @@
 # Clause Guard execution checklist
 
-Checkpoint: November 19, 2026 (America/New_York).
+Current checkpoint: November 23, 2026 (America/New_York).
+Historical increments follow; the latest increment controls the active gate.
+Current gate: A, branch acceptance complete within documented scope; maintainer
+review/merge and the issue #30 main verification remain open.
+
+User authorized independent cloud-chat adapter implementation on November 22
+while the teammate-dependent gates remain open. See the latest increment below;
+this does not authorize enabling chat or bypassing the engine approval boundary.
 
 The user has requested implementation of the full project across web, iOS and
 Android, following the existing roadmap. Before each step, publish its checklist
@@ -885,6 +892,8 @@ checkboxes above are historical; the user's newer 10/10 request and v2 sequence
 supersede their planned focused/publish-before-full ordering. Broader Gate A
 remains open. No additional model send followed the successful full-lease run.
 
+
+<!-- Preserved #40 checkpoint; its build-status boxes are historical and superseded by the current roadmap below. -->
 ## November 23: native chat method candidate
 
 This isolated branch starts at #35 (6cf643e); #37–#39 shared engine/bindings/UI
@@ -912,3 +921,738 @@ Native candidate review: https://github.com/lgudip-01/-BuildHybridAI/pull/40 .
 Aarush tagged for SDK builds, native WebView blocked-call evidence and adoption;
 these are concrete remaining platform checks, not a new implementation request.
 Full integrated native source is preserved locally at de3bc38; no main merge.
+
+
+## Near-perfect quality bar and remaining sample increment — November 20
+
+User preference is saved in AGENTS.md. Aim for near-perfect execution while
+keeping evidence candid; no single-run or schema result proves legal accuracy.
+
+- [x] Check refs/current PR #28 discussion and document-work issue; no new teammate
+  runtime change or ownership reply supersedes this increment.
+- [x] Reproduce rent timing contradiction; five regressions fail before correction.
+- [x] Strengthen shared prompt/guard; focused rent/deposit cloud 2/2, timing and
+  independent values correct. A residual waiver/procedure question remains.
+- [x] Full offer cloud 11/11 validation; inspect content and identify geographic
+  scope/advance-notice overclaims instead of treating count as quality success.
+- [x] Add geography/notice withholding and source instructions; focused c6/c8
+  cloud 2/2 after correction. Preserve full-run flaws as historical evidence.
+- [x] Pass 188 web tests and core/web typechecks; synchronization of local prompt
+  templates does not publish server settings.
+- [x] Inspect full freelance, note, SaaS and NDA previews/results one sample at a
+  time; no automatic retries. Record 49/50 runtime validation across all five
+  remaining full samples, with content caveats and focused checks separately.
+- [ ] Publish tested code/evidence, verify fetched tree and deploy no-billing
+  Hosting-only release.
+
+The full offer preview set needsReview true because document-title/Employee ID
+label text was conservatively masked. It was explicitly inspected and approved;
+no flag was cleared or engine batch reconstructed. Employee ID and its value
+restored correctly, although the model's question about that relationship is
+redundant. No unmasked fixture value was sent.
+
+
+## November 21: follow-up on merged main and sample-template retirement
+
+Likhil merged #28 into main at 65152ce after approving the v2 migration/privacy
+invariants. He asked for the exact-sentence date template to be retired in favor
+of the general v2 path. GitHub connector writes still return 403; authorized
+publication uses the signed-in browser.
+
+Reconciliation preserved all local work: 13d29d1 remains on the original local
+branch; new codex/content-quality-v3 starts from origin/main and applies only
+that work as 8b1fc7d. The newer upstream evaluation PDF is unchanged. No reset,
+force push, branch deletion or agent-performed main merge occurred.
+
+- [x] Preserve the working tree before changing branches and retain old history.
+- [x] Retire the exact-sentence lease helper/schema/validator; preserve general
+  runtime validation and the prior unsupported-checklist regression.
+- [x] Verify four lease formulations on cloud/device mocked providers; the exact
+  sample case failed before retirement. 189 web + 94 engine tests and nine
+  Firebase checks pass; typecheck/build pass.
+- [x] Record first freelance 3/3 focused validation as a content failure; subsequent
+  2/3 leaves a signature claim withheld and one additional assertion now covered.
+  Do not label signature quality resolved or these runs a unified full pass.
+- [x] Record SaaS focused 2/2 under final general path: mutual cap and intended
+  signatories restored; broader hypothetical carve-out commentary is a caveat.
+- [x] Verify one full lease run without the special template: cloud 10/10,
+  failed empty, general-v2 reported and correct local restoration.
+- [x] Publish separate draft follow-up PR #31; application/templates/release
+  evidence match fetched 872f39e, excluding final root instruction/tracker files.
+  Verify the complete tree after the root upload.
+- [x] Deploy verified no-billing Hosting-only build and record current live asset:
+  /assets/index-olgSHuM7.js; no hosted model call in this smoke check.
+
+User preference: close completed task tabs; old project tabs were closed, leaving
+active diagnostic, publication, billing and live-check pages only. Close those
+too after their evidence is recorded. Unrelated user tabs stay untouched.
+
+Broader Gate A remains open for a uniform final-policy full matrix/content
+review and complete hosted acceptance. This increment records actual failures
+and withholds known overclaims rather than weakening guards to force green.
+
+
+Publication: https://github.com/lgudip-01/-BuildHybridAI/pull/31 is draft. The
+application, local templates and release evidence match fetched 872f39e before
+this final root update. No final-policy full-matrix or hosted-inference success
+is claimed. Close the publication tab after final verification; other completed
+project tabs have been closed as requested.
+
+
+## November 21: concise policy v3 and general signatory fields (in progress)
+
+Checklist:
+- [x] Refresh refs/PR #31 discussion; published c0230e1 matches the clean starting
+  tracked tree. No newer maintainer runtime change supersedes the work.
+- [x] Replace global legal-topic lists with concise source-fact instructions;
+  retire cached v1/v2 prompts while retaining independent false kill switches.
+  Configure cloud temperature 0; no model/provider/API change.
+- [x] Six migration/provider checks fail before correction, then pass. Known
+  overclaim guards and actual high-risk source-supported analysis remain covered.
+- [x] Fresh policy-v3 freelance c6/c9/c10 returns 2/3; ownership improves, but
+  signature wording still fails. Do not erase or relabel that observation.
+- [x] Add a bounded signatory/identification FIELD grammar across layouts, not an
+  exact sentence or named sample. Unknown/operative fields stay on ordinary
+  analysis. Explicitly labeled application-authored source quote, fixed neutral
+  questions and empty draft are enforced by both schemas and equality checks.
+  Provider noncompliance remains a failure, never a substituted answer.
+- [x] Pass 218 web tests, core/web typechecks; tests include unseen token IDs and
+  field layouts, lowercase/unknown tokens, unknown titles, operative additions,
+  input bounds and cloud/device schema enforcement.
+- [x] Verify affected freelance/SaaS clauses under the new field format; preserve
+  the intermediate cap-comparison failure and its subsequent guard/correction.
+- [x] Run/review all six fixed samples on frozen analyzer 5b0a147: actual cloud
+  60/60 validation (50 general, nine signatory, one guarantee). Content review
+  found an amount-as-recipient deposit question; this is not a perfect content
+  pass. New cloud/device replay failures precede its narrow guard; one fresh
+  post-guard rent/deposit batch passes actual cloud 2/2. All prior runs retained.
+- [x] Correct the dev acceptance WebSocket reconnect reset, prove selection
+  survives a server restart without inference, retain the interrupted lease
+  attempt as inconclusive. Production unchanged by this dev-only transport fix.
+- [x] Pass 225 web tests and core/web typechecks/build after the recipient guard;
+  prior unchanged engine (94) and Firebase (nine) checks remain recorded.
+- [x] Verify ordinary offline content/restoration: completed November 22 after
+  restoring native control and correcting the observed incomplete draft. The
+  earlier no-window/prepared-only blocker remains in the historical evidence.
+- [x] Complete hosted review: November 22 actual cloud 4/4 plus edit clearing;
+  inspect degraded masking warning without clearing it.
+- [x] Publish reviewed source/release evidence and verify the fetched application
+  tree at 923883b; deploy verified no-billing Hosting-only build. Final root
+  tracker upload/full-tree verification are reported in the PR checkpoint.
+  Close completed task tabs; retain only the pending hosted-mask handoff.
+
+Pricing/actual project state were rechecked before inference: standard configured
+model input/output remain free and the project has no linked billing account.
+Only approved masked fixture clauses were sent; no unchanged automatic retry.
+The field review labels its application-authored guidance visibly and does not
+prove actual signing, authority or legal correctness. It is not free-form model
+reasoning. The existing bounded guarantee format remains separately labeled.
+
+Hosted follow-up: the default four-clause demo returned cloud 4/4 and passed
+edit clearing, but content review caught contact-scope and compound Name/CEO/entity
+signing claims. Seven checks failed before extending the general field grammar
+and adding a narrow contact-scope guard/instructions. Grounding v5, 235 web tests
+and build now pass; a new hosted check is pending. The 60/60 matrix above is
+explicitly the prior v4 baseline and must not be relabeled as a v5 full matrix.
+
+Current deployment: official Hosting-only CLI succeeded, live entry
+index-BkV4srSd.js matches the tested build. Fresh hosted v5 masking remains
+pending (no preview, no cloud approval/send); native Chrome also reports no
+visible window. A human action was requested only to expose a Chrome window for
+the isolated DevTools test/diagnosis. Do not advance Gate B while this is blocked.
+
+Next required checks, in order within Gate A:
+- [x] Restore native control and inspect the recovered 185,806 ms degraded mask.
+  Its cause was not captured; no blind resend was made.
+- [x] Complete v5 hosted preview/approval/content/restoration and edit clearing.
+- [x] Verify one ordinary general clause offline with actual device source and
+  restored values, incomplete draft visibly withheld; No throttling restored.
+- [x] Run and inspect uniform v5 six-sample matrix on frozen 3f096b6. Keep the
+  earlier v4 60/60 and focused checks separate.
+- [x] Update draft PR #31 title/description around current scope and tag Likhil
+  for review; prepare the verified publication checkpoint. Close completed
+  project tabs while retaining the pending hosted-mask handoff. Gate B's local
+  PDF/DOCX fixtures remain blocked by the unchecked acceptance items above.
+
+Publication checkpoint: source, templates, tests and release evidence match
+fetched 923883b, excluding this final tracker update. The upstream evaluation
+PDF is untouched. Local and browser-created histories remain preserved; no
+reset, force push, branch deletion or main merge occurred. PR #31 stays draft.
+235 web tests and build pass; remaining acceptance boxes above are intentionally
+open. Finished diagnostic/billing tabs are closed; the unresolved hosted-mask
+page is retained as a handoff. No further model request was made while blocked.
+
+## November 22: resumed hosted/offline acceptance and draft preservation
+
+- [x] Restore native Chrome access; recover the old preview rather than resend.
+  Mask completed after 185,806 ms with patterns-only/review warning; cause not
+  captured. Inspect all four fictional clauses/ten values without clearing it.
+- [x] Recheck no-billing/free model pricing; approve exact preview once. Hosted
+  grounding-v5 cloud 4/4 has correct contact scope and source-based printed-name
+  review. Restore all local values; verify editing clears preview/approval/results.
+- [x] Mask ordinary one-clause lease dates on device, inspect two placeholders,
+  select only the tab Offline, verify cloud failure/zero bytes, actual device
+  source and both dates restored. Restore and verify No throttling afterwards.
+  Runtime 1/1, but content FAILED: date-only replacement dropped the end date.
+- [x] Two provider replay regressions fail before correction; visibly withhold
+  drafts omitting source references without replacing prose or retrying. Keep
+  complete-reference noncommercial rewrites and strict validation first.
+- [x] 238 web tests, core typecheck and production typecheck/build pass. Prompts,
+  schemas, configured model, grounding v5 and privacy boundaries unchanged.
+- [x] Verify corrected ordinary offline behavior once on the tested deployed
+  build: actual device 1/1, both dates restored, incomplete draft visibly withheld.
+  Cloud request blocked/zero bytes; No throttling restored. This is safe display,
+  not improved model drafting. Current entry index-Cr3HSrZw.js verified live.
+- [x] Publish source/evidence, verify fetched application tree at 4d7b67a, update
+  PR #31 and close finished test tabs. Full-tree/root verification follows in
+  the final PR checkpoint.
+
+New teammate branches are preserved, not merged: engine-masking-gaps at 3e90529
+(masking patterns/review warning changes), docs-import at 1a6b334 (local PDF/DOCX,
+section splitting, twelve fixtures). Main remains 65152ce and PR #31 has no new
+reviewer comment at this checkpoint. Review these branches before Gate B/integration;
+do not overwrite their work. Final-policy full matrix remains an unchecked Gate A
+item; the v4 60/60 cannot be relabeled. Long/degraded masking remains a reliability
+limitation, not a new pass or a proven consequence of window visibility.
+
+## November 22: final branch matrix and team v2 priorities
+
+- [x] Run all six samples on frozen analyzer 3f096b6 without changing policy:
+  actual cloud lease 10/10, freelance 10/10, offer 11/11, SaaS 10/10, NDA 10/10,
+  note 9/9. Failed empty and all drafts empty. 50 general, nine labeled signatory,
+  one labeled guarantee. Preserve broad/redundant-question quality caveats.
+- [x] Complete current-policy hosted flow/restoration/edit clearing and ordinary
+  guarded offline restoration, retaining degraded-mask and incomplete-draft evidence.
+- [x] Publish final source/evidence and verify the fetched application tree at
+  4d7b67a; post #30 results/dependencies, update PR #31 and close completed test
+  tabs. The final root upload/full-tree check is reported in the PR checkpoint.
+- [ ] Likhil reviews/merges #31 when approved; verify and run the cloud checks on
+  main before closing #30's explicitly main-based requirement. No agent main merge.
+
+Issue #30 supersedes older assumed owner priorities: team v2 target is November 23
+at 2:59 AM Eastern (November 22, 11:59 PM Pacific). Our assigned scope is six-sample
+cloud acceptance, general lease path, clearly preliminary offline results, cloud
+chat (#9/#13), and Hosting after merges. No main success is inferred from this branch.
+
+Do not duplicate the new teammate work: review #32 (3e90529 engine masking gaps)
+and #33 (1a6b334 local PDF/DOCX plus twelve fixtures) for integration/compatibility
+before the import gate. Both are unmerged and preserved. Main remains 65152ce.
+
+Next Cloud AI step after the acceptance gate: chat #9/#13 using the confirmed
+engine-issued frozen context/question tickets, per-question masked approval,
+atomic one-use consumption, current-revision checks, masked-only bounded history,
+exact placeholder/clause-citation validation and local restoration. Likhil confirmed
+the contract in #13 but the engine APIs are not implemented; Sai's UI confirmation
+is still outstanding. Request concrete delivery in #30; never remask a question
+with document mask(), fabricate approval tickets, or enable chat before the real
+question-masking privacy checks pass. Keep mobile ownership with Aarush (#17/#30).
+
+Final publication handoff: #30 now contains the branch results and explicitly
+open main requirement, with Likhil tagged for #31 review/merge and chat engine
+delivery, Sai for #13 UI confirmation, and Aarush for mobile PR/device evidence.
+Main is not modified by the agent. The runtime source/tests/templates/release
+evidence match 4d7b67a; only this final tracker update follows. Keep the long-mask,
+broad-question and generated-draft limitations visible; do not mark native,
+masked chat, import integration or main acceptance complete from branch results.
+
+## November 22: independent cloud-chat adapter (user-authorized)
+
+Checklist:
+- [x] Recheck clean tree, refs, #13 confirmation and #30 comments before editing.
+  No new engine delivery or UI confirmation. Preserve analyzer/teammate branches.
+- [x] Isolate on codex/cloud-chat-adapter from published e2cde29; no main merge.
+- [x] Implement typed masked-only chat bridge, fixed source prompt, strict
+  placeholder/citation/schema validation and bounded immutable masked history.
+- [x] Enforce first approval check, post-config recheck, atomic consume immediately
+  before dispatch, post-dispatch current checks, cross-wrapper serialization,
+  clear/timeout cancellation, stale/late discard and fixed sanitized errors.
+- [x] Keep production disabled through fail-closed chatGuard functions; no issuer
+  or injectable production authorizer. App/production entry does not import chat.
+- [x] 58 new chat tests pass; 296 total web tests, core typecheck and production
+  typecheck/build pass. Production JS hash remains byte-identical to the live
+  index-Cr3HSrZw.js. No deployment, live inference or cloud setting change.
+- [x] Write CHAT_INTEGRATION.md with confirmed binding contract, limits, tested
+  scope and six-sample real acceptance cases. Mock passes are not live chat proof.
+- [x] Publish separate stacked draft PR #34 (base codex/content-quality-v3,
+  head codex/cloud-chat-adapter). Source/tests/handoff match fetched e6e6830
+  excluding this final tracker update. Tag Likhil/Sai with the concrete #13
+  engine/UI binding requirements in #30. Full-tree check follows in PR checkpoint.
+
+Chat runtime remains blocked: real engine ticket/context/question-mask/restoration
+exports, UI lifecycle confirmation/binding, actual outgoing-payload inspection,
+six-sample cited-answer/variant privacy checks, and current no-billing/App Check
+verification before any model call. PR #31/main verification and #32/#33 integration
+remain separate open gates. This independent code does not close those checkboxes.
+
+Independent adapter/testing step complete within this scope. PR #34 is draft,
+production guard still rejects all chat, no live inference/deployment or paid
+service was enabled, and production JS is byte-identical to the existing release.
+All old local branches and teammate work remain preserved. Next independent task
+is compatibility review of #32/#33 in isolation; actual chat enablement continues
+to require engine/UI delivery and real privacy/content acceptance.
+
+## November 22: independent PR #32/#33 compatibility review
+
+- [x] Refresh refs and #13/#34 comments after the browser-review interruption;
+  no new engine/UI delivery. PR #34 publication/checkpoint is verified and tabs closed.
+- [x] Create a disposable local review worktree from bbac120; combine #32 at
+  3e90529 and #33 at 1a6b334 without changing main or teammate branches.
+- [x] Baseline combined verification: 320 web + 107 engine tests pass, all twelve
+  imported fixtures match, core typecheck and production build pass. No model calls.
+- [x] Reproduce a #32 false-negative review flag using an email and URL containing
+  a model-only name: two failing cases; a missed lowercase name remains in masked output.
+- [x] Reproduce #33 deletion of substantive standalone rent/year/account numbers:
+  three failing cases. Reproduce a slow import overwriting newer manual edits:
+  one failing actual-handler/ReviewSession case with controlled hooks/file read.
+- [x] Preserve six failing cases on the local review branch and as a checked patch;
+  document precise source locations, scope and correction requests in
+  PR_COMPATIBILITY_REVIEW.md. Do not count these as passing or approve integration.
+- [x] Publish report/repro patch (application docs match fetched 9782f32); post
+  findings to #32/#33 with Likhil tagged and summarize blockers in #30. Final
+  root upload/full-tree verification follows in the PR #34 checkpoint; close tabs.
+- [ ] Author corrections and retests before integration approval. Main/cloud-chat
+  activation and real device/payload checks remain separate gates.
+
+Review handoff: #32 comment 7083451440 and #33 comment 7083456530 contain the
+three findings and requested corrections. Full rerun after adding the cases:
+320 web passes/four expected failures, 107 engine passes/two expected failures;
+typecheck passes. All six failures are review cases, with no unrelated baseline
+failure. Runtime implementation and deployed app remain unchanged. Do not approve
+integration merely because the original twelve fixtures pass. Retest the author's
+corrected heads before advancing; all local evidence is preserved at the documented
+temporary worktree/review commit. No main merge, force push, reset or branch deletion.
+
+## November 22: optional independent candidate corrections
+
+- [x] Preserve original failure evidence at 4a81662 and create a second isolated
+  candidate checkout; do not modify teammate branches or deployed source.
+- [x] Correct rule coverage, preserve standalone numeric values, and make import
+  completion generation/snapshot-aware with an explicit cancellation outcome.
+- [x] Keep actual short-name/address coverage, explicit page markers and latest-
+  import behavior covered. An added long-company short-form control failed first;
+  checking coverage after defined-alias registration corrected that candidate issue.
+- [x] Candidate full verification: 326 web + 112 engine = 438 passes, core typecheck
+  and production typecheck/build pass, all twelve imported fixtures retained.
+- [x] Preserve candidate at d2613f7 and create PR_COMPATIBILITY_CANDIDATE.patch,
+  checked forwards against original failure checkout and backwards against candidate.
+- [x] Publish candidate artifact/report at fetched 715a560; notify owners in
+  #32/#33 and #30 (comments 7083669351, 7083673650, 7083681170). Final root upload/
+  full-tree verification follows in PR #34 checkpoint; close finished tabs.
+  Candidate corrections are review material, not adopted/deployed behavior.
+- [ ] Author review/adoption and actual-head retests before approving integration.
+
+Both original failure and candidate worktrees/commits remain available. Only
+review documentation/patch artifacts are added to the published chat branch;
+its runtime remains disabled and production source remains unchanged.
+
+Candidate handoff complete: all 438 cases pass only on the isolated candidate,
+with engine/core typechecks and production typecheck/build passing. Original
+six failures and both local worktrees remain preserved. The actual #32/#33 heads
+still require author review/adoption and retest. The engine coverage correction
+changes the review flag; it does not automatically discover the intentionally
+missed name or certify fully redacted input. Keep actual chat activation, main
+acceptance, real browser/Nano checks and phone evidence as separate open gates.
+
+## November 22: teammate requests, native chat and UI handoff
+
+- [x] Inspect both project locations/current Git state; fetch all refs and read
+  new PRs, issue comments, review timelines and direct mentions. Preserve local
+  graphs and all teammate branches. New work: #35 native analysis, #36 redesign.
+- [x] Respond to Aarush's #17 request: verify current Spark/no-linked-billing
+  state and official no-payment pricing; register Android/iOS app.clauseguard;
+  download and validate both SDK configs outside Git. Ask Aarush for a direct
+  delivery address/channel in #17 (7091242882); never post files/debug tokens publicly.
+- [x] Review #35 at 6cf643e: 191 web + 94 engine tests and web build pass; accept
+  one-masked-clause native interface. Flag iOS localizedDescription raw-path
+  logging/rejection to Aarush (7091360009). No real native/model run claimed.
+- [x] Inspect #36 at 628c44e; preserve Workbench ownership, flag absolute privacy
+  claims and reduced-motion smooth-scroll fallback. No visual/merge approval.
+- [x] Move chatbot to top development priority; request concrete engine exports
+  from Likhil and coordinate Aarush/Sai in #13 (7091268965).
+- [x] Share the guarded dispatcher between web/native; add native cloud-only TS
+  adapter, UI conversation store and genuine approved-batch ReviewSession hook.
+  No fake ticket registry, document-question remask, raw/history overload or
+  production mock answer. Engine seams and guards continue to reject all chat.
+- [x] Test per-question approval, native projection/source/timeout, immutable
+  masked-vs-display history, stale/close races, exact batch handoff, and closing
+  before document edits/remasks including a failed remask. Preserve any test/
+  build failures as local verification evidence; final full counts follow.
+- [x] Publish verified implementation/handoff at fetched e9f1239 and tag owners
+  in #13 (7091553991). Source/contracts match the tested local tree. Final
+  root upload/full-tree verification is reported in the #34 checkpoint.
+- [ ] Aarush supplies a private delivery endpoint; send only the requested native
+  config files. Native App Check/debug/release registration remains separate.
+- [ ] Likhil supplies real engine APIs/variants; owner-reviewed binding and actual
+  privacy/payload checks before enabling chat. Swift/Kotlin chat methods, UI view
+  binding, live six-sample answers and phone evidence remain separate gates.
+
+No deployment, live model call, payment, trial, billing linkage, enforcement
+reduction or IAM grant. New work is isolated from original primary checkout at
+/private/tmp/clauseguard-chat-mobile-20261122. See CHAT_UI_MOBILE_HANDOFF.md for
+concrete UI/native contracts, tested scope and remaining delivery requirements.
+
+Final local verification: 331 web + 94 engine tests, core typecheck and web
+production typecheck/build pass. New coverage is 35 cases beyond the initial
+296-test adapter. An early test-only mock typing error was corrected before the
+final typecheck; focused runtime checks had passed. Source commit 1ed7bea plus
+#35 (6cf643e) and #36 (628c44e) merges cleanly in a separate local checkout and
+passes 344 web tests and production typecheck/build. Its >500 kB chunk advisory
+is retained. #32/#33 are excluded; prior failure/candidate evidence is untouched.
+This is no claim about actual engine masking, native SDK builds, phones, live
+answers, main or deployment. PR #34 remains draft and chat is disabled.
+
+Final self-review found one additional lifecycle issue before handoff: an external
+remask during local question preparation left previous restored messages visible
+in phase error. A new regression failed against 1ed7bea (log preserved at
+/private/tmp/clauseguard-chat-stale-history-before.log). Stale/wrong-session
+failures now close/clear the conversation, including stale response restoration;
+cleanup exceptions still clear display state and cannot expose SDK error text.
+A throwing-cleanup control is included. Final source/combined counts supersede
+the earlier 331/344 checkpoint after the justified correction rerun.
+
+Final corrected verification: **333 web + 94 unchanged engine tests**, core
+typecheck and production typecheck/build pass. The isolated corrected #35/#36
+combination passes **346 web tests and production typecheck/build**. These final
+counts supersede 331/344. The only new cloud resources are the requested native
+app registrations; there was no inference, deployment, billing or IAM change.
+
+Verified owner replies: #17 native configs/private delivery (7091242882), #35
+native interface and raw-error review (7091360009), #36 integration/copy/motion
+review (7091379482), and #13 concrete chat UI/native/engine handoff (7091553991).
+No teammate response or engine export had arrived at this checkpoint. Original
+primary/source branches remain preserved. After full publication verification,
+the primary checkout may move to a new local branch at this tested handoff; never
+reset or overwrite the old browser/local histories.
+
+## November 22: genuine engine candidate for the chat dependency
+
+- [x] Fetch refs/read current #13/#17/#30/#34/#35/#36 comments: no new engine/native
+  delivery or teammate reply. Full Xcode is still unavailable; do not claim an iOS build.
+- [x] Isolate from published #34 at 0ab24d8; preserve primary checkout and all
+  existing branches. Implement real engine authority/snapshots/variant masking,
+  append-only session tokens, per-question review, atomic consume and local restore.
+- [x] Keep production seams and guards rejecting. Add only a typed cleanup seam;
+  no bridge/UI issuer, no vault read/write for chat, no document mask on a question.
+- [x] Preserve/fix the two initial masking regressions and the actual-Nano
+  party-label issue. Pre-correction commit b0a4a22 and local failure logs remain.
+- [x] Final automated checks: 140 engine + 340 web tests, engine/core typechecks,
+  web production typecheck/build pass. Seven web cases use REAL engine authority
+  with only provider/config/binding mocked. Diagnostic is absent from build output.
+- [x] Complete the frozen corrected local-only Chrome synthetic matrix on
+  d2ac4ec: eight expected outcomes; nine actual Prompt API completions, zero
+  failed. Inspect document/question previews, verify one-use/replay locally,
+  preserve both runs in CHAT_ENGINE_BROWSER_EVIDENCE.json, close context/tab
+  and stop only the agent-owned 5176 server. No cloud answer/network-capture claim.
+- [x] Publish separate stacked draft #37 (base #34); source/evidence match
+  fetched e098ae7 apart from this final tracker update. Tag Likhil/Aarush/Sai
+  in the PR and #13 (7092173315). Full-tree/root verification follows in the
+  final PR checkpoint; production seams/guards still reject all chat.
+- [ ] Owner-reviewed real binding, native methods/product view, full six-sample
+  payload/answer/privacy checks, current zero-cost/App Check verification and phones.
+
+No cloud model call, Firebase activation/configuration, deployment, billing,
+payment/trial, IAM or enforcement change. Local Prompt API uses only an already
+available device model with no Firebase transport or model download. The candidate
+worktree is /private/tmp/clauseguard-chat-engine-20261122. See
+CHAT_ENGINE_CANDIDATE.md for precise limits, rephrasing behavior and review gates.
+
+Corrected browser checkpoint completed November 23 at 12:00 AM Eastern.
+Known parties remain PARTY_A/B; new Sam/Ada use PERSON_1/2. Shared surname and
+invented-token cases block, while full names, street prefix and injection-data
+masking preserve expected identities. Main and #34 remain unchanged; separate
+engine-candidate publication and reviewer handoff follow. No real cloud call.
+
+Separate candidate + #35 (6cf643e) + #36 (628c44e) compatibility check: clean
+local merges, 353 web tests and production typecheck/build pass. The >500 kB
+redesign chunk advisory remains visible. No Swift/Kotlin/native SDK build, phone,
+main or #32/#33 integration acceptance is inferred. All temporary worktrees and
+original branches are preserved.
+
+Engine-candidate handoff: https://github.com/lgudip-01/-BuildHybridAI/pull/37 .
+The dependency is now review/adoption and real direct binding of implemented
+engine APIs, not waiting for an engine implementation from scratch. Candidate
+remains isolated on codex/chat-engine-candidate-20261122; primary checkout is
+still the preserved #34 UI handoff on codex/chat-ui-ready-20261122. No source
+was copied over teammate work or merged to main. Local/browser histories and
+all original failure evidence are retained. No live cloud chat is enabled.
+
+## November 23: real chat binding and full isolated compatibility
+
+- [x] Recheck current refs/comments: no new teammate delivery at this checkpoint.
+- [x] Replace stub engine/guard modules with direct real engine exports. Add an
+  independent unconditional release stop before config/provider/session/consume.
+- [x] Verify real approved questions stop safely on both bridges; forged objects
+  still fail authority. Binding checks: 341 web + 140 engine, typecheck/build pass.
+- [x] Reconcile #32/#33 and preserved compatibility corrections with #35/#36 in
+  an isolated branch, porting import controls/race safeguards into Workbench.
+  Full checks: 384 web + 158 engine, core/engine typechecks and web build pass.
+- [x] Preserve resolution patch and exact provenance in CHAT_BINDING_INTEGRATION.md.
+- [x] Publish thin stacked draft #38 (base #37); fetched 7a41a69 matches all
+  tested source/evidence files. This final tracker upload/full-tree check follows.
+- [ ] Owner adoption, product chat view/native methods, zero-cost/App Check and
+  bounded live acceptance, then real phones/demo. Hard chat egress stop remains.
+
+No cloud calls, deployment, payment, billing linkage or enforcement/IAM change.
+Full combined source is local only at 10d9674; primary and author branches intact.
+
+Binding review: https://github.com/lgudip-01/-BuildHybridAI/pull/38 . Owners
+Likhil/Aarush/Sai tagged in the PR with concrete adoption/UI/native needs.
+The full combined branch remains isolated locally; main was not merged.
+
+## November 23: product chat view candidate
+
+- [x] Recheck #13/#38 and remote heads; no new teammate implementation/review.
+- [x] Add shared ReviewChat panel using real session/controller, exact masked
+  previews, explicit per-question approval and safe release_pending feedback.
+- [x] Wire web/native bridges without enabling dispatch; retain independent stop.
+- [x] Seven view regressions: 348 thin-branch web tests; production build passes.
+  Isolated redesign/import/mobile integration: 391 web tests/build pass.
+- [x] Local desktop/430px browser check: preview, blocked send, zero config/provider
+  calls, document-edit cleanup; record synthetic-fixture limits. Stop server/tab.
+- [x] Preserve redesign wiring patch and adoption notes in CHAT_VIEW_HANDOFF.md.
+- [x] Publish stacked draft #39 (base #38); fetched 0fbbf43 matches all tested
+  source/adoption artifacts. Final tracker upload/full-tree verification follows.
+- [ ] Owner adoption, native methods, zero-cost/App Check/live acceptance, phones.
+
+Full combined view source is isolated locally at e43d254; original work preserved.
+No cloud/model call, deployment, payment, billing or enforcement/IAM change.
+
+Product chat view review: https://github.com/lgudip-01/-BuildHybridAI/pull/39 .
+Aarush/Sai tagged for view/redesign adoption; Likhil tagged for engine review.
+Native plugin chat methods and live release/phone checks remain unfinished.
+
+
+## November 23: functional web chat release
+
+- [x] Preserve primary/ZIP folders and teammate branches; use an isolated #39-based release.
+- [x] Adopt reviewed masking coverage corrections; retain real approval authority.
+- [x] Direct masked-document chat approval, per-question review, source links and stale recovery.
+- [x] Verify Spark/no billing, existing Developer API and enforced App Check; no configuration changes.
+- [x] Real cloud answers across six public samples and normal product flow; retain provider failures.
+- [x] Validate all 18 captured body snapshots against projection/raw-fixture checks (includes duplicates).
+- [x] Final 355 web + 158 engine tests and production typecheck/build pass.
+- [x] Publish #44 tested runtime source (78b0bb2); Hosting-only deployment succeeded.
+- [x] Actual production-origin cloud answer and #chat-source-c1 target verified.
+- [ ] Adopt verified flow into teammate UI/import/progress branches without overwriting them.
+- [ ] Native #40 full SDK builds, App Check and real-device acceptance; mobile chat stays disabled.
+
+Details/evidence: apps/web/WEB_CHAT_RELEASE_20261123.md and
+apps/web/WEB_CHAT_LIVE_EVIDENCE_20261123.json. Earlier release_pending notes above
+are historical: web dispatch is now enabled in this candidate; native remains stopped.
+
+Release review: https://github.com/lgudip-01/-BuildHybridAI/pull/44 .
+Hosted demo: https://clause-guard-hackathon.web.app . Production smoke used only
+synthetic Lucia/Example Services/$250/30-day text, with Nano masking, genuine
+document/question approval, real cloud response and local detail restoration.
+The source citation resolves to the exact approved masked clause.
+
+New teammate work was read at this checkpoint: #41 (42dfdcc) masking progress,
+#42 (16b6f00) manual mask/reveal/undo and per-clause source, #43 (a9f8149) document
+deletion with storage/approval races. No new discussion comments in these PRs.
+Next integration must invalidate chat on manual changes/deletion, clear per-
+document choices, preserve source provenance, and port controls into #36 Workbench.
+These branches remain unchanged; this release does not claim their acceptance.
+
+
+## November 23: redesigned controls + chat integration
+
+- [x] Recheck refs/comments and preserve every original branch/check-out.
+- [x] Isolate #44 + #36/#33 corrections + #41/#42/#43; port controls into Workbench.
+- [x] Preserve real engine authority and revised private chat snapshots/aliases.
+- [x] Close chat on manual edits/deletion and discard pending cloud completions.
+- [x] Keep manual protections for deletion retry; clear them for the next document.
+- [x] 395 web + 163 engine tests, core/engine typechecks and production build pass.
+- [x] Real Nano progress/manual reveal/undo/chat-preview check; desktop and actual 430px layout.
+- [x] Publish #45 complete source dcb2a3c, exact full-tree match; tag owners.
+- [x] Hosting-only deployment, fresh no-billing check, actual production chat/import/citation/undo smoke.
+- [ ] Native #40 SDK builds, App Check and physical-device acceptance remain separate.
+
+See apps/web/WEB_CONTROLS_INTEGRATION_20261123.md for provenance, corrections and limits.
+
+Integration review: https://github.com/lgudip-01/-BuildHybridAI/pull/45 .
+Deployed runtime/config source 044ad59; root responds HTTP 200 with Cache-Control:
+no-cache and existing security headers. Published source matched the complete
+tested local tree. Word NDA import produced 10 clauses on the production origin.
+A real cloud answer restored manually masked bluebird, Lucia, Example Services,
+$250 and 30 days; citation points to the approved masked source. Hosted undo then
+removed the conversation and required fresh document approval. One cloud question
+was approved for this hosted acceptance; no automatic retries or provider switch.
+
+Next: final release review/adoption against main and extension/mobile surfaces,
+then #40 full native SDK/device acceptance. Current web integration is functional,
+not waiting for missing chat implementation. Native chat remains disabled.
+
+
+## November 23: reported lowercase and currency-free number misses
+
+- [x] Reproduce the report; preserve failing regression evidence locally.
+- [x] Remove chat's extra capitalization restriction after case-insensitive known-alias matching.
+- [x] Retain shared-name ambiguity, word boundaries and explicit document/question approval.
+- [x] Mask standalone comma-grouped numeric values without requiring a currency marker.
+- [x] Keep bare numbers separate from currency values, restoring their exact entered spelling.
+- [x] Verify provider body/history projection excludes Acme and 12,500 (mocked provider).
+- [x] 396 web + 173 engine tests, engine typecheck and production build pass.
+- [x] Real local Chrome preview: Does acme pay 12,500? becomes Does PARTY_A pay AMOUNT_2, with bracketed tokens.
+- [x] Publish #46 on #45; source 7029038 exactly matches the tested runtime tree.
+- [x] Verify no billing account and complete Hosting-only deployment.
+- [x] Confirm the exact question preview on the hosted production origin after verifying current bundle.
+
+Fix review: https://github.com/lgudip-01/-BuildHybridAI/pull/46 .
+Known company variants Acme/acme/ACME/aCmE and lowercase known first names now
+mask without relying on new model detections. Comma-grouped values such as
+12,500 and 1,234,567.89 are masked in both documents and questions. Ordinary
+deadlines/section numbers and embedded identifier fragments remain unchanged.
+This is not a claim of detecting every previously unknown lowercase proper noun.
+No actual cloud question was approved for this fix verification; real masking
+uses ONLY_ON_DEVICE. No payment, billing, API, IAM or App Check changes.
+Teammate branch updates 17d1ab0/5cac809 remain preserved for later integration.
+
+Hosted verification completed: `Does acme pay 12,500?` previews as
+`Does [PARTY_A] pay [AMOUNT_2]?` before any send. Initial tab loaded the older
+index-BEUXnVKD bundle and reproduced the old rejection; a normal refresh loaded
+the deployed index-DJtNrnDw bundle and the exact reported case passed. Existing
+open tabs need a refresh to load this fix. No cloud question was approved.
+
+
+## Current roadmap after November 23 repository review
+
+This section supersedes earlier pending-status notes, without deleting their
+history. Main is still 65152ce; no main merge or teammate branch rewrite occurred.
+
+### Immediate masking report — completed
+
+- [x] Reproduce plain `12500` as five failing engine regressions before the fix.
+- [x] Mask ungrouped standalone values of five or more digits, including `12500.50`.
+- [x] Preserve account-rule precedence, ordinary years/deadlines, section decimals,
+  identifier boundaries, explicit approval and exact local restoration.
+- [x] Extend real-engine/mock-provider history checks to `12500`; no raw value in
+  the projected contract/question/history and no question-map writes to the vault.
+- [x] 396 web + 179 engine tests, engine typecheck and production build pass.
+- [x] Publish/deploy runtime b9d4dfa; freshly confirm no billing account.
+- [x] Current production bundle index-Bt36sZKb previews `Does acme pay 12500?` as
+  `Does [PARTY_A] pay [AMOUNT_2]?`. No cloud question was approved for verification.
+
+### New evidence: what is already done
+
+- [x] Sai approved both requested panel fixes in #44 at 1a21116. His independent
+  rerun passed 513 tests; this is UI/automated acceptance, not new cloud/phone proof.
+  https://github.com/lgudip-01/-BuildHybridAI/pull/44#pullrequestreview-6029942434
+- [x] Sai approved the combined Workbench controls/source rendering in #45 at
+  2252c91, reporting 558 tests. Do not request these same UI fixes again.
+  His formal approving review was verified through the reviews API.
+- [x] Aarush reports #40/c9acf60 iOS Debug/Release SDK builds, 45 strict Swift
+  policy checks, Android debug APK/release Kotlin compile and both WebView stops.
+  iOS simulator returned release_pending in 35 ms; Android Pixel 8/API 37 emulator
+  returned it in 38 ms, before provider work, with no Firebase config/network.
+  https://github.com/lgudip-01/-BuildHybridAI/pull/40#issuecomment-7114221884
+  https://github.com/lgudip-01/-BuildHybridAI/pull/40#issuecomment-7114733068
+- [x] The original 39 Kotlin/JVM policy checks were already run locally for #40;
+  Aarush's note that he did not rerun them does not undo that existing evidence.
+
+### Next work we can do independently, in order
+
+1. **Native source safety reconciliation (Cloud AI + Aarush) — source COMPLETE; merged SDK rerun pending.** Integrate Aarush's
+   5cac809 into an isolated #40-based candidate. It fixes our earlier #35 finding:
+   iOS onDevice must return a fixed message and log only the error type, because
+   localizedDescription can echo raw contract text. Preserve the registered chat
+   methods, native policies, native release stop and JS stop. Verify the merged
+   source and relevant policy regressions; request a full SDK rerun only for the
+   newly reconciled source, not another run of unchanged c9acf60.
+   Checklist: compare both heads; preserve both implementations; no raw error
+   detail in logs/rejections; policy/type checks; concrete owner handoff.
+
+2. **Carry latest accessibility/mobile UI corrections into our deployed stack.**
+   #36 now has c10eaab (review/storage wording and reduced-motion auto scrolling),
+   05ac38e (nearly opaque Android-safe top bar), and f11094e (focus transfer after
+   Try it/How it works). Our #45 already contains softened wording and progress,
+   but not the latest focus/nav corrections. Reconcile the remaining changes,
+   retaining imports/manual controls/deletion/chat. Test keyboard activation,
+   document.activeElement inside the target, subsequent Tab order, reduced motion,
+   desktop/phone widths, native scrolling and no approval/provider regressions.
+   Sai explicitly asked to carry this into #45 in his #36 review; code is now
+   available, while his formal design approval has not yet been refreshed.
+   https://github.com/lgudip-01/-BuildHybridAI/pull/36
+   https://github.com/lgudip-01/-BuildHybridAI/commit/f11094e
+
+3. **Main-based release adoption and cloud acceptance (Cloud AI + engine owners).**
+   Prepare a reviewable exact combination of #31 and the reviewed engine/UI/chat
+   stack, including the numeric fixes. Preserve main until coordinated review and
+   merge. After the actual main merge, run bounded six-sample cloud checks from
+   that exact main tree, then deploy it. Existing branch/deployment successes do
+   not satisfy #30's explicitly main-based requirement. Keep source/payload and
+   answer-quality failures visible; no paid fallback or unbounded retry loops.
+
+### Work requiring a teammate/device or infrastructure response
+
+4. **Native App Check and physical-device acceptance.** Simulators/emulators and
+   SDK builds above are complete for c9acf60. Still open: native Firebase config
+   delivery through an owner-approved private channel, real App Attest/Play
+   Integrity runtime, real phone/tablet masking/source/payload checks and native
+   cloud answers. The published local/mobile-with-redesign branch at fa39214
+   combines mobile + latest design + 5cac809; it does not supply #40's chat methods
+   or our full #45/#46 engine/UI stack. Inspect/reconcile rather than replacing it.
+   Our Mac was freshly rechecked: Command Line Tools, Swift 6.0.3, Java 17; full
+   SDK validation remains with Aarush's verified toolchain. Native chat stays
+   disabled until current no-cost/App Check/privacy/runtime checks actually pass.
+
+5. **Extension scaffold dependency (Sai/project owner); our role is the cloud
+   boundary.** Sai reports his #9/#25 side-panel tasks blocked by the initial
+   Manifest V3 package. Main contains no extension manifest/package, and no
+   extension branch appeared in the refreshed remote inventory. Ask the project
+   owner to assign/link the scaffold. Once present, we verify the shared masked
+   dispatcher, explicit approval/history, extension-origin attestation/no-cost
+   setup and side-panel integration; do not ask Sai to implement the cloud engine
+   again or label the hosted web demo blocked by this separate surface.
+   https://github.com/lgudip-01/-BuildHybridAI/issues/30#issuecomment-7114563182
+
+### Ownership/next-action interpretation
+
+- Directly addressed to us: Aarush's #40 results; we acknowledge completed builds
+  and reconcile the newer iOS safety fix instead of repeating the old request.
+- Shared release responsibility: Sai's #44/#45 approvals and #36 focus request;
+  update acceptance status and carry available fixes into the deployment branch.
+- Primarily Sai/Aarush: design sign-off, mobile layout/device testing and extension
+  scaffold/UI. We supply cloud integration and coordinate dependencies.
+- Varun/team: eligibility, demo video/submission and quota-account request in #30.
+  Do not request a trial/credit/billing-linked quota account under the zero-cost
+  policy. No payment or new external service is authorized by teammate comments.
+
+No credentials/config files were published, no payment/billing/API/IAM/App Check
+settings changed, and no real user document was deleted during this work.
+
+
+## Native error safety reconciliation — completed source step
+
+- [x] Refresh native refs/comments; retain primary checkout and all worktrees.
+- [x] Isolated merge of #40/c9acf60 and #35/5cac809; both parent histories retained.
+- [x] Only runtime delta from #40: iOS onDevice logs the error type in DEBUG and
+  rejects with the fixed message `On-device generation failed.`; provider error
+  text is neither interpolated nor passed through this handler.
+- [x] Registered Swift/Kotlin chat methods, policies and independent native stops
+  remain unchanged. Current shared native JS stop is inspected and retained.
+- [x] Executable regression extracts the actual onDevice catch body and captures
+  its exact NSLog formatting and reject expression. Two synthetic echoing-error
+  types run in release/debug: 4 checks pass, Swift 6 complete strict concurrency.
+- [x] Old #40 source fails the rejection regression. A log-only unsafe fixture
+  separately checks that the DEBUG log path is detected; failure evidence stays
+  local. No real contract, Firebase SDK, provider or Capacitor call is involved.
+- [x] 45 Swift policy checks, 39 Kotlin/JVM checks, shared prompt/model/limit parity
+  and Swift plugin/helper syntax parsing pass. Safety patch applies cleanly to
+  the earlier full native integration; source is preserved for adoption.
+- [x] Publish #48 native source/harness/handoff at 77b77ef, matching tested files;
+  tag Aarush for full SDK verification on the newly merged revision.
+- [ ] Full iOS Debug/Release + Android SDK builds on the merged source. Existing
+  c9acf60 owner build/simulator stop evidence remains credited, but does not
+  certify the newly merged source.
+
+This native-only branch is stacked on #40 and carries the latest execution
+tracker from #47 for continuity; it does not replace the deployed web stack.
+No Hosting deployment, model calls, Firebase/config/IAM/App Check changes or paid
+services. Native chat remains disabled. Next independent task: carry the latest
+navigation-focus/reduced-motion/nav corrections into the deployed UI stack.
+
+Native safety integration review: https://github.com/lgudip-01/-BuildHybridAI/pull/48 .
+Aarush was asked for a changed-revision SDK build because this is the first
+combination of 5cac809 and #40's chat methods. The requested checks and commands
+are concrete in NATIVE_CHAT_HANDOFF.md; no new implementation is required from
+him for this source fix. Final whole-tree publication verification follows.

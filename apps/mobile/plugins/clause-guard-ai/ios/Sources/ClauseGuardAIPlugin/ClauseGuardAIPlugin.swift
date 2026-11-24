@@ -113,10 +113,10 @@ public class ClauseGuardAIPlugin: CAPPlugin, CAPBridgedPlugin {
                     }
                 } catch {
                     #if DEBUG
-                    // The error only, never the prompt or the result: both hold raw contract text.
-                    NSLog("ClauseGuardAI onDevice failed: %@ (%@)", String(describing: type(of: error)), error.localizedDescription)
+                    // The error's type only. Provider error text can echo the input, and this is the raw-contract path.
+                    NSLog("ClauseGuardAI onDevice failed: %@", String(describing: type(of: error)))
                     #endif
-                    call.reject("On-device generation failed: \(error.localizedDescription)")
+                    call.reject("On-device generation failed.")
                 }
             }
             return
