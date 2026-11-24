@@ -52,7 +52,19 @@ attestation or cloud execution is certified here. No main merge, deployment,
 service activation or billing change. Before any future provider acceptance,
 verify current no-cost pricing/account state and App Check first.
 
-Next independent source step: prepare an isolated combined source candidate
-from #54 plus this correction and the reviewed native #53/#55 changes; inspect
-conflicts, run relevant local checks, and publish only after the source tree is
-reviewable. Preserve owner review/merge and real-device/runtime gates separately.
+Aarush subsequently approved exact #55/fb0d85a: both private config files received,
+configured iOS Debug/Release builds and bundled-copy checks passed, missing-source
+rebuild removed stale output; script sandbox is NO. Evidence:
+https://github.com/lgudip-01/-BuildHybridAI/pull/55#pullrequestreview-6046758729 .
+His Android emulator sample cloud run returned 4/4 validated/restored clauses
+with debug App Check; real devices/Nano/Play Integrity and iOS runtime attestation
+remain open. This is owner-reported emulator evidence, not a new provider call
+by this review or proof on the #56 revision:
+https://github.com/lgudip-01/-BuildHybridAI/pull/48#issuecomment-7143275410 .
+
+Next priority: disable Capacitor Debug bridge logging before model-capable phone
+testing. Aarush observed masked prompts/results in logcat; raw on-device input
+would cross the same bridge. Prepare loggingBehavior=none and request native log
+verification. Then prepare an isolated combined #54/#56 plus #53/#55 source
+candidate, inspect conflicts and run local checks. Preserve owner review/merge
+and real-device/runtime gates separately.
