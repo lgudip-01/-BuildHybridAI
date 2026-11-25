@@ -1866,3 +1866,30 @@ cloud acceptance, real phones and native attestation remain separate.
 
 Bundling review: https://github.com/lgudip-01/-BuildHybridAI/pull/55 .
 No main merge or configured SDK build is claimed by publication.
+
+
+## Aarush tags and iOS fenced-output fix — November 24, 2026
+
+- [x] Inspect new #17/#48 comments, #56/#57 formal approvals, and latest #54 head.
+- [x] Credit #56 approval/merge into #54 and #57 native Debug logging verification;
+  preserve #54/e693389 empty-preview correction. Final #56 negative control is
+  three failing tests after the full-read wording change, not only the first two.
+- [x] Prioritize iOS cloud JSON mode: Likhil prefers a strict parser; Aarush verified
+  the public options API and local 4/4 validated/restored precursor on the simulator.
+- [x] Add the same cloud-only JSON MIME options to isolated #55-based native code;
+  retain Apple defaults, model-source guard, shared strict parser and chat stops.
+- [x] Carry approved #57 logging config unchanged; real private configs untouched.
+- [x] Five actual-snippet dispatch checks, 24 source guards, Swift parse and 137
+  analysis/adapter tests pass; old method fails the new options harness.
+- [x] Publish ready-for-review #58 above #55 and formally request Aarush review.
+  Reply on #17 with the fix, credited results and bounded SDK build request.
+  Fetched 3189bdd matches all four native source/test/handoff files; complete-tree
+  verification follows this final tracker upload. No new inference requested.
+
+Existing iOS App Check/cloud transport and 4/4 local precursor restoration are
+owner-reported complete; this is not six-sample or final-revision acceptance.
+#57 Debug native log gate is complete on Aarush's combined local branch. No model
+call/deployment/payment in this task. Next independent step: combine latest #54,
+logging fix and this #55-based native fix in an isolated reviewable candidate.
+
+JSON output follow-up: https://github.com/lgudip-01/-BuildHybridAI/pull/58 .
