@@ -10,8 +10,8 @@ No gate becomes complete merely because a PR is published or a synthetic test pa
 | Actual main | 65152ceaaa4a5006223c0705f7896631b95b70ed | Still lacks pending integrated work |
 | Web adoption, #50 | accdd4185e81c2047b24df7a12aadd146c413123 | Likhil and Sai review requests pending |
 | Latest reviewed UI/core, #54 | e69338979f800773801c7717d9c5a3395579d957 | Includes merged #56 and truthful empty preview |
-| Native JSON fix, #58 | e7e0d14aecf3f1b645f7cf8724c72794399a4d91 | Exact SDK check consolidated into #60 |
-| Combined SDK target, #60 | 47e08be8b2c4e52ee26ea2706227813e50f6d4de | Aarush review/build result pending |
+| Native JSON fix, #58 | e7e0d14aecf3f1b645f7cf8724c72794399a4d91 | Approved; SDK check completed through #60 |
+| Combined SDK target, #60 | 47e08be8b2c4e52ee26ea2706227813e50f6d4de | Approved; iOS Debug/Release and Android Debug/Release pass |
 | Offline six-sample baseline, #61 | fb1c9062afe4a024a9c23469b85323a53d87f341 | 12 synthetic cases, 454 web tests; not live acceptance |
 
 #61 adds tests/docs only; all 63 production output files match the tested #60
@@ -42,7 +42,35 @@ Evidence links and reproduction details:
 [iOS JSON precursor](https://github.com/lgudip-01/-BuildHybridAI/issues/17#issuecomment-7147133536),
 [logging review](https://github.com/lgudip-01/-BuildHybridAI/pull/57#pullrequestreview-6047375683).
 
-## Gate 1: exact combined SDK build — Aarush
+## Gate 1: exact combined SDK build — COMPLETE
+
+Aarush approved exact #60/47e08be: clean 627-test run, all typechecks/build,
+normal sync with clean Git status, configured iOS Debug/Release simulator builds,
+and Android assembleDebug/assembleRelease (unsigned Release as expected).
+Resolved iOS Firebase 12.19.3, App Check 11.3.2, Capacitor Swift 8.6.2; Android
+firebase-ai 18.2.0, ondevice 16.0.0-beta08, App Check debug 20.1.0. Generated and
+bundled configs retain logging none, and iOS bundles the exact local plist.
+This also closes #58's exact changed-Swift SDK gate; do not request it again.
+
+Evidence: https://github.com/lgudip-01/-BuildHybridAI/pull/60#pullrequestreview-6061644704 .
+
+### Exact combined built-in sample — COMPLETE on emulator/simulator
+
+Aarush ran the built-in sample on those exact Debug builds, logging off. Android
+Pixel 8 emulator and iOS iPhone 18 Pro simulator both returned 4/4 validated cloud
+reviews with real values restored and no leftover placeholders. Ten values were
+masked first, both platforms required patterns-only review, and bridge payloads
+were absent from logs. iOS's only reported model-error lines were type-only.
+
+Evidence: https://github.com/lgudip-01/-BuildHybridAI/pull/60#issuecomment-7169992278 .
+
+This closes exact-revision built-in-sample acceptance, not physical model support,
+release attestation, six-sample content evaluation, native chat release or main
+adoption. These are owner-reported cloud runs; no model call was made by this
+reconciliation, and any future provider use still requires fresh cost/App Check
+verification. Earlier precursor failures remain part of the evidence.
+
+### Reproduction reference (completed gate; no duplicate build requested)
 
 Use #60's exact SHA in a clean isolated checkout; retain private configuration
 only at its ignored native paths. Do not post either Firebase file publicly.
@@ -74,7 +102,7 @@ From apps/mobile/android, the owner can validate these actual project tasks:
 
 These SDK commands have not been executed on our Mac; full Xcode/Android SDKs
 remain unavailable here. One combined pass can cover #58's changed Swift too.
-No cloud/model call is requested for this gate. Native chat stays stopped in JS,
+No additional cloud/model call or repeated SDK build is requested. Native chat stays stopped in JS,
 Swift and Kotlin; compilation alone is not permission to enable it.
 
 Evidence reply on #60:
@@ -92,6 +120,13 @@ No model/provider request made (yes/no):
 ```
 
 ## Gate 2: physical devices and runtime acceptance — mobile/cloud owners
+
+Local readiness: full Xcode and Android Studio are absent on this Mac; only Apple
+Command Line Tools are selected. Apple lists Xcode as free and says a free Apple
+Account supports testing on a device: https://apps.apple.com/us/app/xcode/id497799835 .
+The existing App Store account is being used for the no-cost installation flow;
+any authentication/agreement step remains a user action. No paid Developer Program
+membership, payment details or billing service is authorized.
 
 User-reported iPhone: iPhone 16 Pro Max, iOS 27.2.1. Confirm actual OS, local-model
 availability and configuration on the phone before recording support. Likhil's

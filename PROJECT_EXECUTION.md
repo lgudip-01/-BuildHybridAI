@@ -2000,3 +2000,24 @@ SDK result remains pending; main is still 65152ce. This documentation does not
 advance acceptance, enable native chat, perform inference or authorize billing.
 
 Current acceptance packet: RELEASE_GATES_20261125.md.
+
+
+## Combined native SDK and sample gates completed — November 25, 2026
+
+- [x] Verify Aarush's #60/#58 approvals on exact 47e08be and preserved source ancestry.
+- [x] Credit clean 627-test run, sync, configured iOS Debug/Release and Android
+  Debug/Release builds. #58's changed-Swift build gate is complete through #60.
+- [x] Credit exact-revision built-in sample: both platforms 4/4 validated cloud
+  reviews, restored values and clean payload logs with patterns-only review.
+- [x] Update the acceptance packet with linked SDK/runtime evidence and remaining gates.
+- [x] Check local readiness: full Xcode/Android Studio absent; Apple listing verifies
+  Xcode free and free-account device testing. Start the existing App Store flow.
+- [ ] Install full Xcode: two free Get attempts stalled on a blank App Store sheet.
+  Product page left open; user asked to complete authentication/agreement if shown.
+  Download/installation has not started; physical iPhone installation remains blocked.
+- [x] Publish corrected gate state in existing #61 and hand off remaining owner/main/device
+  work. Final remote complete-tree verification follows these documentation uploads.
+
+Next native gate: physical iPhone/local-model behavior and release attestation;
+Android tablet details remain pending. Six-sample content and actual-main/Hosting
+acceptance stay open; native chat remains stopped. No new model/deployment call.
