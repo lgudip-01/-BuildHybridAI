@@ -1,3 +1,8 @@
+> November 25 update: Aarush approved exact #60/47e08be. iOS Debug/Release,
+> Android Debug/Release and the built-in cloud sample (4/4 validated/restored on
+> both emulator/simulator) pass. See RELEASE_GATES_20261125.md for current gates;
+> older build-pending wording below records the original handoff.
+
 # Combined web/mobile candidate — November 24, 2026
 
 ## Exact inputs and reconciliation
