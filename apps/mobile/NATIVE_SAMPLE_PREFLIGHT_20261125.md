@@ -52,10 +52,15 @@ support, real cloud provenance, attestation, quota/cost state or physical phones
 
 ## Next gate
 
-Aarush's one combined SDK build on #60 remains the next native gate. This test-only
-follow-up leaves its production source and build output unchanged and does not
-require a second SDK matrix. Physical devices and attestation, genuine bounded
-sample/content/restoration acceptance after fresh no-cost/App Check checks, main
-owner integration and exact-main/hosted validation remain separate. Do not enable
+Aarush completed and approved #60/47e08be's combined iOS/Android SDK builds and
+reported 4/4 validated cloud analyses for the built-in sample on both simulator
+and emulator. He also approved this offline preflight at #61/171bfcf:
+https://github.com/lgudip-01/-BuildHybridAI/pull/61#pullrequestreview-6062779927 .
+This test-only follow-up leaves production source/build output unchanged and
+does not require another SDK matrix. Physical iPhone signing and installation
+are now verified separately; app runtime/local-model checks and release attestation
+remain open. Genuine bounded sample/content/restoration acceptance after fresh
+no-cost/App Check checks, main owner integration and exact-main/hosted validation
+remain separate. Current state: RELEASE_GATES_20261125.md. Do not enable
 native chat or count this matrix as completed cloud acceptance. No deployment,
 main merge, service activation or billing change occurred.
