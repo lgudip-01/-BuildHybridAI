@@ -1551,7 +1551,7 @@ history. Main is still 65152ce; no main merge or teammate branch rewrite occurre
 
 ### Next work we can do independently, in order
 
-1. **Native source safety reconciliation (Cloud AI + Aarush) — source and #48 SDK rerun COMPLETE; physical-device acceptance pending.** Integrate Aarush's
+1. **Native source safety reconciliation (Cloud AI + Aarush) — source COMPLETE; merged SDK rerun pending.** Integrate Aarush's
    5cac809 into an isolated #40-based candidate. It fixes our earlier #35 finding:
    iOS onDevice must return a fixed message and log only the error type, because
    localizedDescription can echo raw contract text. Preserve the registered chat
@@ -1641,10 +1641,9 @@ settings changed, and no real user document was deleted during this work.
   the earlier full native integration; source is preserved for adoption.
 - [x] Publish #48 native source/harness/handoff at 77b77ef, matching tested files;
   tag Aarush for full SDK verification on the newly merged revision.
-- [x] Full iOS Debug/Release + Android SDK builds on #48/294ca23 were reported
-  by Aarush November 24. His 45 Swift + four error-boundary checks also passed.
-  This closes that changed-source build gate; physical-device/cloud acceptance
-  remains separate. Later Swift changes need their own changed-revision build.
+- [ ] Full iOS Debug/Release + Android SDK builds on the merged source. Existing
+  c9acf60 owner build/simulator stop evidence remains credited, but does not
+  certify the newly merged source.
 
 This native-only branch is stacked on #40 and carries the latest execution
 tracker from #47 for continuity; it does not replace the deployed web stack.
@@ -1811,85 +1810,38 @@ Native adapter review: https://github.com/lgudip-01/-BuildHybridAI/pull/52 .
 No native release or additional SDK/model run is claimed by this source candidate.
 
 
-## Aarush review/build reconciliation and iOS source guard — November 24
+## PR #54 model coverage review — November 24, 2026
 
-- [x] Verify Aarush's formal #52 approval and reported 606 tests/typecheck/build.
-  Credit his empty/whitespace-reply check; its wording nit is nonblocking.
-- [x] Credit #48/294ca23 iOS Debug/Release, Android debug APK/release compile,
-  45 Swift policy and four error-boundary checks. Existing WebView stop and
-  local Kotlin policy results remain credited; no unchanged rerun requested.
-- [x] Reproduce iOS analysis accepting blank/unknown cloud model versions.
-- [x] Tighten analysis source confirmation and strict end-of-input matching;
-  retain fixed model, providers, native chat stop and both platform histories.
-- [x] 24 actual-source-guard checks and 47 Swift policy checks pass; old source
-  and old matcher negative controls fail. Contract parity and Swift parse pass.
-- [x] Document exact source/build evidence and the remaining iOS-only SDK check
-  in apps/mobile/plugins/clause-guard-ai/NATIVE_CHAT_HANDOFF.md.
-- [x] Publish the source/test/handoff follow-up as #53, stacked on #48, and
-  formally request Aarush review of the changed iOS revision. Fetched 813d413
-  matches all six native source/test/handoff files; final whole-tree verification
-  follows this tracker upload.
+- [x] Inspect exact #54 head 0e41aae, its empty comment timeline and nine-file diff.
+- [x] Preserve opaque top bar/native theme listener and all teammate branches.
+- [x] Reproduce misleading zero/unknown coverage wording with two failing checks.
+- [x] Correct wording and clarify the optional field without changing its shape
+  or any production engine/approval/native/provider behavior.
+- [x] Verify later-chunk failure and unusable output yield zero complete reads;
+  manual edits retain coverage and invalidate old approval.
+- [x] 438 web + 185 engine tests, three typechecks and production build pass.
+- [x] Chrome synthetic Workbench zero and 1-of-4 flows pass at 430px with no
+  horizontal overflow. No SDK/provider calls; QA files/server cleaned up.
+- [x] Publish ready-for-review #56 above #54; request Aarush review and deliver
+  findings on #54. Fetched 0161ea6 matches all six source/test/review-note files;
+  final complete-tree verification follows this tracker upload.
 
-The next native build gate targets this new Swift source, not the completed
-#48 baseline. Android is unchanged. Physical devices, runtime attestation, native
-cloud answers and approved private config delivery remain open. No main merge,
-provider call, deployment, payment, billing or security setting change occurred.
+#53 owner SDK builds are complete. Aarush approved exact #55/fb0d85a: config
+receipt confirmed, configured iOS Debug/Release builds and exact bundled-copy
+checks pass, missing-source rebuild removes stale output; target script sandbox
+is NO. Android emulator built-in-sample cloud review is owner-reported complete
+(4/4 validated clauses, restored values, debug App Check), per #17/#48. This is
+not real-device/Nano/Play Integrity evidence or exact-main acceptance. #50 owner
+merge, iOS runtime App Check/cloud proof, #54 Likhil shared-type review, and
+physical-device attestation remain separate. No deployment or payment. See apps/web/MODEL_COVERAGE_REVIEW_20261124.md.
 
-New iOS source-confirmation review: https://github.com/lgudip-01/-BuildHybridAI/pull/53 .
-Aarush’s #48 builds and #52 approval remain credited; no extra Android build or
-unchanged release-stop check is requested. Full native release remains gated.
+Next priority: suppress Capacitor Debug bridge logging before testing raw text
+on model-capable phones. Aarush found masked prompts/replies in emulator logcat;
+on-device calls would cross the same bridge with raw text. Prepare and verify
+loggingBehavior=none locally, then request native log verification. Afterward,
+reconcile this #54-based UI/core stack with #53/#55 in an isolated candidate.
+Preserve owner branches; publication is not native release authorization.
 
-
-## iOS config bundling — November 24, 2026
-
-- [x] Verify Aarush's #53 approval, 47/24/4 checks, and Debug/Release SDK builds.
-  That Swift build gate is now complete; actual source/device/cloud proof is open.
-- [x] Inspect #35/0ec857d and carry its exact Xcode project change into an isolated
-  #53-based branch; preserve author/provenance and all existing worktrees.
-- [x] Execute the actual build-phase script in a synthetic build tree: eight
-  config copy/missing/stale/path/failure/privacy checks pass; old project fails.
-- [x] Validate project syntax and verify config identifiers locally without
-  printing values. No real config is copied into source or published.
-- [x] Record Dhruv's confirmation that he sent both files privately; receipt
-  remains unconfirmed. No email action was taken.
-- [x] Inspect new #54 phone UI/model-status work; preserve it for separate shared
-  core/UI review after this packaging step. Do not overwrite it with native code.
-- [x] Publish source/test/handoff as ready-for-review #55, stacked on #53, and
-  formally request Aarush review. Fetched f052e32 matches all three native files;
-  the complete-tree verification follows this final tracker upload.
-
-Next packaging gate: Aarush confirms receipt and checks a configured iOS build
-product on the combined revision. No cloud requests until current no-cost/App
-Check checks pass. Next independent source review: #54's model-read provenance,
-shared optional field and status/bar changes. #50 owner merge and actual-main
-cloud acceptance, real phones and native attestation remain separate.
-
-Bundling review: https://github.com/lgudip-01/-BuildHybridAI/pull/55 .
-No main merge or configured SDK build is claimed by publication.
-
-
-## Aarush tags and iOS fenced-output fix — November 24, 2026
-
-- [x] Inspect new #17/#48 comments, #56/#57 formal approvals, and latest #54 head.
-- [x] Credit #56 approval/merge into #54 and #57 native Debug logging verification;
-  preserve #54/e693389 empty-preview correction. Final #56 negative control is
-  three failing tests after the full-read wording change, not only the first two.
-- [x] Prioritize iOS cloud JSON mode: Likhil prefers a strict parser; Aarush verified
-  the public options API and local 4/4 validated/restored precursor on the simulator.
-- [x] Add the same cloud-only JSON MIME options to isolated #55-based native code;
-  retain Apple defaults, model-source guard, shared strict parser and chat stops.
-- [x] Carry approved #57 logging config unchanged; real private configs untouched.
-- [x] Five actual-snippet dispatch checks, 24 source guards, Swift parse and 137
-  analysis/adapter tests pass; old method fails the new options harness.
-- [x] Publish ready-for-review #58 above #55 and formally request Aarush review.
-  Reply on #17 with the fix, credited results and bounded SDK build request.
-  Fetched 3189bdd matches all four native source/test/handoff files; complete-tree
-  verification follows this final tracker upload. No new inference requested.
-
-Existing iOS App Check/cloud transport and 4/4 local precursor restoration are
-owner-reported complete; this is not six-sample or final-revision acceptance.
-#57 Debug native log gate is complete on Aarush's combined local branch. No model
-call/deployment/payment in this task. Next independent step: combine latest #54,
-logging fix and this #55-based native fix in an isolated reviewable candidate.
-
-JSON output follow-up: https://github.com/lgudip-01/-BuildHybridAI/pull/58 .
+Review follow-up: https://github.com/lgudip-01/-BuildHybridAI/pull/56 .
+Packaging evidence: https://github.com/lgudip-01/-BuildHybridAI/pull/55#pullrequestreview-6046758729 .
+Android evidence: https://github.com/lgudip-01/-BuildHybridAI/pull/48#issuecomment-7143275410 .
