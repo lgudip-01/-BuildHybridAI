@@ -17,6 +17,7 @@ public class ClauseGuardAIPlugin: CAPPlugin, CAPBridgedPlugin {
         CAPPluginMethod(name: "onDeviceStatus", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "downloadModel", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "onDevice", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "chat", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "analyzeClause", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "vaultKey", returnType: CAPPluginReturnPromise),
     ]
@@ -122,6 +123,38 @@ public class ClauseGuardAIPlugin: CAPPlugin, CAPBridgedPlugin {
         }
         #endif
         call.reject("The on-device model isn't available.", "UNAVAILABLE")
+    }
+
+    // MARK: - chat (stateless masked request; independently blocked pending release)
+
+    @objc func chat(_ call: CAPPluginCall) {
+        do {
+            // FIRST: direct plugin calls cannot bypass the shared JS release stop.
+            try NativeChatRelease.assertEnabled()
+            guard let options = call.options as? [String: Any] else { throw NativeChatFailure.invalidRequest }
+            let request = try NativeChatPolicy.validate(options)
+            #if canImport(FirebaseAILogic) && canImport(FoundationModels) && compiler(>=6.2.3)
+            if #available(iOS 26.0, *) {
+                Task {
+                    do {
+                        let text = try await AnalysisSupport.withDeadline(seconds: Double(request.timeoutMs) / 1000) {
+                            try await AnalysisSupport.runCloudChat(request)
+                        }
+                        guard !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty, text.utf16.count <= 60_000 else { throw NativeChatFailure.invalidRequest }
+                        call.resolve(["text": text, "source": "cloud"])
+                    } catch {
+                        call.reject("Contract chat could not complete a confirmed cloud answer.", "model_error")
+                    }
+                }
+                return
+            }
+            #endif
+            call.reject("Native cloud chat is unavailable on this build.", "model_error")
+        } catch NativeChatFailure.releasePending {
+            call.reject("Contract chat is awaiting release checks. No question was sent.", "release_pending")
+        } catch {
+            call.reject("The native chat request is invalid.", "invalid_response")
+        }
     }
 
     // MARK: - analyzeClause (leak-checked text only)

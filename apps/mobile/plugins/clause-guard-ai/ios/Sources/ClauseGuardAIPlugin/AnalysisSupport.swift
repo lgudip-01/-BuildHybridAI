@@ -46,6 +46,20 @@ enum AnalysisSupport {
         }
     }
 
+    /// Fresh cloud-only session per masked chat request. No provider history or local fallback.
+    @available(iOS 26.0, *)
+    static func runCloudChat(_ request: NativeChatRequest) async throws -> String {
+        guard configureFirebase() else { throw AnalysisError.notConfigured }
+        let ai = FirebaseAI.firebaseAI(backend: .googleAI())
+        let session = ai.generativeModelSession(model: ai.geminiModel(name: request.model), instructions: request.system)
+        // Experimental session schema API is not public; shared JS validates the JSON response.
+        let schema = request.schemaJSON
+        let prompt = "Return only JSON matching this schema:\n\(schema)\n\nMasked contract, history and question data:\n\(request.input)"
+        let response = try await session.respond(to: prompt)
+        guard NativeChatPolicy.confirmsCloud(response.rawResponse.modelVersion) else { throw NativeChatFailure.wrongSource }
+        return response.content
+    }
+
     /// One masked clause through Firebase AI Logic. `source` is "cloud" (Gemini) or "device" (Apple's model).
     @available(iOS 26.0, *)
     static func run(source: String, model: String, system: String, input: String, schema: [String: Any]) async throws -> String {

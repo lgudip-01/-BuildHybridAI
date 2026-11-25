@@ -175,6 +175,34 @@ class ClauseGuardAIPlugin : Plugin() {
         }
     }
 
+    /** Stateless cloud-only masked chat. JS owns engine approval/history; this gate also blocks direct calls. */
+    @PluginMethod
+    fun chat(call: PluginCall) {
+        val request = try {
+            NativeChatRelease.assertEnabled() // FIRST, before config, validation or provider work.
+            NativeChatPolicy.validate(call.data)
+        } catch (e: NativeChatFailure) {
+            if (e.code == "release_pending") call.reject("Contract chat is awaiting release checks. No question was sent.", "release_pending")
+            else call.reject("The native chat request is invalid.", "invalid_response")
+            return
+        } catch (e: Exception) {
+            call.reject("The native chat request is invalid.", "invalid_response")
+            return
+        }
+        scope.launch {
+            try {
+                // runCloud sets ONLY_IN_CLOUD and requires InferenceSource.IN_CLOUD.
+                val text = withTimeout(request.timeoutMs) {
+                    runCloud(request.model, request.system, request.input, request.schema)
+                }
+                if (text.isBlank() || text.length > 60_000) throw NativeChatFailure("invalid_response")
+                call.resolve(JSObject().put("text", text).put("source", "cloud"))
+            } catch (e: Exception) {
+                call.reject("Contract chat could not complete a confirmed cloud answer.", "model_error")
+            }
+        }
+    }
+
     private suspend fun runCloud(model: String, system: String, input: String, schema: JSONObject): String {
         val generative = Firebase.ai(backend = GenerativeBackend.googleAI()).generativeModel(
             modelName = model,

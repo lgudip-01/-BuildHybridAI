@@ -15,4 +15,4 @@ npm run open:ios -w @clause-guard/mobile
 ```
 
 Put `google-services.json` in `android/app/` and `GoogleService-Info.plist` in `ios/App/App/`
-(both are git-ignored). Native methods are skeletons: every `TODO` is still to be implemented.
+(both are git-ignored). The #35 branch implements analysis/on-device helpers. Native chat is now a guarded candidate with independent release blocking; see [native chat handoff](plugins/clause-guard-ai/NATIVE_CHAT_HANDOFF.md) for tested scope and still-open full platform builds/device checks.
