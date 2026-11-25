@@ -2122,3 +2122,56 @@ Native release attestation is still shown unregistered in Console; enforcement
 remains on. No new token registration, cloud analysis, deployment or paid change.
 Next: prepare one public fixture at a time for local-only phone scoring, preserving
 observed misses/retained-term losses; no automatic inference retry or cloud send.
+
+
+## Prepared six-fixture physical-phone masking protocol — November 25, 2026
+
+- [x] Use actual splitter and current JSON fixtures; validate every expected
+  mask/keep string appears in source before deriving the checklist.
+- [x] Verify 60 total clauses, 70 required mask-string checks and 35 keep checks;
+  per-sample clauses are 10/10/10/11/9/10. Replacement counts are not mask totals.
+- [x] Prepare reports/PHONE_LOCAL_MASKING_20261125.md with exact source hashes,
+  source links, checklist and first-result reporting template. No model run.
+- [ ] Run unchanged NDA text on the physical phone, then remaining fixtures.
+
+The built-in four-clause smoke result is separate from all six pending fixtures.
+Stop at local preview; retain partial/failure observations, no automatic retry.
+
+
+## NDA physical-phone score and mirroring setup — November 25, 2026
+
+- [x] User explicitly authorized iPhone Mirroring for Clause Guard and test files,
+  completed Apple setup/authentication; notification forwarding declined and
+  future sessions set to Ask Every Time.
+- [x] Prepare exact six-fixture protocol; existing source samples match #60.
+- [x] Reject malformed automation transfers BEFORE inference (wrong clause count);
+  transfer exact source via TextEdit Copy, focused mirrored field and Paste.
+- [x] NDA: one local run after confirming 10 input clauses; 8 replacements,
+  21,006 ms; visually score mask 9/9 and keep 5/5 across complete c1–c10 preview.
+- [x] Preserve two classification disagreements: c2 and c7 confidentiality vs
+  expected other and liability/other respectively. No prompt/fixture change.
+- [x] Leave cloud approval unpressed; keep private config/signing out of uploads.
+- [ ] Owner review of the two NDA classification expectations.
+- [ ] Finish freelance local run and remaining four fixture scores.
+
+No app source/dependency changes or new cloud model calls. Current native result
+comes from the same signed app installed earlier. Coverage inference/limitations
+and exact checklists are in reports/PHONE_LOCAL_MASKING_20261125.md.
+
+
+## Physical masking matrix checkpoint and liveness priority — November 25, 2026
+
+- [x] Complete first local-only runs for NDA/freelance/lease/offer/note: 50 clauses,
+  62/62 required mask checks and 27/27 keep checks pass by direct mirrored UI review.
+- [x] Preserve 7 classification disagreements (43/50 fixture labels match).
+- [x] SaaS input verified 10 clauses and model ready; first actual run stalls at
+  reading clause 2 with no completed preview. Keep remaining 8 mask/8 keep unscored.
+- [x] Record all timings, review states, additional redactions and limitations in
+  reports/PHONE_LOCAL_MASKING_20261125.md; save screenshots locally.
+- [ ] Fix unbounded native raw-read wait, prove with a never-settling-plugin test,
+  then perform one separately recorded candidate recovery check.
+- [ ] Resolve classification findings with engine/native owners; no fixture edits.
+
+Next priority changed from more model scoring to local-read liveness. Original
+failed SaaS evidence must remain; no automatic model retry or cloud approval.
+Private/local signing project changes are preserved and excluded from publishing.

@@ -144,8 +144,14 @@ First built-in fictional sample local masking is complete by user observation:
 Apple Intelligence remained ready; 10 values replaced in 7,776 ms; 4/4 clauses
 read; no sensitive sample values visible in the masked preview. No cloud approval
 or analysis was requested. These phone-screen observations are user-reported,
-not an automated UI capture or network audit. Six-sample/edge-case coverage,
-release attestation and general content quality remain unverified.
+not an automated UI capture or network audit. Five public phone fixtures now complete: 62/62 required mask checks and 27/27
+keep checks pass on the exact text inputs (50 clauses), directly inspected via
+user-authorized Mirroring. SaaS (10 clauses) stalls at clause 2; its 8 mask/8 keep
+checks remain unscored. 7 of 50 observed labels disagree with unchanged fixtures.
+See reports/PHONE_LOCAL_MASKING_20261125.md for first-run detail and limitations.
+Highest next priority is a bounded native-read wait and safe recovery; preserve
+this stall before any candidate retest. Release attestation, edge cases and
+general content quality remain unverified.
 
 Physical iPhone 16 Pro Max and actual iOS 27.2.1 are tool-verified; first local-model
 read evidence is scoped to the built-in sample above. Likhil's
