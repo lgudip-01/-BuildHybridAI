@@ -126,7 +126,7 @@ selected; the user reviewed and accepted its first-launch SDK agreement. The
 first-launch status check passed and iOS 27.2 device/simulator SDKs are available.
 Web production build and iOS Capacitor sync passed with a clean tracked tree;
 generated payload logging remains `none`. The existing private ignored Firebase
-plist matches the expected bundle/project identifiers. No app or provider was run.
+plist matches the expected bundle/project identifiers. Those build steps did not run the app.
 Local unsigned device build result is recorded in the execution tracker.
 
 Apple's free Personal Team supports personal-device testing, with periodic
@@ -139,10 +139,16 @@ installed app.clauseguard and independently confirms version 1.0/build 1.
 The profile covers this device and expires December 2, 2026 at 20:12:44 UTC.
 Two local DEVELOPMENT_TEAM settings remain uncommitted and excluded from upload.
 Private plist matches the signed bundle; payload logging remains none.
-App launch/runtime, local model and release attestation remain unverified.
+Physical app launch is verified after the user trusted their development profile.
+First built-in fictional sample local masking is complete by user observation:
+Apple Intelligence remained ready; 10 values replaced in 7,776 ms; 4/4 clauses
+read; no sensitive sample values visible in the masked preview. No cloud approval
+or analysis was requested. These phone-screen observations are user-reported,
+not an automated UI capture or network audit. Six-sample/edge-case coverage,
+release attestation and general content quality remain unverified.
 
-User-reported iPhone: iPhone 16 Pro Max, iOS 27.2.1. Confirm actual OS, local-model
-availability and configuration on the phone before recording support. Likhil's
+Physical iPhone 16 Pro Max and actual iOS 27.2.1 are tool-verified; first local-model
+read evidence is scoped to the built-in sample above. Likhil's
 Android tablet model/OS/Nano availability are still unknown. Simulator/emulator
 results do not close this gate.
 

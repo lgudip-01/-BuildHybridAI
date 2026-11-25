@@ -2089,3 +2089,36 @@ Next: verify current no-cost/account/App Check readiness before runtime/provider
 activity, then inspect local-model status and exercise a bounded fictional sample
 with explicit preview review. Installation alone does not establish runtime,
 App Attest, model availability, semantic quality or native chat acceptance.
+
+
+## First physical iPhone local-model masking result — November 25, 2026
+
+- [x] Recheck installed app identity; current Console shows Spark, no linked
+  billing account, AI Logic App Check enforced. No billing/service change.
+- [x] Inspect native startup: native bridge, local Foundation Models for raw text;
+  masking does not dispatch an approved cloud analysis. Apple documents on-device
+  inference as no-cost; no cloud/private-cloud provider was selected for masking.
+- [x] Preserve first launch failure: iOS rejected launch with a signing/trust
+  security error. User then trusted their development profile; CoreDevice launch
+  succeeded and the expected installed app process remained running.
+- [x] User observed Apple Intelligence ready on the physical iPhone.
+- [x] One unchanged built-in fictional Acme/Dana sample masking run, user observed:
+  Apple Intelligence still ready; 10 values replaced; 7,776 ms; all 4 clauses read;
+  all sensitive sample values masked correctly in the visible preview.
+- [x] Stop at preview; no Approve & analyze action or cloud inference requested.
+- [ ] Extend coverage to public six-contract fixtures with exact mask/keep checks.
+- [ ] Confirm partial/unavailable/offline behavior on the physical phone.
+- [ ] Release attestation, native chat and actual-main/Hosting acceptance.
+
+Evidence distinction: launch/process/configuration checks are tool-verified.
+Status, latency, 4/4 coverage, count and visual masking are reported by Dhruv from
+the phone screen, not an automated capture or instrumented payload audit. This
+is the first real-phone local-model result, separate from Aarush's emulator/
+simulator cloud sample and #61's synthetic six-sample tests. One sample does not
+establish general masking recall, clause classification or legal/content quality.
+Production source remains #60/47e08be; same signed app.clauseguard 1.0/build 1 as
+the prior installation (published baseline #61/171bfcf; later changes docs only).
+Native release attestation is still shown unregistered in Console; enforcement
+remains on. No new token registration, cloud analysis, deployment or paid change.
+Next: prepare one public fixture at a time for local-only phone scoring, preserving
+observed misses/retained-term losses; no automatic inference retry or cloud send.
