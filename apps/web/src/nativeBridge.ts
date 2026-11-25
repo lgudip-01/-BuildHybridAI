@@ -1,16 +1,16 @@
 import { assertApproved } from './approvalGuard';
 import { registerPlugin } from '@capacitor/core';
-import type { AiBridge, Analysis, AnalyzeResult, ApprovedBatch, MaskedClause, OnDeviceStatus } from '@clause-guard/core/types';
+import type { AiBridge, AnalyzeResult, ApprovedBatch, OnDeviceStatus } from '@clause-guard/core/types';
+import { analyzeApprovedNative, type AnalysisPlugin } from './nativeAnalyzer';
 
 /** Native plugin implemented in Kotlin (Android) and Swift (iOS): apps/mobile/plugins/clause-guard-ai. */
-interface ClauseGuardAIPlugin {
+interface ClauseGuardAIPlugin extends AnalysisPlugin {
   onDeviceStatus(): Promise<{ status: OnDeviceStatus }>;
   /** Starts the model download if needed. Resolves when it is available. Progress arrives as 'downloadProgress' events. */
   downloadModel(): Promise<void>;
   /** The only call that carries raw contract text. Runs ONLY_ON_DEVICE. */
   onDevice(options: { prompt: string; schema?: object }): Promise<{ text: string }>;
-  /** PREFER_IN_CLOUD. Receives leak-checked text only. */
-  analyze(options: { clauses: MaskedClause[] }): Promise<{ results: Analysis[]; ranOn: 'cloud' | 'device' }>;
+  // analyzeClause(request): one masked clause through Firebase AI Logic (cloud first, then on-device). See AnalysisPlugin.
   /** The vault's AES key as base64 (32 bytes). Created on first use and kept in the iOS Keychain or Android Keystore. */
   vaultKey(): Promise<{ key: string }>;
   addListener(event: 'downloadProgress', cb: (e: { fraction: number }) => void): Promise<{ remove(): Promise<void> }>;
@@ -43,10 +43,8 @@ export class NativeBridge implements AiBridge {
     return (await Native.onDevice({ prompt, schema })).text;
   }
 
-  async analyze(batch: ApprovedBatch): Promise<AnalyzeResult> {
-    assertApproved(batch);
-    // The native plugin still exposes the old clauses-only protocol. Fail closed
-    // until its owner implements the agreed approved-batch/result contract.
-    throw new Error('Native approved-batch analysis is not integrated yet. See issue #5.');
+  /** PREFER_IN_CLOUD in effect: cloud first, then on-device when allowed. Approval is checked around every native call. */
+  analyze(batch: ApprovedBatch): Promise<AnalyzeResult> {
+    return analyzeApprovedNative(Native, batch);
   }
 }
