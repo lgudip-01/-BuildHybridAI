@@ -2021,3 +2021,37 @@ Current acceptance packet: RELEASE_GATES_20261125.md.
 Next native gate: physical iPhone/local-model behavior and release attestation;
 Android tablet details remain pending. Six-sample content and actual-main/Hosting
 acceptance stay open; native chat remains stopped. No new model/deployment call.
+
+
+## Local iPhone build readiness — November 25, 2026
+
+- [x] Verify full Xcode 27.2 (27B52), selected Developer directory and iOS 27.2 SDKs.
+- [x] User reviewed/accepted the first-launch SDK agreement; first-launch check passes.
+- [x] Refresh main/combined/follow-up refs without merging. Main remains 65152ce;
+  combined remains 47e08be. Clean local tree matched published #61/9825b0e before
+  this documentation update; production source still matches approved combined.
+- [x] Web production build/typecheck and iOS Capacitor sync passed; logging none.
+- [x] Place existing Firebase plist only at its ignored local build path; confirm
+  expected app/project identity without disclosing configuration.
+- [x] Build unsigned Debug for generic physical iOS using the pinned resolved
+  dependencies: BUILD SUCCEEDED. Firebase 12.19.3, Capacitor 8.6.2, App Check 11.3.2.
+- [x] Confirm built app includes the byte-identical local plist, app.clauseguard
+  bundle ID and generated logging none. No tracked source/lockfile changes.
+- [x] Check device readiness: no devices found by unrestricted CoreDevice check.
+  Initial sandboxed discovery timed out; that was a local service access issue.
+- [ ] Physical phone connection/pairing: explicitly deferred by user until later.
+- [ ] Free Personal Team signing, device installation and runtime/local-model evidence.
+
+Local build command: `xcodebuild -project apps/mobile/ios/App/App.xcodeproj
+-scheme App -configuration Debug -destination 'generic/platform=iOS'
+-derivedDataPath /private/tmp/clauseguard-iphone-build-20261125
+-onlyUsePackageVersionsFromResolvedFile CODE_SIGNING_ALLOWED=NO build`.
+
+Local output: /private/tmp/clauseguard-iphone-build-20261125/Build/Products/Debug-iphoneos/App.app .
+This unsigned artifact is build evidence, not an installable signed release.
+Local build log: /private/tmp/clauseguard-iphone-build-20261125.log . No app launch,
+new provider/model request, deployment, paid enrollment or billing change.
+Only the current readiness packet and tracker are updated for publication in #61.
+Next: connect/unlock/trust the iPhone when the user is available, inspect actual
+OS/developer mode, then configure free personal signing without weakening App Check.
+Earlier installation-pending notes above are historical and superseded here.

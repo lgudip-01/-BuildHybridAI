@@ -121,12 +121,19 @@ No model/provider request made (yes/no):
 
 ## Gate 2: physical devices and runtime acceptance — mobile/cloud owners
 
-Local readiness: full Xcode and Android Studio are absent on this Mac; only Apple
-Command Line Tools are selected. Apple lists Xcode as free and says a free Apple
-Account supports testing on a device: https://apps.apple.com/us/app/xcode/id497799835 .
-The existing App Store account is being used for the no-cost installation flow;
-any authentication/agreement step remains a user action. No paid Developer Program
-membership, payment details or billing service is authorized.
+Local readiness update (November 25): Xcode 27.2 (27B52) is installed and
+selected; the user reviewed and accepted its first-launch SDK agreement. The
+first-launch status check passed and iOS 27.2 device/simulator SDKs are available.
+Web production build and iOS Capacitor sync passed with a clean tracked tree;
+generated payload logging remains `none`. The existing private ignored Firebase
+plist matches the expected bundle/project identifiers. No app or provider was run.
+Local unsigned device build result is recorded in the execution tracker.
+
+Apple's free Personal Team supports personal-device testing, with periodic
+reprovisioning: https://developer.apple.com/help/account/basics/about-your-developer-account/ .
+No paid Developer Program membership, payment details or billing service is
+authorized. No device was detected; the user deferred USB connection because
+they were leaving. Physical installation/runtime/signing remain unverified.
 
 User-reported iPhone: iPhone 16 Pro Max, iOS 27.2.1. Confirm actual OS, local-model
 availability and configuration on the phone before recording support. Likhil's
