@@ -1962,3 +1962,23 @@ files, all original branches and working folders remain preserved.
 
 Combined candidate review: https://github.com/lgudip-01/-BuildHybridAI/pull/60 .
 Candidate-only history merge: https://github.com/lgudip-01/-BuildHybridAI/pull/59 .
+
+
+## Independent six-sample native preflight — November 25, 2026
+
+- [x] Check #60/#58 reviews, #54 and #17: no combined SDK result/new tag yet.
+- [x] Preserve #60/47e08be; add only offline tests and evidence in isolated follow-up.
+- [x] Exercise genuine NativeBridge/masking/vault/approval/validation/restoration
+  and deletion on six public samples with synthetic cloud/device metadata.
+- [x] 12 cases pass: 80 required strings masked, 35 required terms retained per
+  source; no provider/model calls. Deletion invalidates old native approval.
+- [x] 454 web tests, web typecheck and build pass; all 63 output files byte-identical
+  to #60. Prior engine/native results credited without duplicate SDK checks.
+- [x] Publish ready-for-review #61 above #60. Fetched b3dd290 matches both test
+  and evidence files; final complete-tree verification follows this tracker upload.
+
+See apps/mobile/NATIVE_SAMPLE_PREFLIGHT_20261125.md. SDK/device/cloud/main gates
+remain open and are not satisfied by synthetic responses. #60 remains the one
+combined SDK target; this test-only change does not require another native build.
+
+Offline sample review: https://github.com/lgudip-01/-BuildHybridAI/pull/61 .
