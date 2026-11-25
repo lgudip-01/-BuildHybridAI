@@ -38,3 +38,21 @@ it('keeps source-based review labels visible and distinguishes a device scan', (
   expect(html).toContain('Source-based guarantee review');
   expect(html).toContain('No replacement wording proposed');
 });
+
+it('shows the confirmed source inside its clause card, including a rejected answer', () => {
+  const list = [...clauses, { id: 'c3', index: 2, text: 'Another clause.' }];
+  const html = renderToStaticMarkup(<AnalysisResults clauses={list} outcome={{
+    ranOn: 'cloud',
+    restored: [{ clauseId: 'c1', risk: 'low', explanation: 'Test.', redline: '', questions: [] }],
+    failed: [
+      { clauseId: 'c2', reason: 'invalid_response', detail: 'Rejected', ranOn: 'device' },
+      { clauseId: 'c3', reason: 'model_error', detail: 'Unavailable' },
+    ],
+  }} />);
+  const cards = html.match(/<article[\s\S]*?<\/article>/g)!;
+  expect(cards[0]).toContain('Analyzed in cloud');
+  expect(cards[1]).toContain('On-device preliminary scan');
+  expect(cards[1]).toContain('Needs review');
+  expect(cards[2]).toContain('Execution source unavailable');
+  expect(cards[2]).not.toContain('source-badge');
+});

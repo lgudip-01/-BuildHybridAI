@@ -3,7 +3,8 @@ import { defineConfig } from 'vite';
 
 export default defineConfig(({ mode }) => ({
   plugins: [react()],
-  // Keep an explicitly approved acceptance run intact across dev websocket loss.
+  // Vite 8 keeps its WebSocket client with hmr:false. Disable that connection too
+  // so its reconnect handler cannot reload an approved acceptance page.
   // Acceptance users must reload manually after every source/config change.
-  ...(mode === 'acceptance' && { server: { host: '127.0.0.1', port: 5173, strictPort: true, hmr: false } }),
+  ...(mode === 'acceptance' && { server: { host: '127.0.0.1', port: 5173, strictPort: true, hmr: false, ws: false } }),
 }));

@@ -33,3 +33,15 @@ informed user review/confirmation; accepting terms is not a zero-cost guarantee.
 Keep raw contract text local, require genuine runtime approval for masked cloud
 requests, preserve validation and actual inference-source reporting. No paid
 inference or provider activation is authorized by previous test evidence.
+
+## Quality bar
+
+Aim for near-perfect execution: inspect content as well as runtime validation,
+address demonstrated weaknesses, and preserve all failure evidence. Do not call
+valid JSON or a single successful sample legal accuracy or general reliability.
+Prefer meaningful regressions and one justified verification after a concrete
+change; never weaken approval/privacy/validation or loop until a green result.
+
+Close finished task tabs when they are no longer needed. Preserve active
+verification pages until their evidence is recorded, and leave unrelated user
+tabs alone.
