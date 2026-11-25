@@ -10,6 +10,10 @@ vi.mock('./approvalGuard', () => ({
 }));
 import { analyzeApprovedNative, type AnalysisPlugin, type ClauseRequest } from './nativeAnalyzer';
 import { AnalysisUnavailableError } from './cloudAnalyzer';
+import {
+  sourceQuotedSignatoryReview, sourceQuotedGuaranteeReview,
+  SIGNATORY_REVIEW_QUESTIONS, GUARANTEE_REVIEW_QUESTIONS,
+} from '@clause-guard/core/analysis';
 
 function batch(count = 2): ApprovedBatch {
   const value = {
@@ -23,6 +27,93 @@ function batch(count = 2): ApprovedBatch {
 }
 const answer = (id: string, extra: Partial<Analysis> = {}): Analysis => ({
   clauseId: id, risk: 'high', explanation: '[PARTY_A] bears broad risk.', redline: '', questions: ['Can [PARTY_B] limit this duty?'], ...extra,
+});
+
+function sourceBatch(text: string): ApprovedBatch {
+  const value = Object.freeze({ docId: 'local-only-doc', clauses: Object.freeze([
+    Object.freeze({ id: 'c1', text: text as CleanText }),
+  ]) });
+  mocks.approved.add(value);
+  return value;
+}
+
+const boundedCases = [
+  { kind: 'signatory', text: 'By: [PERSON_1]\nTitle: CEO',
+    review: sourceQuotedSignatoryReview, questions: SIGNATORY_REVIEW_QUESTIONS },
+  { kind: 'guarantee', text: "[PARTY_A] guarantees all of Borrower's obligations under this Note.",
+    review: sourceQuotedGuaranteeReview, questions: GUARANTEE_REVIEW_QUESTIONS },
+] as const;
+
+describe('current shared analysis policy on the native boundary', () => {
+  it.each(boundedCases)('constrains and validates the bounded $kind format on both provider paths', async fixture => {
+    const expected = fixture.review(fixture.text as CleanText)!;
+    expect(expected).toBeTruthy();
+    const data = answer('c1', { explanation: expected, questions: [fixture.questions[0]] });
+    const p = plugin(reply('c1', 'cloud', data));
+    expect((await analyzeApprovedNative(p, sourceBatch(fixture.text))).results).toEqual([data]);
+    const request = p.analyzeClause.mock.calls[0]![0];
+    expect(request.schema).toMatchObject({ properties: {
+      explanation: { enum: [expected] }, questions: { items: { enum: [...fixture.questions] } },
+    } });
+    expect(request.cloudSystem).toContain('Use the exact source-based explanation');
+    expect(request.deviceSystem).toContain('Use the exact source-based explanation');
+  });
+
+  it.each(boundedCases)('rejects extra commentary on a bounded $kind rather than silently correcting it', async fixture => {
+    const expected = fixture.review(fixture.text as CleanText)!;
+    const p = plugin(reply('c1', 'device', answer('c1', {
+      explanation: expected + ' Extra commentary.', questions: [],
+    })));
+    const result = await analyzeApprovedNative(p, sourceBatch(fixture.text));
+    expect(result.results).toEqual([]);
+    expect(result.failed).toMatchObject([{ clauseId: 'c1', reason: 'invalid_response', ranOn: 'device' }]);
+    expect(p.analyzeClause).toHaveBeenCalledTimes(1);
+  });
+
+  it('rejects duplicated questions in a bounded signatory review', async () => {
+    const source = boundedCases[0];
+    const p = plugin(reply('c1', 'cloud', answer('c1', {
+      explanation: source.review(source.text as CleanText)!,
+      questions: [source.questions[0], source.questions[0]],
+    })));
+    const result = await analyzeApprovedNative(p, sourceBatch(source.text));
+    expect(result.results).toEqual([]);
+    expect(result.failed).toMatchObject([{ reason: 'invalid_response', ranOn: 'cloud' }]);
+  });
+
+  it('keeps ordinary lease terms on general analysis without a sentence template', async () => {
+    const p = plugin(reply('c1', 'cloud', answer('c1', {
+      explanation: 'Review the stated dates.', questions: [],
+    })));
+    const result = await analyzeApprovedNative(p, sourceBatch('The lease starts [DATE_1] and ends [DATE_2].'));
+    expect(result.failed).toEqual([]);
+    expect(p.analyzeClause.mock.calls[0]![0].schema).toMatchObject({ properties: { explanation: { type: 'string' } } });
+    expect(p.analyzeClause.mock.calls[0]![0].schema).not.toHaveProperty('properties.explanation.enum');
+  });
+
+  it('retains confirmed source on invalid JSON and mixed-source failures', async () => {
+    const p = plugin({ text: 'not json', source: 'cloud' }, reply('c2', 'device'));
+    const result = await analyzeApprovedNative(p, batch(2));
+    expect(result.results).toEqual([]);
+    expect(result.ranOn).toBe('cloud');
+    expect(result.failed.map(f => f.ranOn)).toEqual(['cloud', 'device']);
+    expect(p.analyzeClause.mock.calls.map(c => c[0].pin)).toEqual([null, 'cloud']);
+  });
+
+  it('does not inherit a previous clause source when a later request rejects', async () => {
+    const p = plugin(reply('c1'), new Error('synthetic private provider error'));
+    const result = await analyzeApprovedNative(p, batch(2));
+    expect(result.failed[0]).not.toHaveProperty('ranOn');
+    expect(JSON.stringify(result)).not.toContain('synthetic private');
+  });
+
+  it('validates unknown placeholders before the bounded format rules', async () => {
+    const source = boundedCases[0];
+    const p = plugin(reply('c1', 'cloud', answer('c1', { explanation: '[PARTY_Z] signed.', questions: [] })));
+    const result = await analyzeApprovedNative(p, sourceBatch(source.text));
+    expect(result.failed).toMatchObject([{ reason: 'unknown_placeholder' }]);
+    expect(JSON.stringify(result.failed)).not.toContain('PARTY_Z');
+  });
 });
 const reply = (id: string, source: 'cloud' | 'device' = 'cloud', data: unknown = answer(id)) => ({ text: JSON.stringify(data), source });
 
@@ -86,7 +177,7 @@ describe('native approved-batch analysis', () => {
     const result = await analyzeApprovedNative(p, batch(2));
     expect(result.ranOn).toBe('cloud');
     expect(result.results.map(r => r.clauseId)).toEqual(['c1']);
-    expect(result.failed).toEqual([{ clauseId: 'c2', reason: 'invalid_response', detail: expect.any(String) }]);
+    expect(result.failed).toEqual([{ clauseId: 'c2', reason: 'invalid_response', detail: expect.any(String), ranOn: 'device' }]);
   });
 
   it('fails a clause that invents a placeholder, without leaking the model text', async () => {

@@ -1,7 +1,10 @@
-import type { Analysis, AnalyzeResult, ApprovedBatch, ClauseFailure } from '@clause-guard/core/types';
+import type { Analysis, AnalyzeResult, ApprovedBatch, ClauseFailure, ExecutionSource } from '@clause-guard/core/types';
 import {
   ANALYSIS_JSON_SCHEMA, AnalysisValidationError, applyCommercialRedlineGuard, clausePlaceholders,
   validateAnalysis, validateBatch, validateExplanationGrounding,
+  sourceQuotedSignatoryReview, sourceQuotedGuaranteeReview,
+  validateSourceQuotedSignatoryReview, validateSourceQuotedGuaranteeReview,
+  SIGNATORY_REVIEW_QUESTIONS, GUARANTEE_REVIEW_QUESTIONS,
 } from '@clause-guard/core/analysis';
 import { assertApproved } from './approvalGuard';
 import { DEFAULT_ANALYSIS_CONFIG } from './analysisConfig';
@@ -9,8 +12,8 @@ import { AnalysisUnavailableError } from './cloudAnalyzer';
 
 /**
  * One masked clause, handed to the native plugin. Native code runs a single model call and reports which
- * source answered. Everything else (approval, prompts, validation, restoring names) stays in TypeScript, so
- * the phone apps can never drift from the web rules.
+ * source answered. Approval, prompts, response validation and restoration stay in TypeScript.
+ * The shared policy and adapter regressions must be checked when reconciling a native release.
  */
 export type ClauseRequest = {
   /** The cloud and on-device system prompts differ, so both are sent and native uses the one for the path it takes. */
@@ -61,36 +64,50 @@ export async function analyzeApprovedNative(plugin: AnalysisPlugin, batch: Appro
     assertApproved(batch); // Invalidate queued sends after a remask.
     const allowed = clausePlaceholders(clause);
     const rules = placeholderRules(allowed);
+    let source: ExecutionSource | undefined;
     try {
+      const signatoryReview = sourceQuotedSignatoryReview(clause.text);
+      const review = signatoryReview ?? sourceQuotedGuaranteeReview(clause.text);
+      const reviewQuestions = signatoryReview ? SIGNATORY_REVIEW_QUESTIONS : GUARANTEE_REVIEW_QUESTIONS;
+      const reviewInstruction = review ? '\nUse the exact source-based explanation supplied in the response schema. ' +
+        'Do not add commentary to it. Return an empty redline and select relevant questions from the schema. ' +
+        'Choose risk as a preliminary review priority only; do not infer unstated facts.' : '';
+      const schema = review ? { ...ANALYSIS_JSON_SCHEMA, properties: { ...ANALYSIS_JSON_SCHEMA.properties,
+        explanation: { type: 'string', enum: [review] },
+        questions: { type: 'array', items: { type: 'string', enum: [...reviewQuestions] }, maxItems: reviewQuestions.length },
+      } } : ANALYSIS_JSON_SCHEMA;
       assertApproved(batch);
       const response = await plugin.analyzeClause({
-        cloudSystem: config.cloudPrompt + rules,
-        deviceSystem: config.devicePrompt + rules,
+        cloudSystem: config.cloudPrompt + rules + reviewInstruction,
+        deviceSystem: config.devicePrompt + rules + reviewInstruction,
         // Explicit projection: no ledger, vault, docId or extra properties.
         input: JSON.stringify({ id: clause.id, ...(clause.type && { type: clause.type }), text: clause.text }),
-        schema: ANALYSIS_JSON_SCHEMA,
+        schema,
         model: config.model,
         pin: ranOn ?? null,
         allowDeviceFallback: config.deviceFallbackEnabled,
         timeoutMs: 60_000,
       });
       assertApproved(batch);
-      const source = response?.source;
-      if ((source !== 'cloud' && source !== 'device') || (ranOn && source !== ranOn)) {
-        failed.push({ clauseId: clause.id, reason: 'invalid_response', detail: 'The model did not confirm the expected execution source.' });
+      const reported = response?.source;
+      source = reported === 'cloud' || reported === 'device' ? reported : undefined;
+      if (!source || (ranOn && source !== ranOn)) {
+        failed.push({ clauseId: clause.id, reason: 'invalid_response', detail: 'The model did not confirm the expected execution source.', ...(source && { ranOn: source }) });
         continue;
       }
       ranOn = source;
       // Validate first: withheld drafts must not hide invented tokens or bad JSON.
       const validated = validateAnalysis(response.text, clause.id, allowed);
       validateExplanationGrounding(validated, clause.text);
+      if (signatoryReview) validateSourceQuotedSignatoryReview(validated, signatoryReview);
+      else if (review) validateSourceQuotedGuaranteeReview(validated, review);
       results.push(applyCommercialRedlineGuard(validated, clause.text));
     } catch (error) {
       // A stale approval aborts the entire batch, even when the native call itself rejected.
       assertApproved(batch);
       failed.push(error instanceof AnalysisValidationError
-        ? { clauseId: clause.id, reason: error.reason, detail: error.message }
-        : { clauseId: clause.id, reason: 'model_error', detail: 'The model request could not be completed.' });
+        ? { clauseId: clause.id, reason: error.reason, detail: error.message, ...(source && { ranOn: source }) }
+        : { clauseId: clause.id, reason: 'model_error', detail: 'The model request could not be completed.', ...(source && { ranOn: source }) });
     }
   }
   assertApproved(batch);
