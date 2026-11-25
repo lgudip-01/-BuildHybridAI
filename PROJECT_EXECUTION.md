@@ -2055,3 +2055,37 @@ Only the current readiness packet and tracker are updated for publication in #61
 Next: connect/unlock/trust the iPhone when the user is available, inspect actual
 OS/developer mode, then configure free personal signing without weakening App Check.
 Earlier installation-pending notes above are historical and superseded here.
+
+
+## Physical iPhone installation — November 25, 2026
+
+- [x] Verify paired physical iPhone 16 Pro Max on actual iOS 27.2.1.
+- [x] User enabled Developer Mode; CoreDevice independently confirms Enabled.
+- [x] User signed in to Xcode; verify free Personal Team, no paid membership.
+- [x] User explicitly approved development certificate/key/app ID/profile creation.
+- [x] Assign local Personal Team; user completed protected Keychain prompts.
+  Repeated prompts corresponded to separately signed components, then the app;
+  the build advanced and finished without a password reset or security bypass.
+- [x] Signed Debug build for the connected iPhone: BUILD SUCCEEDED.
+- [x] Deep strict signature verification passes; private plist matches source;
+  expected bundle ID and generated logging none retained.
+- [x] Install via CoreDevice and independently query only app.clauseguard:
+  Clause Guard version 1.0, build 1 is installed.
+- [x] Embedded development profile includes this device and expires December 2,
+  2026 at 20:12:44 UTC (3:12:44 PM Eastern). Rebuild/reinstall after expiry.
+- [ ] Launch/runtime, Apple local-model availability and sample acceptance.
+- [ ] Release attestation, native chat and actual-main/hosted acceptance.
+
+Production source remains approved combined #60/47e08be. Existing #61/171bfcf
+was the published baseline. Xcode added two DEVELOPMENT_TEAM lines to the local
+project; preserve these uncommitted for this user's signing, and exclude them
+from publication. No shared app identity, dependencies or runtime source changed.
+Private configuration, provisioning profiles and signing keys are never uploaded.
+Signed output: /private/tmp/clauseguard-iphone-build-20261125/Build/Products/Debug-iphoneos/App.app .
+Log: /private/tmp/clauseguard-iphone-signed-build-20261125.log .
+The unsigned output at this same path was replaced by this successful signed build.
+No app launch, provider/model request, deployment, paid membership or billing change.
+Next: verify current no-cost/account/App Check readiness before runtime/provider
+activity, then inspect local-model status and exercise a bounded fictional sample
+with explicit preview review. Installation alone does not establish runtime,
+App Attest, model availability, semantic quality or native chat acceptance.

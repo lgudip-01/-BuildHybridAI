@@ -132,8 +132,14 @@ Local unsigned device build result is recorded in the execution tracker.
 Apple's free Personal Team supports personal-device testing, with periodic
 reprovisioning: https://developer.apple.com/help/account/basics/about-your-developer-account/ .
 No paid Developer Program membership, payment details or billing service is
-authorized. No device was detected; the user deferred USB connection because
-they were leaving. Physical installation/runtime/signing remain unverified.
+authorized. The phone is now connected and paired: physical iPhone 16 Pro Max, iOS 27.2.1,
+Developer Mode Enabled. User signed in and explicitly approved free development
+signing; signed Debug build and deep/strict signature check passed. CoreDevice
+installed app.clauseguard and independently confirms version 1.0/build 1.
+The profile covers this device and expires December 2, 2026 at 20:12:44 UTC.
+Two local DEVELOPMENT_TEAM settings remain uncommitted and excluded from upload.
+Private plist matches the signed bundle; payload logging remains none.
+App launch/runtime, local model and release attestation remain unverified.
 
 User-reported iPhone: iPhone 16 Pro Max, iOS 27.2.1. Confirm actual OS, local-model
 availability and configuration on the phone before recording support. Likhil's
