@@ -19,7 +19,7 @@ device metadata; those labels are fixtures, not verified inference sources.
 | Offer letter | 10 | 6 |
 | Promissory note | 14 | 5 |
 | SaaS | 8 | 8 |
-| Total per synthetic source | 80 | 35 |
+| Total per synthetic source | 70 | 35 |
 
 All 12 cases pass (six samples times two metadata sources). They verify:
 
