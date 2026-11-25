@@ -65,8 +65,8 @@ enum AnalysisSupport {
     static func run(source: String, model: String, system: String, input: String, schema: [String: Any]) async throws -> String {
         guard configureFirebase() else { throw AnalysisError.notConfigured }
         let ai = FirebaseAI.firebaseAI(backend: .googleAI())
-        // The SDK's schema-constrained respond() is not public yet, so the schema goes into the prompt.
-        // The shared TypeScript validator rejects any answer that does not match it.
+        // Cloud JSON mode uses public GenerationConfig options. The schema remains in the prompt;
+        // the shared TypeScript validator still rejects any answer that does not match it.
         let schemaText = String(data: try JSONSerialization.data(withJSONObject: schema, options: [.sortedKeys]), encoding: .utf8) ?? "{}"
         let prompt = "Answer with only JSON that matches this JSON schema, and nothing else:\n\(schemaText)\n\nClause:\n\(input)"
 
@@ -78,7 +78,10 @@ enum AnalysisSupport {
             guard apple.isAvailable else { throw AnalysisError.unavailable }
             session = ai.generativeModelSession(model: apple, instructions: system)
         }
-        let response = try await session.respond(to: prompt)
+        let options: any GenerationOptionsRepresentable = source == "cloud"
+            ? GenerationConfig(responseMIMEType: "application/json")
+            : ResponseGenerationOptions.default
+        let response = try await session.respond(to: prompt, options: options)
         // Do not trust the request: confirm which model really answered.
         guard NativeAnalysisSource.confirms(source: source, model: model, version: response.rawResponse.modelVersion)
         else { throw AnalysisError.wrongSource }
