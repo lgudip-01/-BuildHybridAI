@@ -1970,7 +1970,7 @@ Candidate-only history merge: https://github.com/lgudip-01/-BuildHybridAI/pull/5
 - [x] Preserve #60/47e08be; add only offline tests and evidence in isolated follow-up.
 - [x] Exercise genuine NativeBridge/masking/vault/approval/validation/restoration
   and deletion on six public samples with synthetic cloud/device metadata.
-- [x] 12 cases pass: 80 required strings masked, 35 required terms retained per
+- [x] 12 cases pass: 70 required strings masked, 35 required terms retained per
   source; no provider/model calls. Deletion invalidates old native approval.
 - [x] 454 web tests, web typecheck and build pass; all 63 output files byte-identical
   to #60. Prior engine/native results credited without duplicate SDK checks.
@@ -1982,3 +1982,21 @@ remain open and are not satisfied by synthetic responses. #60 remains the one
 combined SDK target; this test-only change does not require another native build.
 
 Offline sample review: https://github.com/lgudip-01/-BuildHybridAI/pull/61 .
+
+
+## Consolidated acceptance packet and count correction — November 25, 2026
+
+- [x] Recheck #60/#58/#61/#50 comments/metadata: no new owner result.
+- [x] Verify exact SHAs, owners, sync script, Android alias and fixture totals.
+- [x] Correct documentation arithmetic: actual mask list totals 70, not 80;
+  retained terms total 35. Tests used each real fixture list and remain valid.
+- [x] Consolidate completed evidence and pending SDK/device/inference/main/Hosting
+  gates in RELEASE_GATES_20261125.md with commands and sanitized evidence template.
+- [x] Keep #60 as one SDK target; no duplicate build/model request or production edit.
+- [x] Correct #61 description and sample note; publish the consolidated packet
+  in that existing PR. Final complete-tree verification follows this tracker upload.
+
+SDK result remains pending; main is still 65152ce. This documentation does not
+advance acceptance, enable native chat, perform inference or authorize billing.
+
+Current acceptance packet: RELEASE_GATES_20261125.md.
