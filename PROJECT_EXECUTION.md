@@ -1962,3 +1962,163 @@ files, all original branches and working folders remain preserved.
 
 Combined candidate review: https://github.com/lgudip-01/-BuildHybridAI/pull/60 .
 Candidate-only history merge: https://github.com/lgudip-01/-BuildHybridAI/pull/59 .
+
+
+## Independent six-sample native preflight — November 25, 2026
+
+- [x] Check #60/#58 reviews, #54 and #17: no combined SDK result/new tag yet.
+- [x] Preserve #60/47e08be; add only offline tests and evidence in isolated follow-up.
+- [x] Exercise genuine NativeBridge/masking/vault/approval/validation/restoration
+  and deletion on six public samples with synthetic cloud/device metadata.
+- [x] 12 cases pass: 70 required strings masked, 35 required terms retained per
+  source; no provider/model calls. Deletion invalidates old native approval.
+- [x] 454 web tests, web typecheck and build pass; all 63 output files byte-identical
+  to #60. Prior engine/native results credited without duplicate SDK checks.
+- [x] Publish ready-for-review #61 above #60. Fetched b3dd290 matches both test
+  and evidence files; final complete-tree verification follows this tracker upload.
+
+See apps/mobile/NATIVE_SAMPLE_PREFLIGHT_20261125.md. SDK/device/cloud/main gates
+remain open and are not satisfied by synthetic responses. #60 remains the one
+combined SDK target; this test-only change does not require another native build.
+
+Offline sample review: https://github.com/lgudip-01/-BuildHybridAI/pull/61 .
+
+
+## Consolidated acceptance packet and count correction — November 25, 2026
+
+- [x] Recheck #60/#58/#61/#50 comments/metadata: no new owner result.
+- [x] Verify exact SHAs, owners, sync script, Android alias and fixture totals.
+- [x] Correct documentation arithmetic: actual mask list totals 70, not 80;
+  retained terms total 35. Tests used each real fixture list and remain valid.
+- [x] Consolidate completed evidence and pending SDK/device/inference/main/Hosting
+  gates in RELEASE_GATES_20261125.md with commands and sanitized evidence template.
+- [x] Keep #60 as one SDK target; no duplicate build/model request or production edit.
+- [x] Correct #61 description and sample note; publish the consolidated packet
+  in that existing PR. Final complete-tree verification follows this tracker upload.
+
+SDK result remains pending; main is still 65152ce. This documentation does not
+advance acceptance, enable native chat, perform inference or authorize billing.
+
+Current acceptance packet: RELEASE_GATES_20261125.md.
+
+
+## Combined native SDK and sample gates completed — November 25, 2026
+
+- [x] Verify Aarush's #60/#58 approvals on exact 47e08be and preserved source ancestry.
+- [x] Credit clean 627-test run, sync, configured iOS Debug/Release and Android
+  Debug/Release builds. #58's changed-Swift build gate is complete through #60.
+- [x] Credit exact-revision built-in sample: both platforms 4/4 validated cloud
+  reviews, restored values and clean payload logs with patterns-only review.
+- [x] Update the acceptance packet with linked SDK/runtime evidence and remaining gates.
+- [x] Check local readiness: full Xcode/Android Studio absent; Apple listing verifies
+  Xcode free and free-account device testing. Start the existing App Store flow.
+- [ ] Install full Xcode: two free Get attempts stalled on a blank App Store sheet.
+  Product page left open; user asked to complete authentication/agreement if shown.
+  Download/installation has not started; physical iPhone installation remains blocked.
+- [x] Publish corrected gate state in existing #61 and hand off remaining owner/main/device
+  work. Final remote complete-tree verification follows these documentation uploads.
+
+Next native gate: physical iPhone/local-model behavior and release attestation;
+Android tablet details remain pending. Six-sample content and actual-main/Hosting
+acceptance stay open; native chat remains stopped. No new model/deployment call.
+
+
+## Local iPhone build readiness — November 25, 2026
+
+- [x] Verify full Xcode 27.2 (27B52), selected Developer directory and iOS 27.2 SDKs.
+- [x] User reviewed/accepted the first-launch SDK agreement; first-launch check passes.
+- [x] Refresh main/combined/follow-up refs without merging. Main remains 65152ce;
+  combined remains 47e08be. Clean local tree matched published #61/9825b0e before
+  this documentation update; production source still matches approved combined.
+- [x] Web production build/typecheck and iOS Capacitor sync passed; logging none.
+- [x] Place existing Firebase plist only at its ignored local build path; confirm
+  expected app/project identity without disclosing configuration.
+- [x] Build unsigned Debug for generic physical iOS using the pinned resolved
+  dependencies: BUILD SUCCEEDED. Firebase 12.19.3, Capacitor 8.6.2, App Check 11.3.2.
+- [x] Confirm built app includes the byte-identical local plist, app.clauseguard
+  bundle ID and generated logging none. No tracked source/lockfile changes.
+- [x] Check device readiness: no devices found by unrestricted CoreDevice check.
+  Initial sandboxed discovery timed out; that was a local service access issue.
+- [ ] Physical phone connection/pairing: explicitly deferred by user until later.
+- [ ] Free Personal Team signing, device installation and runtime/local-model evidence.
+
+Local build command: `xcodebuild -project apps/mobile/ios/App/App.xcodeproj
+-scheme App -configuration Debug -destination 'generic/platform=iOS'
+-derivedDataPath /private/tmp/clauseguard-iphone-build-20261125
+-onlyUsePackageVersionsFromResolvedFile CODE_SIGNING_ALLOWED=NO build`.
+
+Local output: /private/tmp/clauseguard-iphone-build-20261125/Build/Products/Debug-iphoneos/App.app .
+This unsigned artifact is build evidence, not an installable signed release.
+Local build log: /private/tmp/clauseguard-iphone-build-20261125.log . No app launch,
+new provider/model request, deployment, paid enrollment or billing change.
+Only the current readiness packet and tracker are updated for publication in #61.
+Next: connect/unlock/trust the iPhone when the user is available, inspect actual
+OS/developer mode, then configure free personal signing without weakening App Check.
+Earlier installation-pending notes above are historical and superseded here.
+
+
+## Physical iPhone installation — November 25, 2026
+
+- [x] Verify paired physical iPhone 16 Pro Max on actual iOS 27.2.1.
+- [x] User enabled Developer Mode; CoreDevice independently confirms Enabled.
+- [x] User signed in to Xcode; verify free Personal Team, no paid membership.
+- [x] User explicitly approved development certificate/key/app ID/profile creation.
+- [x] Assign local Personal Team; user completed protected Keychain prompts.
+  Repeated prompts corresponded to separately signed components, then the app;
+  the build advanced and finished without a password reset or security bypass.
+- [x] Signed Debug build for the connected iPhone: BUILD SUCCEEDED.
+- [x] Deep strict signature verification passes; private plist matches source;
+  expected bundle ID and generated logging none retained.
+- [x] Install via CoreDevice and independently query only app.clauseguard:
+  Clause Guard version 1.0, build 1 is installed.
+- [x] Embedded development profile includes this device and expires December 2,
+  2026 at 20:12:44 UTC (3:12:44 PM Eastern). Rebuild/reinstall after expiry.
+- [ ] Launch/runtime, Apple local-model availability and sample acceptance.
+- [ ] Release attestation, native chat and actual-main/hosted acceptance.
+
+Production source remains approved combined #60/47e08be. Existing #61/171bfcf
+was the published baseline. Xcode added two DEVELOPMENT_TEAM lines to the local
+project; preserve these uncommitted for this user's signing, and exclude them
+from publication. No shared app identity, dependencies or runtime source changed.
+Private configuration, provisioning profiles and signing keys are never uploaded.
+Signed output: /private/tmp/clauseguard-iphone-build-20261125/Build/Products/Debug-iphoneos/App.app .
+Log: /private/tmp/clauseguard-iphone-signed-build-20261125.log .
+The unsigned output at this same path was replaced by this successful signed build.
+No app launch, provider/model request, deployment, paid membership or billing change.
+Next: verify current no-cost/account/App Check readiness before runtime/provider
+activity, then inspect local-model status and exercise a bounded fictional sample
+with explicit preview review. Installation alone does not establish runtime,
+App Attest, model availability, semantic quality or native chat acceptance.
+
+
+## First physical iPhone local-model masking result — November 25, 2026
+
+- [x] Recheck installed app identity; current Console shows Spark, no linked
+  billing account, AI Logic App Check enforced. No billing/service change.
+- [x] Inspect native startup: native bridge, local Foundation Models for raw text;
+  masking does not dispatch an approved cloud analysis. Apple documents on-device
+  inference as no-cost; no cloud/private-cloud provider was selected for masking.
+- [x] Preserve first launch failure: iOS rejected launch with a signing/trust
+  security error. User then trusted their development profile; CoreDevice launch
+  succeeded and the expected installed app process remained running.
+- [x] User observed Apple Intelligence ready on the physical iPhone.
+- [x] One unchanged built-in fictional Acme/Dana sample masking run, user observed:
+  Apple Intelligence still ready; 10 values replaced; 7,776 ms; all 4 clauses read;
+  all sensitive sample values masked correctly in the visible preview.
+- [x] Stop at preview; no Approve & analyze action or cloud inference requested.
+- [ ] Extend coverage to public six-contract fixtures with exact mask/keep checks.
+- [ ] Confirm partial/unavailable/offline behavior on the physical phone.
+- [ ] Release attestation, native chat and actual-main/Hosting acceptance.
+
+Evidence distinction: launch/process/configuration checks are tool-verified.
+Status, latency, 4/4 coverage, count and visual masking are reported by Dhruv from
+the phone screen, not an automated capture or instrumented payload audit. This
+is the first real-phone local-model result, separate from Aarush's emulator/
+simulator cloud sample and #61's synthetic six-sample tests. One sample does not
+establish general masking recall, clause classification or legal/content quality.
+Production source remains #60/47e08be; same signed app.clauseguard 1.0/build 1 as
+the prior installation (published baseline #61/171bfcf; later changes docs only).
+Native release attestation is still shown unregistered in Console; enforcement
+remains on. No new token registration, cloud analysis, deployment or paid change.
+Next: prepare one public fixture at a time for local-only phone scoring, preserving
+observed misses/retained-term losses; no automatic inference retry or cloud send.
