@@ -581,6 +581,22 @@ button {
   font-weight: 600;
 }
 
+/* Import and Scan stay on one line, and move below the title together on a narrow phone. */
+.pane-head:has(.pane-actions) {
+  flex-wrap: wrap;
+}
+
+.pane-actions {
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.pane-actions .ghost,
+.pane-head .meta {
+  white-space: nowrap;
+}
+
 .pane-body {
   flex: 1;
   height: min(70vh, 560px);

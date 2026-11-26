@@ -48,6 +48,16 @@ for (const platform of ['android', 'ios']) {
       if (success) assert.equal(resolved.text, reply);
       else assert.equal(rejected.message, reply);
     }
+    // A camera scan's result is raw contract text too (#62).
+    {
+      const scanned = 'SYNTHETIC_SCANNED_TEXT_SENTINEL';
+      let resolved;
+      const callbackId = cap.toNative('ClauseGuardAI', 'scanDocument', {}, { resolve: data => { resolved = data; }, reject: () => {} });
+      cap.fromNative({ callbackId, pluginId: 'ClauseGuardAI', methodName: 'scanDocument', success: true,
+        data: { pages: [{ lines: [{ text: scanned, x: 0.1, y: 0.1, w: 0.5, h: 0.02 }] }] } });
+      assert.equal(resolved.pages[0].lines[0].text, scanned);
+      if (enabled) assert.ok(JSON.stringify(logs).includes(scanned), 'Negative control must expose the scanned text');
+    }
     const rendered = JSON.stringify(logs);
     if (enabled) {
       assert.ok(rendered.includes('SYNTHETIC_RAW_REQUEST_SENTINEL'), 'Negative control must expose the request');

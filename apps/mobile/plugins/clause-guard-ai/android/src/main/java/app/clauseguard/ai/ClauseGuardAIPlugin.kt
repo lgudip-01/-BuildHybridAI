@@ -60,6 +60,37 @@ class ClauseGuardAIPlugin : Plugin() {
         }
     }
 
+    /**
+     * Scans paper pages and returns their recognized text and line boxes. See DocumentScanner.kt.
+     * Rejections carry fixed messages only, never recognized text.
+     */
+    @PluginMethod
+    fun scanDocument(call: PluginCall) {
+        val activity = activity ?: return call.reject("The scanner couldn't open.", "SCAN_FAILED")
+        activity.runOnUiThread {
+            DocumentScanner.capture(activity) { captured ->
+                captured.fold(
+                    onSuccess = { pages ->
+                        scope.launch {
+                            try {
+                                call.resolve(JSObject().put("pages", DocumentScanner.read(context, pages)))
+                            } catch (e: Exception) {
+                                call.reject("The scan couldn't be read.", "SCAN_FAILED")
+                            }
+                        }
+                    },
+                    onFailure = { failure ->
+                        when ((failure as? DocumentScanner.Failure)?.code) {
+                            "CANCELED" -> call.reject("Scan canceled.", "CANCELED")
+                            "UNAVAILABLE" -> call.reject("The document scanner isn't available on this phone.", "UNAVAILABLE")
+                            else -> call.reject("The scan couldn't be read.", "SCAN_FAILED")
+                        }
+                    },
+                )
+            }
+        }
+    }
+
     /** available | downloadable | downloading | unavailable */
     private suspend fun currentStatus(): String = try {
         when (FirebaseAIOnDevice.checkStatus()) {
