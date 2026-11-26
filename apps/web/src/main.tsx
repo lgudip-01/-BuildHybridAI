@@ -9,7 +9,7 @@ import { createRoot } from 'react-dom/client';
 import { App } from './App';
 import { initAI } from './firebase';
 import { Capacitor } from '@capacitor/core';
-import { useExternalKey } from '@clause-guard/privacy-engine/vault';
+import { purgeExpiredVaults, useExternalKey } from '@clause-guard/privacy-engine/vault';
 import { NativeBridge, nativeVaultKey } from './nativeBridge';
 import { WebBridge } from './webBridge';
 import { CloudChatBridge } from './cloudChat';
@@ -20,6 +20,8 @@ function start(): ReactNode {
     const native = Capacitor.isNativePlatform();
     // The vault key lives in the phone's keystore: WebViews can't store a CryptoKey in IndexedDB.
     if (native) useExternalKey(nativeVaultKey);
+    // Vaults from earlier visits can't be read again, so their real values are deleted once they expire.
+    void purgeExpiredVaults().catch(() => undefined);
     const ai = native ? undefined : initAI();
     const bridge = ai ? new WebBridge(ai) : new NativeBridge();
     const chatBridge = ai ? new CloudChatBridge(ai) : undefined;
