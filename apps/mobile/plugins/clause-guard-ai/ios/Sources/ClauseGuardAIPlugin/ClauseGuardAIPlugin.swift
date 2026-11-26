@@ -20,6 +20,7 @@ public class ClauseGuardAIPlugin: CAPPlugin, CAPBridgedPlugin {
         CAPPluginMethod(name: "chat", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "analyzeClause", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "vaultKey", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "scanDocument", returnType: CAPPluginReturnPromise),
     ]
 
     public override func load() {
@@ -42,6 +43,31 @@ public class ClauseGuardAIPlugin: CAPPlugin, CAPBridgedPlugin {
         } catch {
             call.reject("Couldn't read the vault key from the Keychain.")
         }
+    }
+
+    // MARK: - Document scanning (raw text, stays on this device)
+
+    /// Scans paper pages and returns their recognized text and line boxes. See DocumentScanner.swift.
+    /// Rejections carry fixed messages only, never recognized text.
+    @objc func scanDocument(_ call: CAPPluginCall) {
+        #if os(iOS) && canImport(VisionKit) && canImport(Vision)
+        DispatchQueue.main.async {
+            guard let presenter = self.bridge?.viewController else {
+                return call.reject("The scanner couldn't open.", "SCAN_FAILED")
+            }
+            DocumentScanner.scan(from: presenter) { result in
+                switch result {
+                case .success(let pages): call.resolve(["pages": pages])
+                case .failure(.canceled): call.reject("Scan canceled.", "CANCELED")
+                case .failure(.unavailable): call.reject("The document scanner isn't available on this device.", "UNAVAILABLE")
+                case .failure(.permissionDenied): call.reject("Camera access is off.", "PERMISSION_DENIED")
+                case .failure(.failed): call.reject("The scan couldn't be read.", "SCAN_FAILED")
+                }
+            }
+        }
+        #else
+        call.reject("The document scanner isn't available on this device.", "UNAVAILABLE")
+        #endif
     }
 
     // MARK: - On-device status

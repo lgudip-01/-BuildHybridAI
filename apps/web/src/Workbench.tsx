@@ -2,7 +2,7 @@
 import type { Clause, EntityKind, LedgerEntry, MaskResult, OnDeviceStatus } from '@clause-guard/core/types';
 import { PLACEHOLDER } from '@clause-guard/privacy-engine/placeholders';
 import { Capacitor } from '@capacitor/core';
-import { Download, FileUp, LoaderCircle, ShieldCheck, ShieldX, TriangleAlert } from 'lucide-react';
+import { Download, FileUp, LoaderCircle, ScanText, ShieldCheck, ShieldX, TriangleAlert } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore, type KeyboardEvent } from 'react';
 import type { AiBridge } from '@clause-guard/core/types';
 import { REDLINE_REVIEW_NOTICE } from '@clause-guard/core/analysis';
@@ -13,6 +13,7 @@ import { MaskReviewControls } from './MaskReviewControls';
 import { ReviewChat } from './ReviewChat';
 import type { ChatBridge } from '@clause-guard/core/chat';
 import { ReviewSession, reviewBusy, type ReviewOutcome } from './reviewFlow';
+import { SCAN_REVIEW_NOTE } from './scanText';
 
 const SAMPLE_CONTRACT = `This Mutual Non-Disclosure Agreement is made on January 1, 2026 between Acme Corp ("the Company") and Dana Reyes ("Contractor").
 
@@ -77,7 +78,10 @@ function unavailableReason(): string {
   return `Chrome ${chrome} has the Prompt API turned off. Enable chrome://flags/#prompt-api-for-gemini-nano-multimodal-input, then relaunch Chrome.`;
 }
 
-export function Workbench({ bridge, chatBridge }: { chatBridge?: ChatBridge; bridge: AiBridge & { downloadModel(onProgress: (fraction: number) => void): Promise<void> } }) {
+/** Resolves with the scanned contract's text, or null when the user cancels. Only the phone apps have one. */
+export type Scanner = () => Promise<string | null>;
+
+export function Workbench({ bridge, chatBridge, scan }: { chatBridge?: ChatBridge; scan?: Scanner; bridge: AiBridge & { downloadModel(onProgress: (fraction: number) => void): Promise<void> } }) {
   const workspaceRef = useRef<HTMLDivElement>(null);
   useReveal(workspaceRef, '.pane');
   const [status, setStatus] = useState<OnDeviceStatus | 'checking'>('checking');
@@ -110,7 +114,7 @@ export function Workbench({ bridge, chatBridge }: { chatBridge?: ChatBridge; bri
         setImportError('Import canceled because the contract or review changed. Choose the file again to replace the current text.');
         return;
       }
-      if (session.edit(imported)) setActive(null);
+      if (session.edit(imported, 'import')) setActive(null);
     } catch (e) {
       if (generation === importGeneration.current) setImportError(`Couldn't read ${file.name}: ${errorText(e)}`);
     } finally {
@@ -118,6 +122,27 @@ export function Workbench({ bridge, chatBridge }: { chatBridge?: ChatBridge; bri
         setImporting(false);
         if (fileInput.current) fileInput.current.value = '';
       }
+    }
+  }
+
+  async function scanPaper() {
+    if (!scan) return;
+    const generation = ++importGeneration.current;
+    const original = session.getSnapshot();
+    setImporting(true);
+    setImportError(null);
+    try {
+      const scanned = await scan();
+      if (generation !== importGeneration.current || scanned === null) return;
+      if (session.getSnapshot() !== original) {
+        setImportError('Scan canceled because the contract or review changed. Scan the pages again to replace the current text.');
+        return;
+      }
+      if (session.edit(scanned, 'scan')) setActive(null);
+    } catch (e) {
+      if (generation === importGeneration.current) setImportError(errorText(e));
+    } finally {
+      if (generation === importGeneration.current) setImporting(false);
     }
   }
 
@@ -178,15 +203,23 @@ export function Workbench({ bridge, chatBridge }: { chatBridge?: ChatBridge; bri
               hidden
               onChange={(e) => void importFile(e.target.files?.[0])}
             />
-            <button className="ghost" onClick={() => fileInput.current?.click()} disabled={busy || importing}>
-              {importing ? <LoaderCircle className="spin" size={14} aria-hidden /> : <FileUp size={14} strokeWidth={1.75} aria-hidden />}
-              {importing ? 'Reading' : 'Import PDF or Word'}
-            </button>
+            <div className="pane-actions">
+              <button className="ghost" onClick={() => fileInput.current?.click()} disabled={busy || importing}>
+                {importing ? <LoaderCircle className="spin" size={14} aria-hidden /> : <FileUp size={14} strokeWidth={1.75} aria-hidden />}
+                {importing ? 'Reading' : 'Import PDF or Word'}
+              </button>
+              {scan && (
+                <button className="ghost" onClick={() => void scanPaper()} disabled={busy || importing}>
+                  <ScanText size={14} strokeWidth={1.75} aria-hidden />
+                  Scan paper
+                </button>
+              )}
+            </div>
           </div>
           <textarea
             className="contract"
             value={contract}
-            onChange={(e) => { if (session.edit(e.target.value)) setActive(null); }}
+            onChange={(e) => { if (session.edit(e.target.value, 'typed')) setActive(null); }}
             readOnly={busy}
             aria-describedby={busy ? 'review-busy-hint' : undefined}
             onKeyDown={onContractKey}
@@ -228,7 +261,7 @@ export function Workbench({ bridge, chatBridge }: { chatBridge?: ChatBridge; bri
           </div>
           <div className="pane-body" data-lenis-prevent>
             {downloadError && <div className="banner" data-tone="warn" role="alert"><p>{downloadError}</p></div>}
-            {review.phase !== 'deleting' && review.phase !== 'deleted' && <Output run={run} active={active} onActive={setActive} />}
+            {review.phase !== 'deleting' && review.phase !== 'deleted' && <Output run={run} active={active} onActive={setActive} scanned={review.scanned} />}
             {review.error && <div className="banner review-actions" data-tone="warn" role="alert"><p>{review.error}</p></div>}
             {['review', 'chat', 'results'].includes(review.phase) && review.masked?.ok && <MaskReviewControls session={session} result={review.masked} allowChat={!!chatBridge} approved={review.phase !== 'review'} />}
             {review.phase === 'revising' && <p role="status">Checking the revised preview on this device…</p>}
@@ -294,8 +327,8 @@ function ModelStatus(props: { status: DisplayStatus; progress: number | null; on
   );
 }
 
-export function Output(props: { run: Run | null; active: string | null; onActive: (p: string | null) => void }) {
-  const { run, active, onActive } = props;
+export function Output(props: { run: Run | null; active: string | null; onActive: (p: string | null) => void; scanned?: boolean }) {
+  const { run, active, onActive, scanned = false } = props;
 
   if (!run) {
     return (
@@ -334,13 +367,15 @@ export function Output(props: { run: Run | null; active: string | null; onActive
 
   return (
     <>
-      {result.needsReview ? (
+      {/* Scanned text is always reviewed: a misread value can slip past masking even when the model read every clause. */}
+      {result.needsReview || scanned ? (
         <div className="banner" data-tone="warn">
           <TriangleAlert size={18} strokeWidth={1.75} aria-hidden />
           <div>
-            <p className="banner-title">{reviewTitle(result)}</p>
+            <p className="banner-title">{result.needsReview ? reviewTitle(result) : 'Check the scanned text before sending.'}</p>
+            {scanned && <p>{SCAN_REVIEW_NOTE}</p>}
             <p>
-              {reviewReason(result)} Took <span className="num">{Math.round(ms)} ms</span>.
+              {result.needsReview && `${reviewReason(result)} `}Took <span className="num">{Math.round(ms)} ms</span>.
             </p>
           </div>
         </div>

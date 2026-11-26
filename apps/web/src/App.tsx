@@ -5,7 +5,7 @@ import { Footer } from './ui/Footer';
 import { Hero } from './ui/Hero';
 import { HowItWorks } from './ui/HowItWorks';
 import { Nav } from './ui/Nav';
-import { Workbench } from './Workbench';
+import { Workbench, type Scanner } from './Workbench';
 
 // The review cards live with the tool; they stay importable from here.
 export { AnalysisResults } from './Workbench';
@@ -13,7 +13,7 @@ export { AnalysisResults } from './Workbench';
 type Bridge = AiBridge & { downloadModel(onProgress: (fraction: number) => void): Promise<void> };
 
 /** The whole page: hero, how it works, then the working tool. Sections live in ./ui, the tool in ./Workbench. */
-export function App({ bridge, chatBridge }: { bridge: Bridge; chatBridge?: ChatBridge }) {
+export function App({ bridge, chatBridge, scan }: { bridge: Bridge; chatBridge?: ChatBridge; scan?: Scanner }) {
   useScroller();
   return (
     <>
@@ -21,7 +21,7 @@ export function App({ bridge, chatBridge }: { bridge: Bridge; chatBridge?: ChatB
       <main>
         <Hero />
         <HowItWorks />
-        <Workbench bridge={bridge} chatBridge={chatBridge} />
+        <Workbench bridge={bridge} chatBridge={chatBridge} scan={scan} />
       </main>
       <Footer />
     </>

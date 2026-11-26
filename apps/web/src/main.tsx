@@ -10,7 +10,7 @@ import { App } from './App';
 import { initAI } from './firebase';
 import { Capacitor } from '@capacitor/core';
 import { useExternalKey } from '@clause-guard/privacy-engine/vault';
-import { NativeBridge, nativeVaultKey } from './nativeBridge';
+import { NativeBridge, nativeVaultKey, scanContract } from './nativeBridge';
 import { WebBridge } from './webBridge';
 import { CloudChatBridge } from './cloudChat';
 import { followThemeForSystemBars } from './nativeSystemBars';
@@ -25,7 +25,8 @@ function start(): ReactNode {
     const ai = native ? undefined : initAI();
     const bridge = ai ? new WebBridge(ai) : new NativeBridge();
     const chatBridge = ai ? new CloudChatBridge(ai) : undefined;
-    return <App bridge={bridge} chatBridge={chatBridge} />;
+    // Camera scanning reads text with the phone's own recognizer, so only the native apps offer it.
+    return <App bridge={bridge} chatBridge={chatBridge} scan={native ? scanContract : undefined} />;
   } catch (error) {
     return (
       <main className="setup-error">

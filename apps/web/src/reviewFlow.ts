@@ -17,7 +17,12 @@ export type ReviewSnapshot = {
   ms?: number;
   outcome?: ReviewOutcome;
   error?: string;
+  /** The text came from a camera scan, so a misread value could slip past masking. Kept through manual edits. */
+  scanned?: boolean;
 };
+
+/** Where new contract text came from. A scan sets the scanned flag, an import clears it, and typing keeps it. */
+export type TextSource = 'typed' | 'import' | 'scan';
 
 export function reviewBusy(snapshot: ReviewSnapshot): boolean {
   return snapshot.phase === 'masking' || snapshot.phase === 'revising' || snapshot.phase === 'analyzing' || snapshot.phase === 'deleting';
@@ -36,6 +41,7 @@ export class ReviewSession {
   // Keep manual protections for this document through edits and repeat scans.
   // A value may already be covered by the automatic scan and have no manual token.
   private manualValues = new Map<string, string | undefined>();
+  private scanned = false;
 
   constructor(private readonly bridge: AiBridge, contract: string) {
     this.state = { contract, phase: 'editing' };
@@ -47,7 +53,9 @@ export class ReviewSession {
     return () => { this.listeners.delete(listener); };
   };
   private update(next: ReviewSnapshot): void {
-    this.state = next;
+    // Every snapshot carries the flag, so no phase change can drop the scan warning.
+    const { scanned: _ignored, ...rest } = next;
+    this.state = this.scanned ? { ...rest, scanned: true } : rest;
     this.listeners.forEach(listener => listener());
   }
 
@@ -83,13 +91,17 @@ export class ReviewSession {
     previous?.close();
   }
 
-  edit(contract: string): boolean {
+  edit(contract: string, source: TextSource = 'typed'): boolean {
     // The UI also makes input read-only while a request is running. Do not
     // accept edits and then let queued sends continue under old approval.
-    if (reviewBusy(this.state) || contract === this.state.contract) return false;
+    if (reviewBusy(this.state)) return false;
+    // Fixing a misread word keeps the text scanned; an imported file replaces it.
+    const scanned = source === 'scan' || (source === 'typed' && this.scanned);
+    if (contract === this.state.contract && scanned === this.scanned) return false;
     this.closeChat();
     this.approvedBatch = undefined;
     this.revision += 1;
+    this.scanned = scanned;
     this.update({ contract, phase: 'editing' });
     return true;
   }
@@ -108,6 +120,7 @@ export class ReviewSession {
       return;
     }
     this.manualValues.clear();
+    this.scanned = false;
     this.documentId = crypto.randomUUID();
     this.update({ contract: '', phase: 'deleted' });
   }
