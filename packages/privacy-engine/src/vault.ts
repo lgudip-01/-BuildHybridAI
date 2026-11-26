@@ -1,3 +1,4 @@
+import { forgetRun } from './approval';
 import { openDB, type IDBPDatabase } from 'idb';
 
 /** Placeholder → real value. */
@@ -65,15 +66,29 @@ function vaultKey(): Promise<CryptoKey> {
 // The document id is bound in as additional data, so one document's vault can't be swapped in for another's.
 const docBytes = (docId: string) => new TextEncoder().encode(docId);
 
-export async function saveVault(docId: string, entries: VaultEntries): Promise<void> {
-  const iv = crypto.getRandomValues(new Uint8Array(12));
-  const data = await crypto.subtle.encrypt(
-    { name: 'AES-GCM', iv, additionalData: docBytes(docId) },
-    await vaultKey(),
-    new TextEncoder().encode(JSON.stringify(entries)),
-  );
-  const sealed: Sealed = { iv, data };
-  await (await db()).put('vaults', sealed, docId);
+// Serialize mutations for a single document, including encryption before the IndexedDB write.
+const pendingWrites = new Map<string, Promise<void>>();
+
+function inWriteOrder(docId: string, operation: () => Promise<void>): Promise<void> {
+  const previous = pendingWrites.get(docId) ?? Promise.resolve();
+  const next = previous.then(operation, operation);
+  pendingWrites.set(docId, next);
+  return next.finally(() => {
+    if (pendingWrites.get(docId) === next) pendingWrites.delete(docId);
+  });
+}
+
+export function saveVault(docId: string, entries: VaultEntries): Promise<void> {
+  return inWriteOrder(docId, async () => {
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const data = await crypto.subtle.encrypt(
+      { name: 'AES-GCM', iv, additionalData: docBytes(docId) },
+      await vaultKey(),
+      new TextEncoder().encode(JSON.stringify(entries)),
+    );
+    const sealed: Sealed = { iv, data };
+    await (await db()).put('vaults', sealed, docId);
+  });
 }
 
 export async function loadVault(docId: string): Promise<VaultEntries | undefined> {
@@ -88,5 +103,6 @@ export async function loadVault(docId: string): Promise<VaultEntries | undefined
 }
 
 export async function deleteVault(docId: string): Promise<void> {
-  await (await db()).delete('vaults', docId);
+  forgetRun(docId);
+  await inWriteOrder(docId, async () => (await db()).delete('vaults', docId));
 }

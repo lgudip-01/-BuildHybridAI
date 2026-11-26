@@ -12,6 +12,7 @@ import { Capacitor } from '@capacitor/core';
 import { useExternalKey } from '@clause-guard/privacy-engine/vault';
 import { NativeBridge, nativeVaultKey } from './nativeBridge';
 import { WebBridge } from './webBridge';
+import { CloudChatBridge } from './cloudChat';
 
 function start(): ReactNode {
   try {
@@ -19,8 +20,10 @@ function start(): ReactNode {
     const native = Capacitor.isNativePlatform();
     // The vault key lives in the phone's keystore: WebViews can't store a CryptoKey in IndexedDB.
     if (native) useExternalKey(nativeVaultKey);
-    const bridge = native ? new NativeBridge() : new WebBridge(initAI());
-    return <App bridge={bridge} />;
+    const ai = native ? undefined : initAI();
+    const bridge = ai ? new WebBridge(ai) : new NativeBridge();
+    const chatBridge = ai ? new CloudChatBridge(ai) : undefined;
+    return <App bridge={bridge} chatBridge={chatBridge} />;
   } catch (error) {
     return (
       <main className="setup-error">

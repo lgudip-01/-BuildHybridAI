@@ -25,9 +25,9 @@ export function parseAnalysisConfig(payload: string, enabled = 'true', fallback 
   try { candidate = JSON.parse(payload); } catch { return defaults(); }
   if (!candidate || typeof candidate !== 'object' || Array.isArray(candidate)) return defaults();
   const c = candidate as Record<string, unknown>;
-  // Retire the v1 checklist rather than append contradictory instructions to it.
+  // Retire earlier global-topic prompts rather than append conflicting instructions.
   // Old/invalid payloads use current app defaults; independent remote kill switches
-  // still apply. A v2 payload is required before remote prompts are used again.
+  // still apply. A v3 payload is required before remote prompts are used again.
   if (Object.keys(c).length !== 4 || c.version !== ANALYSIS_VERSION ||
       // Only this model's free tier has been verified for this no-billing project.
       // Expanding the model choice requires a new pricing/account-state review.

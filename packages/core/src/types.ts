@@ -24,7 +24,11 @@ export type EntityKind =
   | 'DATE'
   | 'EMAIL'
   | 'PHONE'
-  | 'ACCOUNT';
+  | 'ACCOUNT'
+  | 'URL'
+  | 'IP'
+  | 'HANDLE'
+  | 'PRIVATE';
 
 // Text that passed the leak check. Only privacy/leakCheck.ts creates one,
 // and the cloud call only accepts this type, so raw text can't be sent by mistake.
@@ -40,7 +44,7 @@ export type Leak = { clauseId: string; snippet: string; reason: string };
 export type MaskResult =
   // needsReview: masking ran without the on-device model, so the user must approve the text before it is sent.
   // docId: the document this run masked. Pass the result to approve() unchanged; it is frozen.
-  | { ok: true; docId: string; clauses: MaskedClause[]; ledger: LedgerEntry[]; needsReview: boolean }
+  | { ok: true; docId: string; clauses: MaskedClause[]; ledger: LedgerEntry[]; needsReview: boolean; manuallyEdited?: true }
   | { ok: false; docId: string; leaks: Leak[] };
 
 export type Analysis = {
@@ -57,7 +61,11 @@ export type ApprovedBatch = {
   readonly clauses: readonly MaskedClause[];
 };
 
+export type ExecutionSource = 'cloud' | 'device';
+
 export type ClauseFailure = {
+  /** Present only when this clause received a response with SDK-confirmed provenance. */
+  ranOn?: ExecutionSource;
   clauseId: string;
   reason: 'unknown_placeholder' | 'invalid_response' | 'model_error';
   detail: string;

@@ -250,6 +250,39 @@ describe('mask', () => {
     expect(sent).toContain('The landlord rents the unit to');
   });
 
+  it('masks a last name used on its own, as in "Smith\'s", without a model', async () => {
+    const texts = ["Smith's obligations end when Jane Smith resigns.", 'Notices go to Smith by email.'];
+    const result = await mask('doc-possessive', texts.map((text, index) => ({ id: `c${index + 1}`, index, text })), fakeBridge([], { status: 'unavailable' }));
+    if (!result.ok) throw new Error(JSON.stringify(result.leaks));
+
+    const [smith, jane] = [result.clauses[0]!.text, result.clauses[1]!.text];
+    expect(`${smith} ${jane}`).not.toContain('Smith');
+    expect(smith).toMatch(/^\[NAME_1\]'s obligations end when \[NAME_1\] resigns\.$/);
+  });
+
+  it('asks for review when the model finds a name the patterns could not see', async () => {
+    const texts = ['Globex shall indemnify Initech.', 'Payment is due on receipt.'];
+    const result = await mask('doc-model-only', texts.map((text, index) => ({ id: `c${index + 1}`, index, text })), fakeBridge([
+      { text: 'Globex', kind: 'organization', party: true },
+      { text: 'Initech', kind: 'organization', party: true },
+    ]));
+    if (!result.ok) throw new Error(JSON.stringify(result.leaks));
+
+    expect(result.clauses[0]!.text).toBe('[PARTY_A] shall indemnify [PARTY_B].');
+    expect(result.needsReview).toBe(true);
+  });
+
+  it('does not ask for review when the model only reports details the patterns also found', async () => {
+    const texts = ['Notices go to 77 Willow Lane, Springfield, IL 62704 or legal@quillfeather.io.'];
+    const result = await mask('doc-model-agrees', texts.map((text, index) => ({ id: `c${index + 1}`, index, text })), fakeBridge([
+      { text: '77 Willow Lane', kind: 'address', party: false },
+      { text: 'legal@quillfeather.io', kind: 'organization', party: false },
+    ]));
+    if (!result.ok) throw new Error(JSON.stringify(result.leaks));
+
+    expect(result.needsReview).toBe(false);
+  });
+
   it('labels each masked clause with the type the on-device model gives it, in one call per clause', async () => {
     const working = fakeBridge(model);
     const prompts: string[] = [];

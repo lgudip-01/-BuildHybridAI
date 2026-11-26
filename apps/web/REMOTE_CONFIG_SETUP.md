@@ -1,10 +1,10 @@
 # Analysis Remote Config
 
-Current policy: `clause-analysis-v2` (November 20). The v1 generic risk-topic
-checklist is retired. Published/cached v1 payloads use current application
+Current policy: `clause-analysis-v3` (November 21). The v1/v2 global-topic
+prompts are retired. Published/cached v1/v2 payloads use current application
 default prompts; independently read remote false flags still disable analysis
 or device fallback. The client reports source defaults in that case. It must
-not claim v2 remote verification until a v2 payload is actually published and
+not claim v3 remote verification until a v3 payload is actually published and
 activated. This correction updates local templates only; it does not publish
 server settings. Earlier remote verification applies to the older v1 payload.
 

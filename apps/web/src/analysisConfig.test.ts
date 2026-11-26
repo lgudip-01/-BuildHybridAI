@@ -56,13 +56,11 @@ it('bounds a hanging initialization and returns defaults', async () => {
   finally { vi.useRealTimers(); }
 });
 
-it.each(['true', 'false'])('retires v1 checklist prompts while preserving remote kill switches: %s', flag => {
-  const old = { ...DEFAULT_PAYLOAD, version:'clause-analysis-v1',
-    cloudPrompt:'Flag asymmetric obligations, broad indemnity, uncapped liability and unclear payment duties.',
-    devicePrompt:'Offline scan: flag broad indemnity, uncapped liability and payment ambiguity.' };
+it.each([['clause-analysis-v1','true'], ['clause-analysis-v1','false'], ['clause-analysis-v2','true'], ['clause-analysis-v2','false']])('retires old global-topic prompts %s while preserving flags %s', (version, flag) => {
+  const old = {...DEFAULT_PAYLOAD, version, cloudPrompt:'Old instructions naming broad indemnity and execution.', devicePrompt:'Old instructions naming guarantees and execution.'};
   const config = parseAnalysisConfig(JSON.stringify(old), flag, flag);
   expect(config).toEqual({...DEFAULT_ANALYSIS_CONFIG, enabled:flag !== 'false', deviceFallbackEnabled:flag !== 'false'});
-  expect(config.version).toBe('clause-analysis-v2');
+  expect(config.version).toBe('clause-analysis-v3');
   expect(config.source).toBe('defaults');
   expect(config.cloudPrompt).not.toContain(old.cloudPrompt);
   expect(config.devicePrompt).not.toContain(old.devicePrompt);

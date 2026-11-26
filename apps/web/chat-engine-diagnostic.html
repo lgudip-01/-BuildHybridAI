@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="en">
+  <head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><title>Local chat engine candidate check</title></head>
+  <body>
+    <main><h1>Local engine check</h1><p role="status">Local development access required.</p></main>
+    <script type="module">
+      if (import.meta.env.DEV && ['localhost', '127.0.0.1', '[::1]'].includes(location.hostname)) {
+        const { mountChatEngineDiagnostic } = await import('/src/chatEngineDiagnostic.ts');
+        mountChatEngineDiagnostic(document.querySelector('main'));
+      }
+    </script>
+  </body>
+</html>

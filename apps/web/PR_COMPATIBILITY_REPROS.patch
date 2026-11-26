@@ -1,0 +1,89 @@
+diff --git a/packages/privacy-engine/src/pr32.review.test.ts b/packages/privacy-engine/src/pr32.review.test.ts
+new file mode 100644
+--- /dev/null
++++ b/packages/privacy-engine/src/pr32.review.test.ts
+@@ -0,0 +1,23 @@
++import 'fake-indexeddb/auto';
++import { expect, it } from 'vitest';
++import type { AiBridge } from '@clause-guard/core/types';
++import { mask } from './mask';
++
++it.each(['maria@example.com', 'https://example.com/u/maria'])('still asks for review when a model-only name also occurs inside %s', async contact => {
++  const bridge: AiBridge = {
++    onDeviceStatus:async()=> 'available',
++    onDevice:async()=>JSON.stringify({type:'other',entities:[{text:'maria',kind:'person',party:false}]}),
++    analyze:async()=>{throw new Error('No cloud calls in review');},
++  };
++  const result=await mask(`review-pr32-${contact}`, [
++    {id:'c1',index:0,text:`Contact: ${contact}`},
++    {id:'c2',index:1,text:'maria will sign; anna will witness.'},
++  ],bridge);
++  expect(result.ok).toBe(true);
++  if(!result.ok) return;
++  expect(result.clauses[1]!.text).not.toContain('maria');
++  expect(result.clauses[1]!.text).toContain('anna');
++  // Name recognition is still model-dependent; matching a word inside a
++  // separately masked contact string is not rule coverage of the standalone name.
++  expect(result.needsReview).toBe(true);
++});
+diff --git a/apps/web/src/pr33.review.test.ts b/apps/web/src/pr33.review.test.ts
+new file mode 100644
+--- /dev/null
++++ b/apps/web/src/pr33.review.test.ts
+@@ -0,0 +1,10 @@
++import { expect, it } from 'vitest';
++import { splitClauses } from './clauses';
++
++it.each([
++  ['2150','Monthly rent:\n2150\npayable on the first day.'],
++  ['2026','Effective year:\n2026\nThe parties agree.'],
++  ['1234','Account last four:\n1234\nUse these details.'],
++])('preserves substantive standalone value %s before analysis', (value,input) => {
++  expect(splitClauses(input).map(c=>c.text).join('\n')).toContain(value);
++});
+diff --git a/apps/web/src/pr33.lifecycle.review.test.tsx b/apps/web/src/pr33.lifecycle.review.test.tsx
+new file mode 100644
+--- /dev/null
++++ b/apps/web/src/pr33.lifecycle.review.test.tsx
+@@ -0,0 +1,41 @@
++import 'fake-indexeddb/auto';
++import { expect, it, vi } from 'vitest';
++import type { AiBridge } from '@clause-guard/core/types';
++import type { ReviewSession } from './reviewFlow';
++const mock=vi.hoisted(()=>({read:vi.fn(),sessions:[] as unknown[]}));
++vi.mock('./importDocument',()=>({readDocument:mock.read}));
++vi.mock('./reviewFlow',async original=>{
++  const actual=await original<typeof import('./reviewFlow')>();
++  return {...actual,ReviewSession:class extends actual.ReviewSession {
++    constructor(...args:ConstructorParameters<typeof actual.ReviewSession>){super(...args);mock.sessions.push(this);}
++  }};
++});
++// Capture the component's actual event handlers without adding a DOM dependency.
++// The real ReviewSession is retained; no cloud/model or file parser is called.
++vi.mock('react',async original=>({...await original<typeof import('react')>(),
++  useState:(initial:unknown)=>[typeof initial==='function'?initial():initial,()=>{}],
++  useRef:()=>({current:null}),useEffect:()=>{},useCallback:(callback:unknown)=>callback,
++  useSyncExternalStore:(_subscribe:unknown,snapshot:()=>unknown)=>snapshot(),
++}));
++import { App } from './App';
++function find(node:unknown,type:string):{props:Record<string,unknown>}|undefined {
++  if(Array.isArray(node)) {for(const item of node){const result=find(item,type);if(result)return result;}return;}
++  if(!node||typeof node!=='object')return;
++  const element=node as {type?:unknown;props?:Record<string,unknown>};
++  if(element.type===type&&element.props)return {props:element.props};
++  return find(element.props?.children,type);
++}
++it('does not overwrite newer manual edits when a slow import finishes',async()=>{
++  let finish!:(text:string)=>void;
++  mock.read.mockReturnValueOnce(new Promise<string>(resolve=>{finish=resolve;}));
++  const bridge:AiBridge & {downloadModel():Promise<void>}={onDeviceStatus:async()=> 'unavailable',onDevice:async()=>'',analyze:async()=>{throw new Error('not used');},downloadModel:async()=>{}};
++  const tree=App({bridge});
++  const file=find(tree,'input')!,editor=find(tree,'textarea')!;
++  (file.props.onChange as (e:unknown)=>void)({target:{files:[{name:'slow.docx'}]}});
++  (editor.props.onChange as (e:unknown)=>void)({target:{value:'NEWER MANUAL CONTRACT'}});
++  const session=mock.sessions[0] as ReviewSession;
++  expect(session.getSnapshot().contract).toBe('NEWER MANUAL CONTRACT');
++  finish('OLDER IMPORTED CONTRACT');
++  await Promise.resolve(); await Promise.resolve();
++  expect(session.getSnapshot().contract).toBe('NEWER MANUAL CONTRACT');
++});

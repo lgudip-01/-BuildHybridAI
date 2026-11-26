@@ -35,7 +35,7 @@ it('selects before real masking/approval and only analyzes the three reviewed cl
   expect(result.failed).toEqual([]);
   expect(result.restored.every(c => c.redline === '' && c.explanation.includes(REDLINE_REVIEW_NOTICE))).toBe(true);
   expect(sdk.generate.mock.calls.map(call => JSON.parse(call[0]).id)).toEqual(['c5', 'c7', 'c8']);
-  expect(result.promptCheck).toMatchObject({ cloudReviewRulesPresent: true, deviceReviewRulesPresent: true, redlinePolicy: 'commercial-review-v3' });
+  expect(result.promptCheck).toMatchObject({ cloudReviewRulesPresent: true, deviceReviewRulesPresent: true, redlinePolicy: 'commercial-review-v4' });
 });
 
 it.each([{ ids: [] }, { ids: ['c5', 'c5'] }, { ids: ['missing'] }])('rejects an invalid selection before any model request: $ids', async ({ ids }) => {

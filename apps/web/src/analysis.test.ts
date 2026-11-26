@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { AI } from 'firebase/ai';
 import type { Analysis, ApprovedBatch, CleanText, MaskedClause } from '@clause-guard/core/types';
-import { allowedPlaceholders, validateAnalysis, validateBatch, CLOUD_ANALYSIS_PROMPT, DEVICE_ANALYSIS_PROMPT, ANALYSIS_REVIEW_RULES, applyCommercialRedlineGuard, REDLINE_REVIEW_NOTICE, EXPLANATION_GROUNDING_RULES, validateExplanationGrounding, sourceQuotedGuaranteeReview, GUARANTEE_REVIEW_QUESTIONS, validateSourceQuotedGuaranteeReview } from '@clause-guard/core/analysis';
+import { sourceQuotedSignatoryReview, validateSourceQuotedSignatoryReview, SIGNATORY_REVIEW_QUESTIONS, allowedPlaceholders, validateAnalysis, validateBatch, CLOUD_ANALYSIS_PROMPT, DEVICE_ANALYSIS_PROMPT, ANALYSIS_REVIEW_RULES, applyCommercialRedlineGuard, REDLINE_REVIEW_NOTICE, EXPLANATION_GROUNDING_RULES, validateExplanationGrounding, sourceQuotedGuaranteeReview, GUARANTEE_REVIEW_QUESTIONS, validateSourceQuotedGuaranteeReview } from '@clause-guard/core/analysis';
 
 const mocks = vi.hoisted(() => ({
   approved: new WeakSet<object>(),
@@ -22,7 +22,6 @@ vi.mock('./analysisConfig', async original => {
 import { WebBridge } from './webBridge';
 import { AnalysisUnavailableError } from './cloudAnalyzer';
 import { loadAnalysisConfig, DEFAULT_ANALYSIS_CONFIG, DEFAULT_PAYLOAD, parseAnalysisConfig } from './analysisConfig';
-import { sourceQuotedLeaseTermReview, validateSourceQuotedLeaseTermReview, LEASE_TERM_REVIEW_QUESTIONS } from '@clause-guard/core/analysis';
 
 const ai = {} as AI;
 function batch(count = 2, source?: string): ApprovedBatch {
@@ -45,6 +44,171 @@ beforeEach(() => {
 });
 
 describe('approved web analysis', () => {
+  it.each(['in_cloud', 'on_device'])('withholds the recorded date-only draft without losing the valid preliminary review on %s', async source => {
+    const clause = '2. Term. The lease starts on [DATE_1] and ends on [DATE_2].';
+    const data: Analysis = {clauseId:'c1', risk:'low', explanation:'The lease starts on [DATE_1] and ends on [DATE_2].', redline:'[DATE_1]', questions:['Are the dates in chronological order?']};
+    mocks.generate.mockResolvedValueOnce(output('c1', source, data));
+    const result = await new WebBridge(ai).analyze(batch(1, clause));
+    expect(result.results).toHaveLength(1);
+    expect(result.results[0]!.redline).toBe('');
+    expect(result.results[0]!.explanation).toContain('omits approved source references');
+    expect(result.results[0]!.explanation).toContain(data.explanation);
+    expect(result.results[0]!.questions).toEqual(data.questions);
+    expect(result.failed).toEqual([]);
+    expect(mocks.generate).toHaveBeenCalledTimes(1);
+  });
+
+  it('preserves a noncommercial rewrite with every source reference retained', () => {
+    const clause = 'The term starts on [DATE_7] and ends on [DATE_9].' as CleanText;
+    const data = {...answer(), redline:'The term runs from [DATE_7] through [DATE_9].'};
+    expect(applyCommercialRedlineGuard(data, clause)).toBe(data);
+  });
+
+  it.each(['in_cloud', 'on_device'])('withholds the recorded mandatory-communications overclaim on %s', async source => {
+    const clause = 'Notices go to [ADDRESS_1]. Call [PHONE_1].';
+    mocks.generate.mockResolvedValueOnce(output('c1', source, {clauseId:'c1', risk:'medium', explanation:'Notices must be sent to [ADDRESS_1] and communications must be made by calling [PHONE_1].', redline:'', questions:[]}));
+    const result = await new WebBridge(ai).analyze(batch(1, clause));
+    expect(result.results).toEqual([]);
+    expect(result.failed).toMatchObject([{reason:'invalid_response', detail:expect.stringContaining('all communications')}]);
+    expect(mocks.generate).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps explicit phone-only source wording and neutral contact paraphrases', () => {
+    for (const [source, explanation] of [
+      ['Notices go to [ADDRESS_1]. Call [PHONE_1].', 'The clause gives a notice address of [ADDRESS_1] and contact phone [PHONE_1].'],
+      ['All communications must be made by calling [PHONE_1].', 'All communications must be made by calling [PHONE_1].'],
+    ] as const) expect(() => validateExplanationGrounding({...answer(), explanation, questions:[]}, source as CleanText)).not.toThrow();
+  });
+
+  it.each(['in_cloud', 'on_device'])('constrains printed name/capacity/entity fields on %s without inferring who signed', async source => {
+    const clause = 'By: [PARTY_B]\nName: [PARTY_C], CEO, [PARTY_A]';
+    const data: Analysis = {clauseId:'c1', risk:'low', explanation:'This is a signature block identifying [PARTY_B] as the signing entity, with [PARTY_C] signing as CEO of [PARTY_A].', redline:'', questions:[]};
+    mocks.generate.mockResolvedValueOnce(output('c1', source, data));
+    const result = await new WebBridge(ai).analyze(batch(1, clause));
+    expect(result.results).toEqual([]);
+    expect(result.failed).toMatchObject([{reason:'invalid_response', detail:expect.stringContaining('signatory review format')}]);
+    const expected = sourceQuotedSignatoryReview(clause as CleanText)!;
+    expect(expected).toContain(clause);
+    expect(mocks.factory.mock.calls[0]![1].inCloudParams.generationConfig.responseSchema.properties.explanation.enum).toEqual([expected]);
+  });
+
+  it.each(['in_cloud', 'on_device'])('withholds the recorded amount-as-recipient question on %s without retrying', async source => {
+    const clause = 'Tenants will pay a security deposit of [AMOUNT_3] before move-in. The deposit is returned within 21 days after move-out, less lawful deductions.';
+    const data: Analysis = {clauseId:'c1', risk:'medium', explanation:'Tenants must pay [AMOUNT_3] before move-in.', redline:'', questions:['Where and in what manner must Tenants pay the security deposit to [AMOUNT_3]?']};
+    mocks.generate.mockResolvedValueOnce(output('c1', source, data));
+    const result = await new WebBridge(ai).analyze(batch(1, clause));
+    expect(result.results).toEqual([]);
+    expect(result.failed).toMatchObject([{reason:'invalid_response', detail:expect.stringContaining('amount as a payment recipient')}]);
+    expect(mocks.generate).toHaveBeenCalledTimes(1);
+  });
+
+  it('preserves valid amount limits and unknown payment-recipient questions', () => {
+    for (const question of ['Who should receive the security deposit of [AMOUNT_3]?', 'May Tenants pay up to [AMOUNT_3]?', 'Is the payment equal to [AMOUNT_3]?', 'Where should Tenants send payment to the Landlord?']) {
+      expect(() => validateExplanationGrounding({...answer(), explanation:'Tenants pay [AMOUNT_3] before move-in.', questions:[question]}, 'Tenants pay [AMOUNT_3] before move-in.' as CleanText)).not.toThrow();
+    }
+  });
+
+  it.each(['in_cloud', 'on_device'])('rejects the recorded higher-fees comparison absent from a mutual cap on %s', async source => {
+    const clause = "Except for breaches of confidentiality, each party's total liability is capped at the fees paid in the 12 months before the claim.";
+    const explanation = "The clause caps each party's total liability at the fees paid in the preceding 12 months, excluding breaches of confidentiality. This exposes the party receiving higher fees to a disproportionate liability risk compared to the other party.";
+    mocks.generate.mockResolvedValueOnce(output('c1', source, {clauseId:'c1', risk:'medium', explanation, redline:'', questions:[]}));
+    const result = await new WebBridge(ai).analyze(batch(1, clause));
+    expect(result.results).toEqual([]);
+    expect(result.failed).toMatchObject([{reason:'invalid_response', detail:expect.stringContaining('comparison')}]);
+    expect(mocks.generate).toHaveBeenCalledTimes(1);
+  });
+
+  it.each(['in_cloud', 'on_device'])('constrains a general signatory form on %s and rejects ignored format without replacing it', async source => {
+    const clause = 'For [ORG_4]: [PERSON_3], Chief Operating Officer';
+    const explanation = sourceQuotedSignatoryReview(clause as CleanText)!;
+    const good: Analysis = {clauseId:'c1', risk:'low', explanation, redline:'', questions:[SIGNATORY_REVIEW_QUESTIONS[0]]};
+    mocks.generate.mockResolvedValueOnce(output('c1', source, good));
+    expect((await new WebBridge(ai).analyze(batch(1, clause))).results).toEqual([good]);
+    const params = mocks.factory.mock.calls[0]![1];
+    for (const schema of [JSON.parse(JSON.stringify(params.inCloudParams.generationConfig.responseSchema)), params.onDeviceParams.promptOptions.responseConstraint]) {
+      expect(schema.properties.explanation.enum).toEqual([explanation]);
+      expect(schema.properties.questions.items.enum).toEqual([...SIGNATORY_REVIEW_QUESTIONS]);
+      expect(schema.properties.questions.maxItems).toBe(2);
+    }
+    mocks.generate.mockResolvedValueOnce(output('c1', source, {...good, explanation:'A different free-form review.'}));
+    const failed = await new WebBridge(ai).analyze(batch(1, clause));
+    expect(failed.results).toEqual([]);
+    expect(failed.failed).toMatchObject([{reason:'invalid_response', detail:expect.stringContaining('signatory review format')}]);
+    expect(mocks.generate).toHaveBeenCalledTimes(2);
+  });
+
+  it.each(['in_cloud', 'on_device'])('keeps unrelated legal-topic vocabulary out of a signatory review on %s', async source => {
+    const clause = '[PARTY_A]\nBy: [PERSON_1]';
+    const data: Analysis = {clauseId:'c1', risk:'low', explanation:sourceQuotedSignatoryReview(clause as CleanText)!, redline:'', questions:[]};
+    mocks.generate.mockResolvedValueOnce(output('c1', source, data));
+    const result = await new WebBridge(ai).analyze(batch(1, clause));
+    expect(result.results).toEqual([data]);
+    const params = mocks.factory.mock.calls[0]![1];
+    expect(DEFAULT_ANALYSIS_CONFIG.version).toBe('clause-analysis-v3');
+    expect(params.inCloudParams.generationConfig.temperature).toBe(0);
+    for (const prompt of [params.inCloudParams.systemInstruction, params.onDeviceParams.createOptions.initialPrompts[0].content[0].value]) {
+      expect(prompt).not.toMatch(/\bindemn\w*|\bguarant\w*|\bexecut(?:ion|ed|ing|es)\b/i);
+    }
+    expect(mocks.generate).toHaveBeenCalledTimes(1);
+  });
+
+  it.each(['in_cloud', 'on_device'])('withholds pre-payment ownership and contradictory signature claims on %s', async source => {
+    const cases = [
+      ['All work product is a work made for hire and belongs to the Client upon payment in full.', 'Rights to the work product remain with the creator until full payment is received.', 'pre-payment ownership'],
+      ['[PARTY_A]\nBy: [PERSON_1]', 'The block identifies [PARTY_A] and shows execution by [PERSON_1]. Its text alone does not establish signing or execution.', 'signature block'],
+      ['[PARTY_A]\nBy: [PERSON_1]', 'The block identifies [PARTY_A] and its execution by [PERSON_1]. The text alone does not prove signing.', 'signature block'],
+    ] as const;
+    for (const [clause, explanation, detail] of cases) {
+      mocks.generate.mockResolvedValueOnce(output('c1', source, {clauseId:'c1', risk:'low', explanation, redline:'', questions:[]}));
+      const result = await new WebBridge(ai).analyze(batch(1, clause));
+      expect(result.results).toEqual([]);
+      expect(result.failed).toMatchObject([{reason:'invalid_response', detail:expect.stringContaining(detail)}]);
+    }
+    expect(mocks.generate).toHaveBeenCalledTimes(cases.length);
+  });
+
+  it.each(['in_cloud', 'on_device'])('keeps the recorded SaaS carve-out list withheld on %s', async source => {
+    const clause = "5. Limitation of Liability. Except for breaches of confidentiality, each party's total liability is capped at the fees paid in the 12 months before the claim.";
+    const explanation = "Section 5 establishes that each party's total liability is capped at the fees paid in the 12 months before the claim, with an express exception for breaches of confidentiality. The source text does not specify other potential exclusions from the liability cap, such as indemnification obligations, intellectual property infringement, or gross negligence, which creates ambiguity regarding their treatment.";
+    mocks.generate.mockResolvedValueOnce(output('c1', source, {clauseId:'c1', risk:'medium', explanation, redline:'', questions:[]}));
+    const result = await new WebBridge(ai).analyze(batch(1, clause));
+    expect(result.results).toEqual([]);
+    expect(result.failed).toMatchObject([{reason:'invalid_response', detail:expect.stringContaining('indemnity')}]);
+    expect(mocks.generate).toHaveBeenCalledTimes(1);
+  });
+  it.each(['in_cloud', 'on_device'])('withholds asserted execution from an unsigned signature form on %s', async source => {
+    const clause = 'For [PARTY_A]: [PERSON_1], Managing Director';
+    mocks.generate.mockResolvedValueOnce(output('c1', source, {clauseId:'c1', risk:'low', explanation:'The signature block establishes the execution of the agreement by [PERSON_1].', redline:'', questions:[]}));
+    const result = await new WebBridge(ai).analyze(batch(1, clause));
+    expect(result.results).toEqual([]);
+    expect(result.failed).toMatchObject([{reason:'invalid_response', detail:expect.stringContaining('signature block')}]);
+    expect(mocks.generate).toHaveBeenCalledTimes(1);
+  });
+
+  it.each(['in_cloud', 'on_device'])('withholds observed offer scope/notice overclaims on %s', async source => {
+    const cases = [
+      ['For 12 months after employment ends, you will not work for a direct competitor within the United States.', 'The specific geographic area within the United States is undefined in this excerpt.', 'geographic scope'],
+      ['Employment is at will. Either you or the Company may end it at any time, with or without cause.', 'This creates mutual termination rights without cause or advance notice requirements.', 'notice requirement'],
+    ] as const;
+    for (const [clause, explanation, detail] of cases) {
+      mocks.generate.mockResolvedValueOnce(output('c1', source, {clauseId:'c1', risk:'medium', explanation, redline:'', questions:[]}));
+      const result = await new WebBridge(ai).analyze(batch(1, clause));
+      expect(result.results).toEqual([]);
+      expect(result.failed).toMatchObject([{reason:'invalid_response', detail:expect.stringContaining(detail)}]);
+    }
+    expect(mocks.generate).toHaveBeenCalledTimes(2);
+  });
+
+  it.each(['in_cloud', 'on_device'])('withholds the observed contradictory late-fee explanation on %s', async source => {
+    const clause = '3. Rent. Monthly rent is [AMOUNT_1], due on the first day of each month. Rent paid more than 5 days late incurs a late fee of [AMOUNT_2].';
+    const data: Analysis = {clauseId:'c1', risk:'medium', explanation:'This clause establishes monthly rent of [AMOUNT_1] with a late fee of [AMOUNT_2] if paid more than 5 days late, but lacks grace period details, acceptable payment methods, and compounding terms.', redline:'', questions:[]};
+    mocks.generate.mockResolvedValueOnce(output('c1', source, data));
+    const result = await new WebBridge(ai).analyze(batch(1, clause));
+    expect(result.results).toEqual([]);
+    expect(result.failed).toMatchObject([{reason:'invalid_response', detail:expect.stringContaining('late-payment timing threshold')}]);
+    expect(mocks.generate).toHaveBeenCalledTimes(1);
+  });
+
   it.each(['in_cloud', 'on_device'])('preserves an express high-risk indemnity on %s under the retired-prompt migration', async source => {
     const old = {...DEFAULT_PAYLOAD, version:'clause-analysis-v1',
       cloudPrompt:'Flag asymmetric obligations, broad indemnity, uncapped liability and unclear payment duties.',
@@ -62,22 +226,27 @@ describe('approved web analysis', () => {
     expect(params.onDeviceParams.createOptions.initialPrompts[0].content[0].value).not.toContain(old.devicePrompt);
   });
 
-  it.each(['in_cloud', 'on_device'])('constrains a simple lease term on %s without a risk checklist or retry', async source => {
-    const clause = '2. Term. The lease starts on [DATE_2] and ends on [DATE_3].' as CleanText;
-    const explanation = sourceQuotedLeaseTermReview(clause)!;
-    const data: Analysis = {clauseId:'c1', risk:'low', explanation, redline:'', questions:[...LEASE_TERM_REVIEW_QUESTIONS]};
-    mocks.generate.mockResolvedValueOnce(output('c1', source, data));
-    const result = await new WebBridge(ai).analyze(batch(1, clause));
-    expect(result.results).toEqual([data]);
-    expect(result.failed).toEqual([]);
-    expect(mocks.generate).toHaveBeenCalledTimes(1);
-    const params = mocks.factory.mock.calls[0]![1];
-    for (const schema of [JSON.parse(JSON.stringify(params.inCloudParams.generationConfig.responseSchema)),
-      params.onDeviceParams.promptOptions.responseConstraint]) {
-      expect(schema.properties.explanation.enum).toEqual([explanation]);
-      expect(schema.properties.questions.items.enum).toEqual([...LEASE_TERM_REVIEW_QUESTIONS]);
+  it.each(['in_cloud', 'on_device'])('uses general analysis for varied lease wording on %s', async source => {
+    const clauses = [
+      '2. Term. The lease starts on [DATE_2] and ends on [DATE_3].',
+      'The tenancy commences [DATE_2] and expires [DATE_3].',
+      'The term runs from [DATE_2] through [DATE_3], unless renewed by mutual agreement.',
+      'Term: [DATE_2] to [DATE_3]. An early end requires written consent.',
+    ];
+    for (const clause of clauses) {
+      const data: Analysis = {clauseId:'c1', risk:'low', explanation:'The supplied clause states start and end dates [DATE_2] and [DATE_3].', redline:'', questions:['Are renewal provisions addressed elsewhere?']};
+      mocks.generate.mockResolvedValueOnce(output('c1', source, data));
+      const result = await new WebBridge(ai).analyze(batch(1, clause));
+      expect(result.results).toEqual([data]);
+      expect(result.failed).toEqual([]);
+      const params = mocks.factory.mock.calls.at(-1)![1];
+      for (const schema of [JSON.parse(JSON.stringify(params.inCloudParams.generationConfig.responseSchema)), params.onDeviceParams.promptOptions.responseConstraint]) {
+        expect(schema.properties.explanation.enum).toBeUndefined();
+        expect(schema.properties.questions.items.enum).toBeUndefined();
+      }
+      expect(params.inCloudParams.systemInstruction).not.toContain('For this simple lease term');
     }
-    expect(params.inCloudParams.systemInstruction).toContain('simple lease term');
+    expect(mocks.generate).toHaveBeenCalledTimes(clauses.length);
   });
   it.each(['in_cloud', 'on_device'])('keeps the observed negated indemnity checklist rejected on %s', async source => {
     const clause = '2. Term. The lease starts on [DATE_2] and ends on [DATE_3].';
@@ -86,14 +255,6 @@ describe('approved web analysis', () => {
     const result = await new WebBridge(ai).analyze(batch(1, clause));
     expect(result.results).toEqual([]);
     expect(result.failed).toMatchObject([{reason:'invalid_response', detail:expect.stringContaining('indemnity')}]);
-    expect(mocks.generate).toHaveBeenCalledTimes(1);
-  });
-  it.each(['in_cloud', 'on_device'])('rejects ignored lease-term format on %s rather than replacing the reply', async source => {
-    const clause = '2. Term. The lease starts on [DATE_2] and ends on [DATE_3].';
-    mocks.generate.mockResolvedValueOnce(output('c1', source, {clauseId:'c1', risk:'low', explanation:'The lease has dates.', redline:'', questions:[]}));
-    const result = await new WebBridge(ai).analyze(batch(1, clause));
-    expect(result.results).toEqual([]);
-    expect(result.failed).toMatchObject([{reason:'invalid_response', detail:expect.stringContaining('lease-term review format')}]);
     expect(mocks.generate).toHaveBeenCalledTimes(1);
   });
   it.each(['in_cloud', 'on_device'])('validates term tokens before applying the bounded format on %s', async source => {
@@ -174,7 +335,7 @@ describe('approved web analysis', () => {
     mocks.generate.mockResolvedValueOnce(output('c1', source, bad)).mockResolvedValueOnce(output('c2', source));
     const result = await new WebBridge(ai).analyze(b);
     expect(result.results).toEqual([answer('c2')]);
-    expect(result.failed).toEqual([{ clauseId: 'c1', reason: 'invalid_response', detail: 'The explanation used guarantee terms not established by this clause. Review the source wording before retrying.' }]);
+    expect(result.failed).toEqual([{ clauseId: 'c1', ranOn: source === 'in_cloud' ? 'cloud' : 'device', reason: 'invalid_response', detail: 'The explanation used guarantee terms not established by this clause. Review the source wording before retrying.' }]);
     expect(JSON.stringify(result)).not.toContain('all future obligations');
     expect(mocks.generate).toHaveBeenCalledTimes(2);
   });
@@ -229,7 +390,7 @@ describe('approved web analysis', () => {
     mocks.generate.mockResolvedValueOnce(output('c1', 'in_cloud', { ...answer(), questions: ['Ask [PARTY_C].'] })).mockResolvedValueOnce(output('c2'));
     const result = await new WebBridge(ai).analyze(batch());
     expect(result.results.map(r => r.clauseId)).toEqual(['c2']);
-    expect(result.failed).toEqual([{ clauseId: 'c1', reason: 'unknown_placeholder', detail: expect.any(String) }]);
+    expect(result.failed).toEqual([{ clauseId: 'c1', ranOn: 'cloud', reason: 'unknown_placeholder', detail: expect.any(String) }]);
   });
   it.each(['in_cloud', 'on_device'].flatMap(source =>
     (['explanation', 'redline', 'questions'] as const).map(field => ({source, field}))))(
@@ -272,6 +433,7 @@ describe('approved web analysis', () => {
     mocks.generate.mockResolvedValueOnce(output('wrong')).mockRejectedValueOnce(new Error('secret internal detail')).mockResolvedValueOnce(output('c3'));
     const result = await new WebBridge(ai).analyze(batch(3));
     expect(result.failed.map(f => f.reason)).toEqual(['invalid_response', 'model_error']);
+    expect(result.failed.map(f => f.ranOn)).toEqual(['cloud', undefined]);
     expect(JSON.stringify(result)).not.toContain('secret internal detail');
     expect(mocks.generate).toHaveBeenCalledTimes(3);
   });
@@ -290,7 +452,7 @@ describe('approved web analysis', () => {
     mocks.generate.mockResolvedValueOnce(output('c1')).mockResolvedValueOnce(output('c2', 'on_device'));
     const result = await new WebBridge(ai).analyze(batch());
     expect(result.ranOn).toBe('cloud'); expect(result.results).toHaveLength(1);
-    expect(result.failed[0]!.reason).toBe('invalid_response');
+    expect(result.failed[0]).toMatchObject({ reason: 'invalid_response', ranOn: 'device' });
   });
   it('throws stale approval after an awaited call and blocks all later sends', async () => {
     const b = batch();
@@ -408,26 +570,6 @@ it('allows a source-supported indemnity and neutral questions without inventing 
   expect(() => validateExplanationGrounding({...answer(), explanation:'The Tenants waive claims.', questions:['Is any separate indemnity intended?']}, 'The Tenants waive claims.' as CleanText)).not.toThrow();
 });
 
-describe('bounded lease-term scope', () => {
-  const source = '2. Term. The lease starts on [DATE_2] and ends on [DATE_3].' as CleanText;
-  it.each([
-    '2. Term. The lease starts on [DATE_2] and ends on [DATE_3] unless renewed.',
-    '2. Term. The lease starts on [DATE_2] and ends on [DATE_3]. Rent may increase.',
-    'The lease starts on [DATE_2] and ends on [DATE_3].',
-    '2. Term. The lease starts on July 1 and ends on July 31.',
-    '2. Term. The lease starts on [date_2] and ends on [date_3].',
-  ])('does not replace analysis of other or qualified wording: %s', text => {
-    expect(sourceQuotedLeaseTermReview(text as CleanText)).toBeUndefined();
-  });
-  it.each([
-    {redline:'Move the end date.'},
-    {questions:['Is the guarantee unlimited?']},
-  ])('rejects changed drafts or unrelated questions in the bounded format %#', changed => {
-    const data: Analysis = {clauseId:'c1', risk:'low', explanation:sourceQuotedLeaseTermReview(source)!, redline:'', questions:[]};
-    expect(() => validateSourceQuotedLeaseTermReview({...data, ...changed}, data.explanation)).toThrow();
-  });
-});
-
 describe('bounded source-quoted guarantee format', () => {
   const source = "[PARTY_A] guarantees all of Borrower’s obligations under this Note." as CleanText;
   it('quotes only the approved supplied wording and frames unknown terms as review questions', () => {
@@ -521,4 +663,54 @@ it('rechecks approval after waiting for configuration', async () => {
   vi.mocked(loadAnalysisConfig).mockImplementationOnce(async () => { mocks.approved.delete(b); return DEFAULT_ANALYSIS_CONFIG; });
   await expect(new WebBridge(ai).analyze(b)).rejects.toMatchObject({code:'not_approved'});
   expect(mocks.factory).not.toHaveBeenCalled();
+});
+
+describe('explicit late-payment timing grounding', () => {
+  const timed = 'Rent paid more than 5 days late incurs a late fee of [AMOUNT_2].' as CleanText;
+  it.each(['There is no grace period.', 'The clause lacks a grace period.', 'The grace period is unspecified.'])('rejects an absence claim despite express timing: %s', explanation => {
+    expect(() => validateExplanationGrounding({...answer(), explanation}, timed)).toThrow('late-payment timing threshold');
+  });
+  it('keeps a correct threshold explanation and questions about waiver/payment methods', () => {
+    expect(() => validateExplanationGrounding({...answer(), explanation:'A late fee applies when rent is paid more than 5 days late; payment methods are not specified.', questions:['May the fee be waived for a documented delay?']}, timed)).not.toThrow();
+  });
+  it('does not infer timing from an amount, an unrelated deadline or an absent late-fee trigger', () => {
+    for (const source of ['A late fee of [AMOUNT_2] applies.', 'Rent is due within 5 days. No late fee is specified.', 'The deposit is returned within 21 days.']) {
+      expect(() => validateExplanationGrounding({...answer(), explanation:'The grace period is unspecified.'}, source as CleanText)).not.toThrow();
+    }
+  });
+});
+
+it('preserves accurate national scope and questions about notice without inferring waiver', () => {
+  expect(() => validateExplanationGrounding({...answer(), explanation:'The restriction covers the United States; direct competitor is not defined.', questions:['Would a narrower geographic scope be appropriate?']}, 'You may not work for a direct competitor within the United States.' as CleanText)).not.toThrow();
+  expect(() => validateExplanationGrounding({...answer(), explanation:'Either party may terminate at any time; this excerpt does not specify a notice procedure.', questions:['Is notice addressed elsewhere?']}, 'Either party may terminate at any time.' as CleanText)).not.toThrow();
+  expect(() => validateExplanationGrounding({...answer(), explanation:'The clause permits termination without advance notice requirements.'}, 'Either party may terminate without advance notice.' as CleanText)).not.toThrow();
+});
+
+it('allows an accurate missing-notice statement without treating it as a waiver', () => {
+  expect(() => validateExplanationGrounding({...answer(), explanation:'The excerpt specifies no notice period.'}, 'Either party may end employment at any time.' as CleanText)).not.toThrow();
+});
+it('does not infer a fee trigger from negated late-fee wording', () => {
+  expect(() => validateExplanationGrounding({...answer(), explanation:'The grace period is unspecified.'}, 'No payment more than 5 days late incurs a late fee.' as CleanText)).not.toThrow();
+});
+it('allows a signature form to identify intended signatories without asserting execution', () => {
+  expect(() => validateExplanationGrounding({...answer(), explanation:'This signature block identifies [PERSON_1] as the intended signatory; it does not prove signing.'}, 'For [PARTY_A]: [PERSON_1], Managing Director' as CleanText)).not.toThrow();
+});
+
+it('preserves the express payment condition without choosing a pre-payment owner', () => {
+  expect(() => validateExplanationGrounding({...answer(), explanation:'The clause calls the work product work made for hire and makes Client ownership subject to payment in full.', questions:['What rights or licenses apply before payment?']}, 'All work product is a work made for hire and belongs to the Client upon payment in full.' as CleanText)).not.toThrow();
+});
+
+it('limits structural questions to two distinct allowed questions', () => {
+  const clause = 'By: [PERSON_1]' as CleanText;
+  const explanation = sourceQuotedSignatoryReview(clause)!;
+  const good = {...answer(), explanation, redline:'', questions:[...SIGNATORY_REVIEW_QUESTIONS]};
+  expect(() => validateSourceQuotedSignatoryReview(good, explanation)).not.toThrow();
+  for (const questions of [[SIGNATORY_REVIEW_QUESTIONS[0], SIGNATORY_REVIEW_QUESTIONS[0]], [...SIGNATORY_REVIEW_QUESTIONS, SIGNATORY_REVIEW_QUESTIONS[0]]]) {
+    expect(() => validateSourceQuotedSignatoryReview({...good, questions}, explanation)).toThrow('signatory review format');
+  }
+});
+
+it('allows source facts and cap adequacy questions without inventing a direction of fees', () => {
+  const source = "Each party's total liability is capped at the fees paid in the previous 12 months." as CleanText;
+  expect(() => validateExplanationGrounding({...answer(), explanation:'The clause applies the stated fees-paid cap to each party.', questions:['Does this cap amount match the intended allocation?']}, source)).not.toThrow();
 });

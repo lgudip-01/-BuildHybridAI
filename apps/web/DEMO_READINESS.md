@@ -489,3 +489,346 @@ general offline, native-device or hosted-content acceptance. The date clause
 still uses the previously labeled application-authored format; the new general
 policy did not add further fixed answers. Earlier 6/10 and inconclusive runs
 remain in this ledger. Gate A still requires remaining samples and hosted review.
+
+
+## November 20 broader acceptance and stronger content review
+
+Zero-cost prerequisites were rechecked before this increment: actual project
+Cloud Billing has no linked account, and standard gemini-3.5-flash-lite input/
+output remain free in current official pricing. No billing/model/provider change.
+Each fixed public selection was prepared before genuine engine masking, reviewed
+and approved once; all actual inference sources below are cloud. No batch retry.
+
+- Rent/deposit c5/c6: 2/2 after timing instruction/guard correction. Correct
+  independent values, five-day trigger and 21-day deposit period; no false
+  missing-grace-period claim. A waiver/procedure question remains broad.
+- Full offer: 11/11 runtime validation, but content FAILED on geography/notice
+  overclaims. The United States scope was called undefined and at-will wording
+  was treated as waiving notice. After new instructions/guards, a fresh c6/c8
+  focused run passed 2/2: nationwide scope stated; notice left unspecified in
+  the excerpt. This is not a new full-offer run under the final guards.
+- Full freelance: 10/10 runtime validation, all drafts empty. Parties, address,
+  amounts, payment-routing fields and tax identifier restore locally; hourly
+  fee/project cap, payment-in-full ownership condition and 14-day mutual notice
+  are retained. Content caveats: ownership exposure for the creator is loosely
+  reasoned, and c9/c10 signature forms are described as executed. No proof of
+  actual signing is supplied by these blocks. c6 remains engine-typed payment
+  (known upstream classification miss), while its ownership text reaches the
+  analyzer unchanged.
+- Full promissory note: 9/9, all drafts empty. Principal/interest/installments,
+  penalty-free prepayment and ten-day acceleration threshold are preserved.
+  Mr. Mendoza remains a distinct masked identity, not silently assigned to a
+  same-surname person. Guarantee uses the existing labeled source-based format.
+- Full SaaS: 9/10. c7 is withheld for unsupported indemnity wording. Other
+  responses preserve EUR annual fee, 1% monthly interest, 99.9% availability,
+  5% credit, 36/12-month terms and mutual 90-day nonrenewal notice. Signature
+  block c10 again overclaims established execution.
+
+DevTools was recording before the SaaS send. Inspected the existing c7 Response
+without another request; its first sentence correctly states the mutual
+fees-paid/12-month cap and confidentiality exception. It then says other potential
+exclusions such as indemnification, IP infringement and gross negligence are
+unspecified and therefore ambiguous. This hypothetical carve-out list is not
+supplied by the clause and remains rejected. Only the necessary masked review
+wording is used for regression; provider metadata/opaque signatures are excluded.
+
+The offer preview had needsReview true due to conservative masking of a document
+title and Employee ID label; it was inspected and explicitly approved without
+clearing that flag. All other listed previews had needsReview false. All fixture
+values passed the local surviving-value check; no original/vault map was sent.
+These results distinguish runtime validation from content quality. They do not
+close the broader Gate A or establish general reliability/legal accuracy.
+
+Full NDA completed cloud 10/10 with empty drafts. It recognizes mutual purpose/
+permitted disclosure, flags the three-year survival language naming only one
+party, preserves notice recipients/contact methods, and retains Delaware law.
+The narrower public-information exclusion and asymmetric damages acknowledgment
+are discussed without inventing replacement terms. Signature forms again use
+execution wording, and some questions repeat information or use a loose role
+label (e.g. disclosing party when asking about the other party's survival period).
+Those are content caveats, not evidence of perfect reasoning.
+
+Across the five full samples in this increment, runtime validation was 49/50
+(offer 11/11, freelance 10/10, note 9/9, SaaS 9/10, NDA 10/10). These runs used
+the observed prompt/guard states during the increment; later targeted corrections
+must be reported separately, not converted into a new unified full-matrix pass.
+All accepted drafts were empty. The earlier lease 10/10 used the preceding
+policy and is not a fresh sixth sample run under the final safeguards.
+
+Further correction adds source instructions that hypothetical additional
+carve-outs are questions, not proof of ambiguity, and signature forms identify
+intended signatories rather than prove execution. A narrow signature-form guard
+withholds the observed execution assertions. Counterexamples ensure the newly
+added timing/notice checks do not treat negated fee wording as an affirmative
+trigger or a missing-notice statement as a waiver. Those controls failed before
+correction; original unsupported-indemnity/guarantee validation remains intact.
+195 web tests and core/web typechecks pass. No invalid response is rewritten,
+and no guard causes automatic retries.
+
+
+### November 21 continuation: interim ownership and signature status
+
+The first focused freelance c6/c9/c10 run returned 3/3 validation but still had
+content overclaims: creator ownership until payment and showing execution in a
+signature-form sentence followed by a disclaimer. Further tests reproduced the
+problem on both providers. The prompt now states only the payment condition and
+asks about unspecified interim rights; lexical checks withhold observed interim-
+creator-ownership and signature-execution assertion forms.
+
+A fresh post-correction focused run returned 2/3: ownership correctly leaves
+interim rights unspecified; c10 is withheld for asserted execution. c9 still says
+its execution by before a disclaimer, so that additional observed phrase is
+being covered too. This is NOT a content-quality pass and must not be called a
+3/3 success under the final guard. No unchanged rerun was made.
+
+Likhil approved and merged PR #28 into main at 65152ce while this work was local.
+His new review asks to retire the exact-sentence lease-term template in favor of
+the general v2 path. Follow-up work will preserve this working tree in a separate
+branch based on that main, retaining the newer upstream evaluation report.
+
+
+### November 21 general lease path: 10/10 without the template
+
+After retiring sourceQuotedLeaseTermReview and its special schema/equality
+validator, one newly masked/reviewed full public lease completed actual cloud
+10/10, failed empty, all redlines empty. Diagnostics report defaults,
+clause-analysis-v2, explanation-grounding-v3 and leaseTermReview general-v2.
+The date clause now naturally states the actual start/end dates and asks about
+renewal/early termination; no application-authored lease explanation is supplied.
+Both distinct tenants, landlord/contact alias, apartment, independent amounts
+and dates restore correctly. Rent correctly preserves the more-than-five-days
+late threshold. No unsupported indemnity explanation or asserted execution
+appears. Some questions remain broad/redundant; this is not a legal certificate.
+
+SaaS focused c7/c10 after the final prompt/guard changes returned cloud 2/2.
+The cap's mutual fees-paid/12-month basis and confidentiality exception are
+correct, and signatories are identified as intended, without proof of execution.
+The cap explanation still discusses hypothetical IP/security carve-outs, so
+content refinement remains open even though runtime validation passes.
+
+The final freelance focused result stays 2/3, with a signature claim withheld;
+an additional accepted phrase its execution by is now rejected by a replay.
+No further freelance send was made to chase a green count. This work strengthens
+withholding and removes a demo-specific lease path; it does not close the broader
+Gate A. Next is uniform final-policy sample/content review and complete hosted
+acceptance, preserving these limitations and every earlier result.
+
+
+## November 21 concise policy v3 and structural field-format verification
+
+Initial v3 retired v1/v2 global-topic prompts, kept independent false kill
+switches, and configured cloud temperature 0. Runtime guards remained intact.
+A fresh freelance c6/c9/c10 run still returned 2/3; signature wording was not
+reliably corrected by instructions alone. That failure is retained.
+
+Added a general bounded grammar for masked signatory/identification fields:
+By/For/role fields, printed capacities, letter closings and selected identifier/
+date fields across layouts, not one contract sentence. Unknown titles, malformed
+tokens, operative additions and out-of-bounds blocks remain on ordinary analysis.
+Eligible blocks use visibly application-authored source-quoted guidance, empty
+drafts and allowed neutral questions in both schemas and exact runtime validation.
+Provider noncompliance is rejected, never replaced. This is not free-form model
+legal reasoning or verification of actual signatures/authority.
+
+The first field-format freelance run passed 3/3 with ownership interim rights
+left unspecified and source-based signatory text. One structural reply returned
+three allowed questions; the final format now limits responses to two distinct
+allowed questions, encoded in schemas and runtime validation.
+
+A fresh SaaS c7/c10 follow-up returned 2/2 runtime validation, with compliant
+source-based signatory text and two questions, but content FAILED for an invented
+higher-fees/disproportionate-risk comparison in c7. The mutual formula supplies
+no direction or comparative quantities. A cloud/device regression failed before
+a narrow withholding guard; factual source paraphrases and adequacy questions
+remain accepted. Global explanations now request factual paraphrase only;
+interpretations, possible effects and negotiated additions belong in questions.
+
+The fixed diagnostics report requestedReviewMethods per clause, so source-based
+formats cannot be confused with ordinary analysis. This is a requested format,
+not proof that a failed clause passed it. Earlier observations remain separate
+from the final-policy matrix being verified in this increment.
+
+
+## Frozen-baseline final-policy matrix — 5b0a147 (November 21)
+
+Code is frozen for these manually prepared/reviewed single sends. Policy
+clause-analysis-v3, explanation-grounding-v4, cloud temperature configured to 0.
+Actual no-billing state was freshly checked before the matrix. Each row records
+its real SDK source and requested general/source-based methods, not merely an
+installed format version. No analyzer/prompt/schema/validation code changes between these matrix rows.
+The acceptance-only WebSocket transport correction below precedes the final
+lease row; the production bundle is byte-for-byte unchanged.
+
+| Sample | Actual source | Validated | Requested methods | Content review |
+| --- | --- | --- | --- | --- |
+| Freelance | cloud | 10/10 | 8 general, 2 labeled signatory fields | Services, amounts, payment routing, ownership condition and mutual 14-day notice retained. Interim rights are questions; no asserted signing event. |
+| SaaS | cloud | 10/10 | 9 general, 1 labeled signatory field | Fees, availability/credit, mutual cap/exception, renewal and jurisdiction preserved. No invented higher-fees comparison in explanation. |
+| Offer | cloud | 11/11 | 9 general, 2 labeled signatory fields | Bonus remains eligibility/up-to; equity remains an option subject to approval; nationwide scope and mutual at-will wording retained. Review flag inspected without clearing it. |
+| Promissory note | cloud | 9/9 | 7 general, 1 labeled guarantee, 1 labeled signatory field | Principal/interest/installments, permissive prepayment and acceleration trigger preserved. Mr. Mendoza remains distinct; no invented interim guarantee scope. |
+| NDA | cloud | 10/10 | 8 general, 2 labeled signatory fields | Mutual purpose, named-party survival, separate notice channels and permission to seek relief preserved. No invented signing status. |
+| Lease | cloud | 10/10 | 9 general, 1 labeled signatory field | Independent dates/amounts, more-than-five-days late threshold, lawful deductions, distinct tenants and landlord restored. One deposit question incorrectly used its amount as a recipient; see correction below. |
+
+All six rows returned failed empty: 60/60 runtime validation, 50 general reviews,
+nine labeled signatory-field reviews and one labeled guarantee. All drafts empty. Interpretive/commercial
+choices remain questions. Some questions can still be broad; these are inspected
+fixed-fixture observations, not general legal-accuracy certification. The deposit
+question defect prevents calling this a perfect content pass. Hosted acceptance
+remains pending until observed. Earlier failed and
+prototype runs above are retained and not counted as part of this frozen matrix.
+
+
+### Acceptance infrastructure interruption before the final lease result
+
+The initial full-lease approval was initiated, but its result was lost after a
+Vite connection interruption reset the page to Ready. Completion and request
+count cannot be confirmed; it may have consumed quota. It is inconclusive, not
+a pass or confirmed provider failure. The five saved rows remain 50/50.
+
+Verified the task server command really used mode acceptance. Vite 8's documented
+server.ws option is separate from server.hmr; hmr false still leaves a reconnect
+client that reloads after disconnect. Added ws false only to the localhost
+acceptance server. Resolved configuration confirms host 127.0.0.1, strict port
+5173, hmr false and ws false. No production behavior or analyzer changed.
+
+Without inference, selected a nondefault diagnostic preset, stopped the verified
+task-owned server, observed the state intact, restarted it, and observed the
+same selection/status retained. Production entry index-BPhxPItv.js remained
+byte-identical before/after the dev-only fix: SHA-256
+c9d2c140cd18709de5b5ed4d63f7a8b51f037fa5d82f893ea20809ccc703c1ff.
+Only the interrupted lease case is newly prepared/approved after this concrete
+infrastructure correction; earlier five samples are not repeated.
+
+### Deposit question correction after content review
+
+The lease c6 question asked where/how Tenants must pay the deposit to AMOUNT_3,
+which restores an amount into a recipient position. Correct JSON and token
+membership did not catch that semantic error. Added a narrow amount-as-recipient
+guard across explanation, draft and questions. It rejects the response, never
+rewrites or retries it. This is lexical triage, not general question validation.
+The shared generation instructions, schemas and configured model are unchanged.
+
+Both cloud/device provider replay tests failed before correction, then passed;
+controls preserve amount limits and legitimate unknown-recipient questions.
+225 web tests and production typecheck/build pass. One freshly masked and
+explicitly approved rent/deposit follow-up returned actual cloud 2/2, failed
+empty, correct independent amounts/timing and sensible deduction/holding
+questions. This is a separate post-guard observation, not a replacement of the
+original matrix row or a claim of 60 fresh calls on the changed validator.
+
+An ordinary lease-date offline preview was prepared but NOT approved: native
+Chrome access reports no window, while extension DOM access works. The supported
+browser API exposes no network emulation. No network setting changed and no
+offline pass is claimed; a visible Chrome window is requested to unblock the
+isolated DevTools test. Prior offline failures/limited source-based evidence
+remain above. Broader Gate A remains open pending this and hosted acceptance.
+
+### Hosted acceptance found two additional content gaps
+
+Official Hosting-only deployment completed on the verified no-billing project.
+Hosted entry index-ClxvN20o.js matched local SHA-256
+912651ab5eb42cfaf8503be9c4cc0c47591eafbc4f12003df51530545e784986.
+The default fictional four-clause demo masked ten values locally in 5,461 ms;
+all masked clauses and ledger entries were inspected before genuine approval.
+Actual cloud returned 4/4 validated, with all drafts empty and local restoration.
+Editing the contract then cleared preview, approval and result without another
+model send. Production attestation was used, not a local diagnostic/debug page.
+
+Content FAILED in c3/c4 despite runtime validation: a contact phone was expanded
+into a requirement for all communications, and a printed Name/CEO/entity field
+was narrated as a signing event. This observation is retained, not a final
+hosted content pass. Seven new replay/layout checks failed before correction.
+
+The field grammar now recognizes general Name/By identity-capacity-entity tuples
+and common printed role acronyms across unseen token IDs, while unknown titles
+and operative suffixes still fall back to ordinary analysis. This format quotes
+the approved fields and makes no inference about actual signing or representation.
+Added a narrow contact-scope withholding guard and source-role/contact-scope
+instructions (grounding v5), synchronized only in local Remote Config templates.
+235 web tests and production typecheck/build pass. No privacy/approval/source
+validation was relaxed. A fresh hosted verification remains pending.
+
+The corrected hosted entry index-BkV4srSd.js is verified live and matches local
+SHA-256 749cac1535ce0ddb374cb968a79bc61037a4439c7c55de84ca3521f8f1592ae4.
+Its fresh default-demo attempt is still masking locally with Nano-ready shown;
+no preview completed and no cloud approval/send was made. Do not call this a
+provider failure, successful review, or current-policy hosted content pass.
+Native Chrome reports no visible window. Supported extension APIs do not expose
+network emulation, so ordinary offline and uniform v5 matrix/content acceptance
+remain pending. The v4 60/60 matrix remains separate historical evidence.
+
+## November 22: recovered hosted result and ordinary offline check
+
+Native Chrome control works after the user exposed a visible window. The old
+mask completed in 185,806 ms with an explicit patterns-only/review warning;
+some per-clause model classification was present, but at least one local model
+read failed. The cause was not captured; do not attribute it to window visibility.
+All four fictional masked clauses and ten ledger values were inspected without
+clearing the warning. Actual no-billing state/current free model pricing were
+rechecked before approving this exact batch once.
+
+Hosted index-BkV4srSd.js returned cloud 4/4, all drafts empty. Contact wording
+correctly scoped phone communications, and the compound printed-name block used
+the visibly application-authored source quotation without asserting execution.
+Identities, account/contact details and amount restored locally. Editing the
+contract cleared preview, approval and results. This closes that hosted check;
+the long/degraded masking observation remains a reliability limitation.
+
+An ordinary one-clause lease-term preview then masked two dates on device in
+12,117 ms, leak check passed, and was inspected before approval. DevTools set
+ONLY this hosted tab Offline. Its actual cloud generateContent request failed
+net::ERR_INTERNET_DISCONNECTED, zero bytes transferred. The SDK confirmed device
+source and returned 1/1 validated with both dates correctly restored. Content
+FAILED: its replacement was DATE_1 alone, dropping DATE_2 and the whole clause.
+The factual explanation was correct; the chronology question cannot inspect
+the opaque dates. No source-based template was requested for this ordinary clause.
+No throttling was restored and verified immediately after the observation.
+
+Added redline policy commercial-review-v4: visibly withhold drafts omitting any
+approved source reference, retaining the validated preliminary explanation/risk/
+questions and adding a local drafting notice. Never synthesize replacement prose
+or retry. Two cloud/device replay tests failed before correction, then passed;
+an all-references-retained noncommercial rewrite remains allowed. Presence of
+references is necessary, not proof of complete/equivalent wording. Existing JSON,
+unknown-token and grounding validation runs first. 238 web tests and build pass.
+Shared generation prompts/schemas and grounding v5 are unchanged by this guard.
+Fresh ordinary offline verification of the corrected guard remains pending.
+
+Corrected release verified live: index-Cr3HSrZw.js, SHA-256
+a0829eeeab5a552c0eeb0c218260c8af839ecdf1e3a148d8b927656b9ca41bd3.
+New date-only preview masked two dates on device in 752 ms, leak check passed,
+then was inspected/approved once with only the test tab Offline. DevTools showed
+the new generateContent request failed ERR_INTERNET_DISCONNECTED with zero bytes.
+Actual device 1/1 preliminary review restored both dates correctly. The model
+again proposed an incomplete draft; the application visibly withheld it with
+the new local notice and displayed no replacement wording. This proves guard
+interception, not improved generative drafting. Questions remained broad (rent
+currency/early termination). No source-based term template or extra retry was
+used. No throttling restored and verified afterwards. Ordinary offline safe
+rendering/restoration passes within this one-clause scope; not cold-start or
+general offline legal-accuracy certification.
+
+## Uniform final-policy matrix — November 22, frozen analyzer 3f096b6
+
+Each exact masked preview/ledger was inspected before one manual approval; no
+analyzer, generation prompt, schema or validator changed between rows. Actual
+no-billing state/current free standard model pricing were checked before sending.
+Every row reports clause-analysis-v3 defaults, explanation-grounding-v5 and
+commercial-review-v4. This is on codex/content-quality-v3, NOT main (65152ce).
+
+| Sample | Actual source | Validated | Methods | Content/restoration review |
+| --- | --- | --- | --- | --- |
+| Lease | cloud | 10/10 | 9 general, 1 signatory | Distinct tenants/landlord, three dates and independent amounts preserved; late threshold and lawful deductions correct. No amount-as-recipient question. |
+| Freelance | cloud | 10/10 | 8 general, 2 signatory | Services, hourly/cap figures, payment routing, pay-in-full ownership condition and mutual notice preserved. Interim rights remain questions. One mutual-notice question redundantly asks about already stated mutuality. |
+| Offer | cloud | 11/11 | 9 general, 2 signatory | Bonus remains eligible/up-to; option remains subject to approval; US scope and mutual at-will retained. Conservative title/Employee-ID review flag inspected without clearing; labels/values restore. |
+| SaaS | cloud | 10/10 | 9 general, 1 signatory | Subscription limits, annual advance fee/interest, availability/credit, mutual cap/exception, renewal and jurisdiction preserved. No invented higher-fees comparison. |
+| NDA | cloud | 10/10 | 8 general, 2 signatory | Mutual purpose, named-party survival, notice channels and permission to seek relief preserved. No assumed signing event or guaranteed court outcome. |
+| Promissory note | cloud | 9/9 | 7 general, 1 guarantee, 1 signatory | Principal/rate/installments, debit instructions, permission to prepay and acceleration threshold preserved. Mr. Mendoza remains distinct; guarantee/source labels and SSN restore locally. |
+
+Total 60/60, failed empty in every row, all drafts empty: 50 general reviews,
+nine labeled application-authored source-based signatory reviews, one separately
+labeled guarantee. No replaced invalid response, automatic retry, billing/API/
+provider/model or server configuration change. Some questions remain broad,
+redundant or negotiation-oriented; this is bounded preliminary fixture acceptance,
+not perfect content, legal certification, reliable generated drafting, a native
+platform pass, or the issue #30 requirement to run on main. Earlier v4 runs,
+hosted content failures, degraded masking and the offline bad draft remain above.

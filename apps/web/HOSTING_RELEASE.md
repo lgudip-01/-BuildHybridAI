@@ -244,3 +244,82 @@ v2 defaults; independent false flags remain effective. The client reports
 defaults honestly. Local v2 templates are published with source, but no server
 Remote Config setting was changed and no v2 remote-verification pass is claimed.
 This release remains in draft PR #28; main is not merged.
+
+
+### November 21 content safeguards and general lease path
+
+The official CLI completed a Hosting-only deployment after fresh Cloud Billing
+verification showed no linked account. Official no-billing Hosting quota behavior
+was rechecked. No billing/plan/API/provider change or Remote Config publication
+occurred. Predeploy typecheck/build passed.
+
+Hosted DOM loads `/assets/index-olgSHuM7.js`, matching the local production entry.
+SHA-256: `899eac41a7a724c52249d2f136f2d43560b0d794cfea51a08e993372d439c1aa`.
+Mask contract is present; development diagnostics are excluded from dist. No
+hosted model call was made for this asset/UI smoke check.
+
+189 web tests, 94 engine tests, nine Firebase checks, typecheck and build pass.
+The exact-sentence lease template is removed after Likhil's review; one newly
+approved full public lease returned cloud 10/10 on the general path. Stronger
+v3 content checks withhold observed timing/geography/notice, interim-ownership
+and unsigned-form execution overclaims; they are narrow lexical triage, not
+entailment verification. See DEMO_READINESS.md for the 49/50 broader full-sample
+observations, focused follow-ups and unresolved signature/content caveats.
+
+PR #28 was merged by the maintainer at 65152ce. This follow-up is isolated on
+codex/content-quality-v3 based on that main; original local history and the
+newer upstream evaluation report are preserved. Broader Gate A remains open.
+
+### November 21 factual v3 / grounding v5 release checkpoint
+
+Official CLI Hosting-only deployment completed after actual Cloud Billing showed
+no linked billing account and current official Hosting no-billing hard-stop
+quota behavior was checked. No billing, payment, trial, API/provider/model or
+server Remote Config setting changed. Local templates describe current defaults.
+
+Current hosted module is `/assets/index-BkV4srSd.js`, matching the production
+build. SHA-256: `749cac1535ce0ddb374cb968a79bc61037a4439c7c55de84ca3521f8f1592ae4`.
+235 web tests and production typecheck/build pass. Development diagnostics
+remain excluded. Prior unchanged engine (94) and Firebase (nine) checks passed.
+
+The immediately preceding hosted build index-ClxvN20o.js completed a genuine
+masked approval/cloud/restoration flow, 4/4 validated, and passed edit clearing.
+Content review caught contact-scope and compound printed-signatory errors; this
+is retained as a failed content observation. Grounding v5 and the extended
+general field grammar address those cases with failing-before regressions.
+
+The fresh check on the current hosted asset is pending local masking: Nano-ready
+is shown, but no preview/result has completed. No cloud approval/send was made
+for that attempt. Native Chrome control also reports no visible window, while
+extension DOM control works. A visible Chrome window was requested to unblock
+the isolated offline test and diagnose this pending masking step. Neither that
+check nor the final v5 full matrix is claimed complete. Keep PR #31 draft and
+Gate A open; do not advance import/native/chat/polish gates on this evidence.
+
+### November 22 resumed acceptance and draft-reference correction
+
+Recovered the earlier hosted preview with a degraded patterns-only/review warning
+after 185,806 ms. Explicit inspection/approval returned actual cloud 4/4 under
+grounding v5, with corrected contact scope/source-based printed-name wording,
+local restoration and edit clearing. Preserve the masking reliability limitation.
+
+Ordinary offline device inference exposed a date-only draft dropping the end date.
+The new commercial-review-v4 drafting check visibly withholds omitted source
+references without synthesizing prose or retrying. 238 web tests, core typecheck
+and production typecheck/build pass; prompts/schemas/grounding/model unchanged.
+
+Official Hosting-only CLI deploy completed after fresh no-billing and official
+hard-stop quota checks. Current hosted entry `/assets/index-Cr3HSrZw.js` matches
+local SHA-256 `a0829eeeab5a552c0eeb0c218260c8af839ecdf1e3a148d8b927656b9ca41bd3`.
+A fresh ordinary date-clause offline check passed actual device 1/1, correct
+restoration and visible interception of the incomplete draft. DevTools confirmed
+blocked cloud request/zero bytes; No throttling restored. This is a preliminary
+guarded review, not successful generated replacement wording. See DEMO_READINESS.md.
+No billing/payment/trial, API/provider/model or server Remote Config change.
+The current full sample matrix remains pending until separately observed.
+
+The subsequent frozen 3f096b6 matrix completed actual cloud 60/60 across all six
+samples under grounding v5/draft policy v4, all drafts empty. Methods were 50
+general, nine labeled signatory and one labeled guarantee. Content/restoration
+was inspected; broad/redundant questions remain limitations. See DEMO_READINESS.md
+for row-level evidence. This branch-based result does not close #30's main check.
