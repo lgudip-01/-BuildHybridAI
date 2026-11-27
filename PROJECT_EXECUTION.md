@@ -1729,3 +1729,29 @@ scaffold dependencies remain tracked separately.
 Consolidated main adoption PR: https://github.com/lgudip-01/-BuildHybridAI/pull/50 .
 This is a reviewable web candidate, not a main merge or mobile release. The
 complete earlier stacked history is preserved; no local/remote ref was reset.
+
+
+## Actual-main six-sample acceptance — November 27, 2026
+
+- [x] Owner merged #50; freeze actual main 1ac26a957587ab214d76b7613096bb3935d0f3a2
+  in an isolated worktree; full tree equals reviewed accdd41.
+- [x] 581 web/engine tests, three typechecks, nine Firebase checks/build pass.
+- [x] Fresh Spark/no linked billing, enforced App Check, exact model free pricing
+  and actual free-tier quota verified. Existing localhost attestation passed;
+  unregistered 127.0.0.1 made no cloud request and required no new registration.
+- [x] Six public full fixtures, one explicitly approved cloud batch each: 60/60
+  runtime validated, mask 70/70, keep 35/35, restoration complete, all drafts empty.
+- [x] Inspect content and retain errors: misleading NDA mutual-remedy question,
+  redundant questions, generic term/title overmasking and two type mismatches.
+- [x] Existing hosted entry script independently equals the configured main build.
+- [ ] Resolve content defects using meaningful regressions and a bounded candidate
+  check; do not claim perfect content from runtime validation.
+- [ ] Corrected main adoption/Hosting release; no new deployment while content
+  gate remains open. Existing matching Hosting is preserved.
+
+Full evidence, per-sample findings, active model/policy, limits and next increment:
+MAIN_ACCEPTANCE_20261127.md. Original cloud results preserved; no automatic retry,
+fixture relaxation, paid service, billing/permission change or new registration.
+This closes #30's actual-main runtime/privacy matrix, not full content acceptance,
+physical native cloud/attestation, Android model readiness, chat release or demo
+submission. Prior branch-based evidence and original failures remain historical.
