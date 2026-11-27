@@ -41,6 +41,18 @@ function deferred<T>() { let resolve!: (value: T) => void; const promise = new P
 beforeEach(() => { useExternalKey(undefined); });
 afterEach(() => { vi.useRealTimers(); useExternalKey(undefined); });
 
+describe('a word that starts two names', () => {
+  it('asks for the full name instead of picking one of them', async () => {
+    const text = 'Halcyon Cloud Systems GmbH ("Provider") gives Customer access to the Halcyon Fleet platform.';
+    const d = await document(text, [{ text: 'Halcyon Cloud Systems GmbH', kind: 'organization', party: true }]);
+    const halcyon: Named[] = [{ text: 'Halcyon', kind: 'organization', party: true }];
+    await expect(maskQuestion(d.context, 'Can Halcyon raise the fees?', local(halcyon)))
+      .rejects.toMatchObject({ code: 'ambiguous_entity' });
+    const full = await maskQuestion(d.context, 'Can Halcyon Cloud Systems GmbH raise the fees?', local(halcyon));
+    expect(full.text).toBe(`Can ${tokenFor(d.vault, 'Halcyon Cloud Systems GmbH')} raise the fees?`);
+  });
+});
+
 describe('real engine context and ticket authority', () => {
   it('rejects a copied/hand-built batch and freezes only masked public context fields', async () => {
     const d = await document();
