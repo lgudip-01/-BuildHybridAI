@@ -190,6 +190,9 @@ function genericReferenceRanges(text: string): [number, number][] {
     for (const match of text.matchAll(/\bthe\s+Purpose\b/giu)) ranges.push([match.index, match.index + match[0].length]);
   }
   for (const match of text.matchAll(/\bstandard[^\S\r\n]+((?:[\p{L}-]+[^\S\r\n]+){1,11}Agreement)\b/dgiu)) {
+    // A descriptive-looking company can also be a sentence subject. Require
+    // a document action before the caption, not merely the word standard.
+    if (!/\b(?:sign(?:s|ed|ing)?|execut(?:e|es|ed|ing)|review(?:s|ed|ing)?|attach(?:es|ed|ing)?|deliver(?:s|ed|ing)?)\b[^.!?\n]{0,100}$/i.test(text.slice(0, match.index))) continue;
     // Only descriptive vocabulary is exempted; Northwind Inventions Agreement
     // still contains a private stem and is therefore not a generic reference.
     const description = match[1]!.replace(/\b(?:proprietary|inventions?)\b/giu, '');

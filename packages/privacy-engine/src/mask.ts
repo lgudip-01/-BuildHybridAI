@@ -70,6 +70,7 @@ export async function mask(
   // An explicit adjacent definition can also introduce a non-prefix alias,
   // e.g. Acme Holdings LLC ("AH"). Bind it to that actual name occurrence,
   // never to an unrelated quoted term elsewhere in the document.
+  const explicitAliases: { name: string; alias: string; clauseId: string }[] = [];
   for (const entity of found) {
     for (const clause of clauses) {
       for (const occurrence of findOccurrences(clause.text, entity.value)) {
@@ -78,7 +79,10 @@ export async function mask(
           return seal({ ok: false, docId, leaks: [{ clauseId: clause.id, snippet: alias,
             reason: 'An explicit name alias is also ordinary contract vocabulary. Clarify the alias before analysis.' }] }, run);
         }
-        if (alias && !isGeneric(alias)) entity.variants.push(alias);
+        if (alias && !isGeneric(alias)) {
+          entity.variants.push(alias);
+          explicitAliases.push({ name: entity.value, alias, clauseId: clause.id });
+        }
       }
     }
   }
@@ -109,6 +113,15 @@ export async function mask(
     }, run);
   }
   needsReview ||= coordinated.needsReview;
+  for (const binding of explicitAliases) {
+    const owner = coordinated.entities.find(e => normalize(e.value) === normalize(binding.name));
+    // Coordination can discard inferred personal short forms. Preserve only
+    // the explicit alias of the surviving whole name; never give a group alias
+    // to one of several separately identified people.
+    if (!owner) return seal({ ok: false, docId, leaks: [{ clauseId: binding.clauseId, snippet: binding.alias,
+      reason: 'An explicit alias names an ambiguous group. Clarify the named parties before analysis.' }] }, run);
+    owner.variants.push(binding.alias);
+  }
   const entities = dedupeEntities(coordinated.entities);
 
   const registry = new PlaceholderRegistry();

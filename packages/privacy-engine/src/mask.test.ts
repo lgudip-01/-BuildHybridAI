@@ -89,6 +89,7 @@ describe('mask', () => {
   it.each([
     'Purpose Inc. ("Purpose") evaluates a project (the "Purpose"). Purpose Inc. signs.',
     'The standard Proprietary Information and Inventions Agreement LLC ("PIIA") signs. PIIA agrees.',
+    'The standard Proprietary Information and Inventions Agreement ("PIIA") signs. PIIA agrees.',
   ])('does not exempt a company whose name resembles descriptive vocabulary: %s', async text => {
     const result = await mask(crypto.randomUUID(), [{ id: 'c1', index: 0, text }], fakeBridge([], { status: 'unavailable' }));
     expect(result.ok).toBe(true);
@@ -111,6 +112,25 @@ describe('mask', () => {
     const [restored] = await unmask(result.docId, [{ clauseId: 'c1', risk: 'low',
       explanation: result.clauses[0]!.text, redline: '', questions: [] }]);
     expect(restored!.explanation).toContain('Northwind Analytics Inc. pays Bellhaven Robotics LLC.');
+  });
+
+  it('does not assign an explicit group alias to either separately named person', async () => {
+    const text = 'Jane Smith and Sam Ortega ("TeamJ") sign. Jane Smith works. Sam Ortega works.';
+    const result = await mask(crypto.randomUUID(), [{ id: 'c1', index: 0, text }], fakeBridge([
+      { text: 'Jane Smith and Sam Ortega', kind: 'person', party: true },
+      { text: 'Jane Smith', kind: 'person', party: true },
+      { text: 'Sam Ortega', kind: 'person', party: true },
+    ]));
+    expect(result).toMatchObject({ ok: false, leaks: [{ reason: expect.stringContaining('ambiguous group') }] });
+  });
+
+  it('retains an explicit uppercase non-identifying role', async () => {
+    const result = await mask(crypto.randomUUID(), [{ id: 'c1', index: 0,
+      text: 'Acme Corp ("CLIENT") pays the Contractor.' }], fakeBridge([], { status: 'unavailable' }));
+    expect(result.ok).toBe(true);
+    if (!result.ok) throw new Error('Expected private name and readable role');
+    expect(result.clauses[0]!.text).not.toContain('Acme');
+    expect(result.clauses[0]!.text).toContain('"CLIENT"');
   });
 
   it('preserves the full pronoun set from merged PR #26 without excluding compound organization names', async () => {
