@@ -37,6 +37,17 @@ export function chatSnapshot(entries: Record<string, string>, original: readonly
     const parts = entity.value.split(/\s+/);
     if (parts.length > 1) for (const part of [parts[0]!, parts.at(-1)!]) if (part.length >= 3) add(part, [], true);
   }
+  // One word that starts two names, such as "Halcyon" in "Halcyon Cloud Systems GmbH" and "Halcyon Fleet",
+  // could mean either. It gets the token of each, so a question that uses it has to give the full name.
+  for (const alias of aliases.values()) {
+    if (/\s/.test(alias.value.trim())) continue;
+    for (const [token, value] of Object.entries(entries)) {
+      const words = value.trim().split(/\s+/);
+      if (/^\[(?:PARTY|ORG|PERSON|NAME)_/.test(token) && words.length > 1 && normalize(words[0]!) === normalize(alias.value)) {
+        alias.tokens.add(token);
+      }
+    }
+  }
   return { entries: { ...entries }, aliases: [...aliases.values()].map(({ value, tokens, uncertain }) =>
     ({ value, tokens: [...tokens], ...(uncertain && { uncertain: true }) })) };
 }
