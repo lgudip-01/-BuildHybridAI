@@ -1729,3 +1729,29 @@ scaffold dependencies remain tracked separately.
 Consolidated main adoption PR: https://github.com/lgudip-01/-BuildHybridAI/pull/50 .
 This is a reviewable web candidate, not a main merge or mobile release. The
 complete earlier stacked history is preserved; no local/remote ref was reset.
+
+
+## Question grounding and Likhil's shared-word error — November 27, 2026
+
+- [x] Investigate #13/#17/#18 and #66/#67/#68 updates. Likhil's Halcyon error
+  is fixed in still-unmerged #66, not main/Hosting; previous work had not adopted it.
+- [x] Reproduce old-main failure and verify unchanged #66: 582 tests/typecheck.
+  Public approval posted; follow-up branch is based directly on d7b53da.
+- [x] Implement question-grounding-v1 rules and narrow shared rejection guards,
+  preserving approved dispatch, schema/placeholder/factual checks and no retries.
+- [x] Twenty meaningful captured-failure/counterexample cases; 602 tests, three
+  typechecks/build pass. One reviewed three-clause UI cloud batch: 3/3 validated,
+  restored values, no generated drafts. No broad six-sample repeat.
+- [x] Credit Likhil's closed #18 twelve-file main import check and main chat
+  authority review; retain prior six-sample and physical-phone failures separately.
+- [x] Publish source/tests on this separate stacked candidate; fetched 7673843
+  matches all three tested source/test files. Final complete-tree verification
+  accompanies the PR after the documentation upload.
+- [ ] Owner adoption required before claiming Halcyon/question fixes live.
+- [ ] Resolve remaining generic redaction/classification findings, carry #56
+  banner correction through coordinated adoption, then corrected-main acceptance
+  and Hosting release. No new deployment, billing or permission change here.
+
+Evidence, runtime observations and lexical-guard limits:
+QUESTION_GROUNDING_20261127.md. Native/Android/attestation/chat and submission
+gates remain separate. #66's original source/tests are unchanged in this branch.

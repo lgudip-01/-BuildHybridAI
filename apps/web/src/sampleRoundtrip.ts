@@ -4,7 +4,7 @@ import { approve, assertApproved } from '@clause-guard/privacy-engine/approval';
 import { unmask } from '@clause-guard/privacy-engine/unmask';
 import { initAI } from './firebase';
 import { WebBridge } from './webBridge';
-import { ANALYSIS_REVIEW_RULES, REDLINE_POLICY_VERSION, EXPLANATION_GROUNDING_RULES, GROUNDING_POLICY_VERSION, GUARANTEE_REVIEW_FORMAT_VERSION, SIGNATORY_REVIEW_FORMAT_VERSION, sourceQuotedSignatoryReview, sourceQuotedGuaranteeReview } from '@clause-guard/core/analysis';
+import { ANALYSIS_REVIEW_RULES, REDLINE_POLICY_VERSION, EXPLANATION_GROUNDING_RULES, GROUNDING_POLICY_VERSION, QUESTION_GROUNDING_POLICY_VERSION, GUARANTEE_REVIEW_FORMAT_VERSION, SIGNATORY_REVIEW_FORMAT_VERSION, sourceQuotedSignatoryReview, sourceQuotedGuaranteeReview } from '@clause-guard/core/analysis';
 import { loadAnalysisConfig } from './analysisConfig';
 
 const texts = import.meta.glob('../../../samples/*.txt', { query: '?raw', import: 'default' });
@@ -85,6 +85,7 @@ export async function runSample(preview: Preview, options: { reviewed: true }) {
       deviceReviewRulesPresent: config.devicePrompt.includes(ANALYSIS_REVIEW_RULES),
       redlinePolicy: REDLINE_POLICY_VERSION,
       groundingPolicy: GROUNDING_POLICY_VERSION,
+      questionGroundingPolicy: QUESTION_GROUNDING_POLICY_VERSION,
       guaranteeReviewFormat: GUARANTEE_REVIEW_FORMAT_VERSION,
       signatoryReviewFormat: SIGNATORY_REVIEW_FORMAT_VERSION,
       leaseTermReview: 'general',
