@@ -2195,8 +2195,12 @@ Private/local signing project changes are preserved and excluded from publishing
 - [x] Publish source/tests to the separate candidate branch; fetched 054c222
   matches all three tested code files. Final complete-tree verification is recorded
   in the pull request after this documentation batch.
-- [ ] Aarush/Likhil review; targeted separately recorded physical-iPhone SaaS
-  recovery check after current readiness/no-cost checks. No automatic rerun.
+- [x] Publish #67 at 03371e1; complete fetched tree matches tested local commits.
+- [x] Signed candidate build/install/launch and one separately recorded physical
+  iPhone SaaS run after fresh no-cost/App Check checks: 20,463 ms, 9 replacements,
+  every clause read, required mask 8/8 and keep 8/8. No timeout observed.
+- [ ] Aarush/Likhil review requested on #67; resolve four new SaaS type mismatches
+  alongside the original seven. No automatic rerun.
 
 This bounds the JS caller, not Foundation Models execution or cancellation. A
 never-settling native read remains fenced; status reports unavailable and patterns
@@ -2210,3 +2214,17 @@ Actual-main six-sample content and Hosting acceptance (#30) are now independent
 next work after current no-cost/App Check readiness verification. #60/#61 native
 adoption remains separate; this candidate stays stacked on #61/5f340f7.
 No new cloud/model call, deployment, billing, API, IAM or attestation change.
+
+
+## SaaS recovery outcome and next independent gate — November 27, 2026
+
+Candidate #67's one phone run completed with review-required local masking.
+See the separate increment in reports/PHONE_LOCAL_MASKING_20261125.md for all
+checks and limits. Original stalled first run remains unchanged and unscored.
+Native cancellation and same-revision broader content quality remain unproven.
+No cloud approval, deployment, billing, permissions or release attestation change.
+Next independent step: freeze owner-merged main 1ac26a9 for #30's web acceptance,
+verify current model/no-cost/quota/App Check configuration before provider use,
+then run bounded six-fixture content/source/restoration checks and only release
+the verified main through the existing no-billing Hosting path. Native #67 owner
+review/adoption and Android physical-model readiness remain separate tracks.

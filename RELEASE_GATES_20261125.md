@@ -218,3 +218,13 @@ Original source fails the relevant negative controls. This is a tested candidate
 not a physical-phone recovery pass or a native cancellation guarantee. Original
 SaaS scoring remains incomplete; five prior fixture passes remain credited.
 Next: publish/verify, owner review and one targeted candidate phone check.
+
+
+November 27 device follow-up: #67/03371e1 signed Debug build, bundle verification,
+physical install and launch passed. One separate SaaS local-only run completed
+in 20,463 ms with every clause read, 9 replacements, required mask 8/8 and keep
+8/8. Four type disagreements remain; original stall and seven earlier type
+findings are preserved. Timeout branch was not hit in this run; synthetic
+never-settling regression remains its evidence. #67 owner reviews are requested.
+Next independent gate is actual-main #30 web content/Hosting acceptance after
+fresh no-cost/model/quota/App Check readiness. No cloud approval in this check.
