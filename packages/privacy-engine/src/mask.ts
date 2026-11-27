@@ -28,7 +28,7 @@ export async function mask(
     throw new TypeError('Every clause needs a unique, non-empty id, so each result maps back to one clause.');
   }
 
-  const useModel = (await bridge.onDeviceStatus()) === 'available';
+  let useModel = (await bridge.onDeviceStatus()) === 'available';
   let needsReview = !useModel;
   // Reported so the UI can tell "the model didn't run" apart from "the model ran but found something to check".
   let modelReadClauses = 0;
@@ -56,9 +56,13 @@ export async function mask(
       byModel.push(...reading.entities);
       types.push(reading.type);
       modelReadClauses++;
-    } catch {
+    } catch (error) {
       needsReview = true;
       types.push(undefined);
+      // A caller deadline cannot cancel the native model. Finish this batch
+      // with patterns even if that abandoned request eventually answers.
+      if (error && typeof error === 'object' && 'code' in error &&
+          (error.code === 'local_read_timeout' || error.code === 'local_read_busy')) useModel = false;
     }
     onReadProgress?.(types.length);
   }

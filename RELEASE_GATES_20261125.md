@@ -187,9 +187,10 @@ its separate acceptance before either independent stop can be removed.
 
 ## Gate 4: owner main adoption and hosted demo — Likhil / Sai / Cloud AI
 
-#50's requested engine/cloud and UI reviews remain pending. #54/#60 are stacked
-candidates, not main. Coordinate owner adoption; avoid applying old patches or
-merging superseded versions over the reviewed integrated files.
+November 27 refresh: owner merged #50 on November 26. Actual origin/main is
+1ac26a957587ab214d76b7613096bb3935d0f3a2; its complete tree matches the prepared
+accdd41 web candidate. #54/#60/#61 native adoption remains separate. Preserve
+reviewed integrated files and do not replace them with superseded patches.
 
 After adoption, refresh actual origin/main, inspect any conflict resolutions and
 freeze the resulting SHA. Run affected checks, then the bounded six-sample
@@ -202,3 +203,28 @@ Finally, after active native testing ends, remove obsolete debug tokens through
 the project owner workflow and prepare the demo/submission with the actual
 verified platforms and known limitations. No deadline/contest quota offer changes
 the zero-cost policy. This packet creates no cloud activity or permissions.
+
+
+## November 27 local-read recovery candidate
+
+Aarush's #17 review confirms that Swift task-group cancellation can wait for an
+uncooperative model, so the reliable caller bound belongs in JS. NativeBridge
+now rejects a raw read after 30 seconds, keeps the native request fenced until
+actual settlement, and reports unavailable while it remains pending. The engine
+stops model reads for that batch on timeout/busy and finishes patterns with review
+required. Late replies cannot change the completed preview or resume that batch.
+Seven regressions and all 646 web/engine tests pass; typechecks/build pass.
+Original source fails the relevant negative controls. This is a tested candidate,
+not a physical-phone recovery pass or a native cancellation guarantee. Original
+SaaS scoring remains incomplete; five prior fixture passes remain credited.
+Next: publish/verify, owner review and one targeted candidate phone check.
+
+
+November 27 device follow-up: #67/03371e1 signed Debug build, bundle verification,
+physical install and launch passed. One separate SaaS local-only run completed
+in 20,463 ms with every clause read, 9 replacements, required mask 8/8 and keep
+8/8. Four type disagreements remain; original stall and seven earlier type
+findings are preserved. Timeout branch was not hit in this run; synthetic
+never-settling regression remains its evidence. #67 owner reviews are requested.
+Next independent gate is actual-main #30 web content/Hosting acceptance after
+fresh no-cost/model/quota/App Check readiness. No cloud approval in this check.
