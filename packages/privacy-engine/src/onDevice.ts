@@ -5,9 +5,20 @@ import { isGeneric, isGenericReference, isJurisdiction, isOnlyPlaceOfLaw, isSect
 // On-device context windows are small, so long clauses go in pieces.
 const MAX_CHUNK = 2000;
 
+export const CLASSIFICATION_POLICY_VERSION = 'clause-type-v2';
+
 const TYPE_RULE =
   "Choose the type from the clause's main subject, not from words it mentions in passing. " +
-  'Use "other" for a title, for the opening clause that names the parties, and for signature blocks.';
+  'Use "other" for a title, for the opening clause that names the parties, and for signature blocks. ' +
+  'Use these meanings: payment = amounts, invoices, payment instructions, interest or monetary credits; ' +
+  'termination = ending, renewing or giving notice to end the relationship; ' +
+  'confidentiality = protecting or restricting disclosure/use of confidential information; ' +
+  'ip = ownership, assignment or licensing of work product or intellectual property, including ownership conditioned on payment; ' +
+  'liability = limits or exclusions of damages or liability; ' +
+  'indemnity = an express duty to defend or reimburse claims; ' +
+  'non_compete = restrictions on working for competitors, not a non-exclusive permission to use a product; ' +
+  'governing_law = choosing applicable law or courts, not merely referring to an agreement; ' +
+  'other = no listed subject fits the operative purpose. A generic breach or remedy alone is not confidentiality.';
 
 // One call per clause returns both what masking needs and the clause type, instead of two calls.
 const CLAUSE_SCHEMA = {
