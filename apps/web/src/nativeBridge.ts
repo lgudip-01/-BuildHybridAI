@@ -18,6 +18,20 @@ interface ClauseGuardAIPlugin extends AnalysisPlugin {
 
 const Native = registerPlugin<ClauseGuardAIPlugin>('ClauseGuardAI');
 
+const LOCAL_READ_DEADLINE_MS = 30_000;
+// The plugin is shared across bridge instances. Keep the fence until the native
+// request actually settles: a caller timeout does not cancel Apple/Nano work.
+let pendingLocalRead: Promise<{ text: string }> | undefined;
+
+class LocalReadUnavailable extends Error {
+  constructor(readonly code: 'local_read_timeout' | 'local_read_busy') {
+    super(code === 'local_read_timeout'
+      ? 'The on-device model did not finish in time.'
+      : 'The on-device model is still finishing an earlier read.');
+    this.name = 'LocalReadUnavailable';
+  }
+}
+
 /** The vault key from the device keystore, for `useExternalKey` in the privacy engine. */
 export async function nativeVaultKey(): Promise<Uint8Array> {
   const { key } = await Native.vaultKey();
@@ -27,7 +41,9 @@ export async function nativeVaultKey(): Promise<Uint8Array> {
 /** AiBridge for the Android and iOS apps. Same contract as WebBridge, backed by the native plugin. */
 export class NativeBridge implements AiBridge {
   async onDeviceStatus(): Promise<OnDeviceStatus> {
-    return (await Native.onDeviceStatus()).status;
+    if (pendingLocalRead) return 'unavailable';
+    const { status } = await Native.onDeviceStatus();
+    return pendingLocalRead ? 'unavailable' : status;
   }
 
   async downloadModel(onProgress: (fraction: number) => void): Promise<void> {
@@ -40,7 +56,24 @@ export class NativeBridge implements AiBridge {
   }
 
   async onDevice(prompt: string, schema?: object): Promise<string> {
-    return (await Native.onDevice({ prompt, schema })).text;
+    if (pendingLocalRead) throw new LocalReadUnavailable('local_read_busy');
+    const request = Native.onDevice({ prompt, schema });
+    pendingLocalRead = request;
+    return new Promise<string>((resolve, reject) => {
+      const timer = setTimeout(() => reject(new LocalReadUnavailable('local_read_timeout')), LOCAL_READ_DEADLINE_MS);
+      const finished = () => {
+        clearTimeout(timer);
+        if (pendingLocalRead === request) pendingLocalRead = undefined;
+      };
+      request.then(reply => {
+        finished();
+        if (typeof reply?.text !== 'string') reject(new Error('The on-device model returned an invalid reply.'));
+        else resolve(reply.text);
+      }, error => {
+        finished();
+        reject(error);
+      });
+    });
   }
 
   /** PREFER_IN_CLOUD in effect: cloud first, then on-device when allowed. Approval is checked around every native call. */
