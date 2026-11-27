@@ -1,0 +1,213 @@
+{
+  "policy": "clause-type-v2",
+  "status": "complete",
+  "rows": [
+    {
+      "sample": "nda",
+      "group": "prior-mismatch",
+      "clauseId": "c2",
+      "expected": [
+        "other"
+      ],
+      "actual": "confidentiality",
+      "matched": false,
+      "elapsedMs": 6421,
+      "entityCount": 2
+    },
+    {
+      "sample": "nda",
+      "group": "prior-mismatch",
+      "clauseId": "c7",
+      "expected": [
+        "liability",
+        "other"
+      ],
+      "actual": "other",
+      "matched": true,
+      "elapsedMs": 973,
+      "entityCount": 1
+    },
+    {
+      "sample": "nda",
+      "group": "control",
+      "clauseId": "c4",
+      "expected": [
+        "confidentiality"
+      ],
+      "actual": "confidentiality",
+      "matched": true,
+      "elapsedMs": 951,
+      "entityCount": 1
+    },
+    {
+      "sample": "nda",
+      "group": "control",
+      "clauseId": "c8",
+      "expected": [
+        "governing_law"
+      ],
+      "actual": "governing_law",
+      "matched": true,
+      "elapsedMs": 681,
+      "entityCount": 0
+    },
+    {
+      "sample": "freelance",
+      "group": "prior-mismatch",
+      "clauseId": "c1",
+      "expected": [
+        "other"
+      ],
+      "actual": "other",
+      "matched": true,
+      "elapsedMs": 618,
+      "entityCount": 0
+    },
+    {
+      "sample": "freelance",
+      "group": "prior-mismatch",
+      "clauseId": "c5",
+      "expected": [
+        "payment"
+      ],
+      "actual": "payment",
+      "matched": true,
+      "elapsedMs": 2349,
+      "entityCount": 3
+    },
+    {
+      "sample": "freelance",
+      "group": "prior-mismatch",
+      "clauseId": "c6",
+      "expected": [
+        "ip"
+      ],
+      "actual": "ip",
+      "matched": true,
+      "elapsedMs": 888,
+      "entityCount": 0
+    },
+    {
+      "sample": "freelance",
+      "group": "control",
+      "clauseId": "c4",
+      "expected": [
+        "payment"
+      ],
+      "actual": "payment",
+      "matched": true,
+      "elapsedMs": 1730,
+      "entityCount": 1
+    },
+    {
+      "sample": "freelance",
+      "group": "control",
+      "clauseId": "c7",
+      "expected": [
+        "termination"
+      ],
+      "actual": "termination",
+      "matched": true,
+      "elapsedMs": 902,
+      "entityCount": 1
+    },
+    {
+      "sample": "lease",
+      "group": "prior-mismatch",
+      "clauseId": "c1",
+      "expected": [
+        "other"
+      ],
+      "actual": "other",
+      "matched": true,
+      "elapsedMs": 618,
+      "entityCount": 0
+    },
+    {
+      "sample": "lease",
+      "group": "prior-mismatch",
+      "clauseId": "c8",
+      "expected": [
+        "other"
+      ],
+      "actual": "other",
+      "matched": true,
+      "elapsedMs": 625,
+      "entityCount": 0
+    },
+    {
+      "sample": "saas",
+      "group": "prior-mismatch",
+      "clauseId": "c1",
+      "expected": [
+        "other"
+      ],
+      "actual": "other",
+      "matched": true,
+      "elapsedMs": 617,
+      "entityCount": 0
+    },
+    {
+      "sample": "saas",
+      "group": "prior-mismatch",
+      "clauseId": "c2",
+      "expected": [
+        "other"
+      ],
+      "actual": "other",
+      "matched": true,
+      "elapsedMs": 1419,
+      "entityCount": 2
+    },
+    {
+      "sample": "saas",
+      "group": "prior-mismatch",
+      "clauseId": "c3",
+      "expected": [
+        "ip",
+        "other"
+      ],
+      "actual": "other",
+      "matched": true,
+      "elapsedMs": 1527,
+      "entityCount": 1
+    },
+    {
+      "sample": "saas",
+      "group": "prior-mismatch",
+      "clauseId": "c5",
+      "expected": [
+        "other",
+        "payment"
+      ],
+      "actual": "payment",
+      "matched": true,
+      "elapsedMs": 1182,
+      "entityCount": 0
+    },
+    {
+      "sample": "saas",
+      "group": "control",
+      "clauseId": "c7",
+      "expected": [
+        "liability"
+      ],
+      "actual": "liability",
+      "matched": true,
+      "elapsedMs": 624,
+      "entityCount": 0
+    },
+    {
+      "sample": "offer-letter",
+      "group": "control",
+      "clauseId": "c6",
+      "expected": [
+        "non_compete"
+      ],
+      "actual": "non_compete",
+      "matched": true,
+      "elapsedMs": 949,
+      "entityCount": 0
+    }
+  ]
+}
