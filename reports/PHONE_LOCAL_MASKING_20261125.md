@@ -350,3 +350,56 @@ not legal-analysis scores. 43/50 labels match; 7 do not. SaaS is unscored.
 Current TYPE_RULE already directs titles/preambles/signatures to other and main
 subject over incidental words. Preserve these failures for owner review instead
 of simply claiming that instruction was absent or relaxing expected labels.
+
+
+## Separate SaaS candidate recovery check — November 27, 2026
+
+This does not replace the original November 25 SaaS stall or convert the original
+six-fixture first-run matrix to six passes. One new run followed a concrete
+caller-deadline/batch-stop fix, rebuild, install and restart. Production candidate:
+03371e1090e33a2ff29af12ad4d68870683579b0, PR #67, stacked on #61/5f340f7.
+
+Readiness rechecked before inference: physical iPhone 16 Pro Max connected;
+Firebase Console Spark/no-cost and Cloud Billing explicitly no linked account;
+AI Logic Basic Enforced, replay off; native release providers remain unregistered.
+Apple's official on-device Foundation Models pricing remains free:
+https://www.apple.com/newsroom/2025/09/apples-foundation-models-framework-unlocks-new-intelligent-app-experiences/
+Swift raw reads still instantiate local LanguageModelSession, with no cloud path.
+No payment, provider activation, token registration or cloud approval.
+
+Signed Debug build succeeded with the existing approved free Personal Team.
+Deep/strict signature verification passed. Bundled private Firebase plist equals
+local source; logging remains none; every built web asset equals the web dist
+output. Private config remains ignored; tracked signing/project files unchanged.
+CoreDevice independently confirmed install and launch. User completed protected
+Keychain and existing Mirroring authentication; no credentials were handled here.
+
+Exact unchanged saas.txt copied from TextEdit; preview input count verified 10 and
+Apple Intelligence ready. One actual Mask contract activation observed at clause
+1/10, then clause 8/10. Completed in **20,463 ms**, **9 values replaced**. Banner
+explicitly says the model returned a usable read of every clause, with names
+still requiring confirmation. This run did NOT exercise the timeout branch.
+The never-settling regression proves the caller deadline; phone cancellation or
+root-cause elimination is not established by this successful run/restart.
+
+Direct preview inspection across c1–c10:
+- Required mask checks **8/8**: date, Halcyon (including Fleet and signatures),
+  Verdant, EUR 84,000, Johanna Weiss, email, Stefan Brandt and Eline de Vries are
+  replaced by placeholders. No required value observed in the preview.
+- Keep checks **8/8**: Provider, Customer, GDPR, 99.9%, 36 months, 90 days,
+  Netherlands and Amsterdam remain.
+- Types **6/10** match fixtures. New disagreements: c1 title governing_law vs
+  other; c2 opening governing_law vs other; c3 Subscription non_compete vs ip|other;
+  c5 Service Levels governing_law vs other|payment. c4 payment, c6 confidentiality,
+  c7 liability, c8 termination, c9 governing_law and c10 other match.
+
+This is local-only masking/content inspection, not cloud/legal-analysis quality
+or a network-payload audit. The original five passes plus this separate candidate
+result cover all required fixture mask/keep strings across mixed revisions, not
+a new same-revision six-fixture acceptance. Original seven classification
+disagreements remain; four additional ones require engine-owner review.
+
+Screenshots retained locally: clause-count/readiness, candidate preview head
+(banner/timing/c1–c5) and tail (c6–c10). Phone stopped at preview, before Approve &
+analyze. No broad retry, cloud analysis or extra model generation. iOS input
+auto-zoom caused horizontal clipping after editing; separate mobile UI follow-up.
