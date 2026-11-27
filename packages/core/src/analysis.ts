@@ -31,6 +31,14 @@ export const ANALYSIS_REVIEW_RULES = 'Review from a neutral perspective when the
   'Do not present a clause-level omission as an established omission from the entire agreement.';
 
 export const GROUNDING_POLICY_VERSION = 'explanation-grounding-v5';
+export const QUESTION_GROUNDING_POLICY_VERSION = 'question-grounding-v1';
+export const QUESTION_GROUNDING_RULES = 'Questions must preserve the source facts and must not imply that a stated term is missing. ' +
+  'Ask zero questions when no material uncertainty is supported; do not fill a question quota for headings or salutations. ' +
+  'A role such as disclosing party can be held by either participant; do not presume that role-based relief benefits only one named side. ' +
+  'Acknowledge an explicit geographic scope or late-payment threshold before asking about exceptions, changes or additional procedures. ' +
+  'Do not ask what a stated scope or threshold is, or frame it as unspecified. ' +
+  'If context may be in another clause, ask whether it is addressed elsewhere rather than asserting a contract-wide omission. ' +
+  'Separate a genuine missing definition from a scope or condition already supplied. Avoid broad, unsolicited renegotiation questions.';
 // Keep global instructions about evidence, not a catalog of legal labels that
 // could be echoed into unrelated clauses. Runtime rejection guards stay separate.
 export const EXPLANATION_GROUNDING_RULES = 'Describe only facts and relationships established by the supplied wording. ' +
@@ -44,7 +52,7 @@ export const EXPLANATION_GROUNDING_RULES = 'Describe only facts and relationship
   'Do not convert a permission into a duty, a condition into an absolute promise, or silence into a waiver. ' +
   'Risk is a preliminary review priority based on the supplied wording, not a legal conclusion.';
 
-export const ANALYSIS_OUTPUT_RULES = ANALYSIS_REVIEW_RULES + ' ' + EXPLANATION_GROUNDING_RULES + ' Return only JSON: {clauseId, risk: low|medium|high, explanation, redline, questions: string[]}. ' +
+export const ANALYSIS_OUTPUT_RULES = ANALYSIS_REVIEW_RULES + ' ' + EXPLANATION_GROUNDING_RULES + ' ' + QUESTION_GROUNDING_RULES + ' Return only JSON: {clauseId, risk: low|medium|high, explanation, redline, questions: string[]}. ' +
   'Echo the exact clause id as clauseId. Preserve every placeholder exactly, including brackets and case, ' +
   'in all fields and questions. Never invent a placeholder or rewrite [PARTY_A] as Party A. ' +
   'Preserve each typed placeholder\'s source role in questions as well as explanations: an amount is a quantity, never a payment recipient. ' +
@@ -215,6 +223,7 @@ export function validateSourceQuotedSignatoryReview(analysis: Analysis, expected
  * Call after validateAnalysis, so unsupported output cannot hide bad JSON/tokens.
  */
 export function validateExplanationGrounding(analysis: Analysis, source: CleanText): void {
+  validateQuestionGrounding(analysis.questions, source);
   // A notice address plus a phone contact does not establish that every
   // communication must be by telephone. Narrow replay triage, not a general
   // interpretation of notice delivery rules or the imperative "Call".
@@ -299,6 +308,37 @@ export function validateExplanationGrounding(analysis: Analysis, source: CleanTe
   for (const label of GUARANTEE_LABELS) {
     if (label.test(analysis.explanation) && (!label.test(source) || SOURCE_QUALIFICATION.test(source))) {
       throw new ExplanationGroundingError();
+    }
+  }
+}
+
+/** Narrow replay triage for demonstrated question premises, not semantic/legal
+ * verification. Reject the answer visibly; never silently rewrite its questions.
+ * Run only after schema/placeholder validation, as part of the shared guard.
+ */
+function validateQuestionGrounding(questions: readonly string[], source: CleanText): void {
+  const roleBasedRelief = /\bthe disclosing party may seek injunctive relief\b/i.test(source) &&
+    !/\b(?:only|solely)\s+(?:to\s+)?\[PARTY_[A-Z0-9]+\]|\[PARTY_[A-Z0-9]+\]\s+alone\b/i.test(source);
+  const place = /\b(?:within|throughout|across)\s+(?:the\s+)?([A-Z]\p{Ll}+(?:\s+[A-Z]\p{Ll}+){0,3})(?=[.;,]|$)/u.exec(source)?.[1];
+  const statedGeography = !!place && !/^(?:Term|Agreement|Period|Company|Scope)$/.test(place) &&
+    /\b(?:competitor|competition|compete|geographic|territory)\b/i.test(source);
+  const statedLateThreshold = /\bmore than \d+ days? late\b/i.test(source) &&
+    /\blate fee\b|\b(?:declare|accelerate)\b[^.!?\n]{0,80}\b(?:balance|due)\b/i.test(source) &&
+    !/\b(?:unless|except|not|never)\b/i.test(source);
+  for (const question of questions) {
+    let detail: string | undefined;
+    if (roleBasedRelief && /\b(?:mutual|both parties)\b/i.test(question) &&
+        /\b(?:rather than|instead of)\b[^.!?\n]{0,60}\b(?:only|solely|exclusively)\b[^.!?\n]{0,40}\bdisclosing party\b/i.test(question)) {
+      detail = 'The question presumed that role-based relief benefits only one side. Review the source wording.';
+    } else if (statedGeography && /\b(?:what|which)\s+(?:(?:specific|exact|intended|applicable)\s+){0,2}geographic(?:al)?\s+(?:scope|area|territory)\b/i.test(question)) {
+      detail = 'The question overlooked the stated geographic scope. Review the source wording.';
+    } else if (statedLateThreshold && /\bwhat\s+(?:(?:is|are)\s+)?(?:(?:the|a|any|specific|exact|applicable)\s+){0,3}grace period\b/i.test(question)) {
+      detail = 'The question overlooked the stated late-payment threshold. Review the source wording.';
+    }
+    if (detail) {
+      const error = new AnalysisValidationError('invalid_response');
+      error.message = detail;
+      throw error;
     }
   }
 }
