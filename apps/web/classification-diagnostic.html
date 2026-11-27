@@ -1,0 +1,12 @@
+<!doctype html>
+<html lang="en">
+  <head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><title>Local classification evaluation</title></head>
+  <body><main><h1>Public classification evaluation</h1><p role="status">Development access required.</p></main>
+    <script type="module">
+      if (import.meta.env.DEV && ['localhost', '127.0.0.1', '[::1]'].includes(location.hostname)) {
+        const { mountClassificationDiagnostic } = await import('/src/classificationDiagnostic.ts');
+        mountClassificationDiagnostic(document.querySelector('main'));
+      }
+    </script>
+  </body>
+</html>

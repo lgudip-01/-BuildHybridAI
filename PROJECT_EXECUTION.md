@@ -1781,3 +1781,20 @@ gates remain separate. #66's original source/tests are unchanged in this branch.
 Evidence and privacy/conservative-blocking limits:
 GENERIC_REFERENCE_MASKING_20261127.md. No new provider call or deployment.
 #66/#69 source and prior runtime/phone failures remain preserved.
+
+
+## Clause taxonomy and bounded evaluation — November 27, 2026
+
+- [x] Start from #70/f833dc3; main remains 1ac26a9; preserve local work and stack.
+- [x] Add clause-type-v2 definitions without label overrides or fixture changes.
+- [x] Add loopback/development-only 17-case joint-reader diagnostic with caller
+  deadlines, fixed safe reporting and no cloud analysis/retries.
+- [x] 640 tests, three typechecks/build and whitespace checks pass; no dependency
+  changes or production diagnostic output.
+- [x] One genuine Chrome run: 16/17 overall, 10/11 prior-mismatch cohort, 6/6
+  controls. NDA c2 remains wrong. Phone failures are not claimed fixed by Chrome.
+- [x] Record actual receipt and limits in CLASSIFICATION_EVALUATION_20261127.md
+  and reports/classification-local-20261127.json.
+- [ ] Review/adopt the stacked candidate; no main merge or deployment here.
+- [ ] Genuine full-mask acceptance on accepted revision, preserve #56 banner
+  correction, then corrected-main/Hosting acceptance. Native gates remain separate.
