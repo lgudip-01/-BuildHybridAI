@@ -2175,3 +2175,38 @@ and exact checklists are in reports/PHONE_LOCAL_MASKING_20261125.md.
 Next priority changed from more model scoring to local-read liveness. Original
 failed SaaS evidence must remain; no automatic model retry or cloud approval.
 Private/local signing project changes are preserved and excluded from publishing.
+
+
+## Native local-read deadline candidate — November 27, 2026
+
+- [x] Inspect latest #17/#60/#61 comments and refreshed remote refs; Aarush's
+  #17 cancellation review confirms JS must enforce the caller limit. No owner
+  code change accompanied that review. Preserve the five phone passes and SaaS stall.
+- [x] Add a 30-second deadline per NativeBridge.onDevice call and a shared raw-read
+  fence retained until actual native settlement, including after caller timeout.
+- [x] Stop further model reads in the affected masking batch after timeout/busy;
+  late native completion cannot resume that batch or mutate its finished preview.
+- [x] Seven regressions cover never-settling, late, overlap, status race, normal,
+  rejected/malformed/synchronous failure, and actual engine review-required fallback.
+- [x] Original bridge fails deadline regression; original engine fails late-answer
+  batch regression. Fixed source: 461 web + 185 engine tests (646), core/engine/web
+  typechecks, production build and diff whitespace check pass. Existing bundle-size
+  advisory remains. Fake timers leave IndexedDB's setImmediate real.
+- [x] Publish source/tests to the separate candidate branch; fetched 054c222
+  matches all three tested code files. Final complete-tree verification is recorded
+  in the pull request after this documentation batch.
+- [ ] Aarush/Likhil review; targeted separately recorded physical-iPhone SaaS
+  recovery check after current readiness/no-cost checks. No automatic rerun.
+
+This bounds the JS caller, not Foundation Models execution or cancellation. A
+never-settling native read remains fenced; status reports unavailable and patterns
+remain available. No Swift/Kotlin, dependencies, private config or personal signing
+changes. Approval, leak checks, analysis validation and native chat gates remain.
+
+Main adoption update: owner merged #50 on November 26; origin/main is now
+1ac26a957587ab214d76b7613096bb3935d0f3a2. Its complete tree matches the previously
+prepared accdd41 candidate. The old pending-#50 statements above are historical.
+Actual-main six-sample content and Hosting acceptance (#30) are now independent
+next work after current no-cost/App Check readiness verification. #60/#61 native
+adoption remains separate; this candidate stays stacked on #61/5f340f7.
+No new cloud/model call, deployment, billing, API, IAM or attestation change.
