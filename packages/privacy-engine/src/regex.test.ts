@@ -138,6 +138,11 @@ describe('findNames', () => {
     expect(names(text, true)).toEqual([['NAME', 'Hannah Lee']]);
   });
 
+  it('keeps the titles of other documents in broad mode', () => {
+    const text = 'Sign the Proprietary Information and Inventions Agreement and read the Employee Handbook, as Hannah Lee did.';
+    expect(names(text, true)).toEqual([['NAME', 'Hannah Lee']]);
+  });
+
   it('skips role words like "the Company"', () => {
     expect(names('The Company and the Receiving Party agree.', true)).toEqual([]);
   });

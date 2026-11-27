@@ -38,6 +38,7 @@ export async function mask(
   const found: Entity[] = [];
   const ruleNames: Entity[] = [];
   const rulePatterns: Span[] = [];
+  const patternsByClause: Span[][] = [];
   const byModel: Entity[] = [];
   const types: (ClauseType | undefined)[] = [];
   if (useModel) onReadProgress?.(0);
@@ -46,7 +47,9 @@ export async function mask(
     const named = names.map(spanToEntity);
     found.push(...named);
     ruleNames.push(...named);
-    rulePatterns.push(...findPatterns(clause.text));
+    const patterns = findPatterns(clause.text);
+    rulePatterns.push(...patterns);
+    patternsByClause.push(patterns);
     if (!useModel) continue;
     try {
       const reading = await readClause(bridge, clause);
@@ -78,7 +81,11 @@ export async function mask(
     // rule-matched address, without extending it to model-only people/companies.
     const address = entity.kind === 'ADDRESS' && [...ruleNames, ...rulePatterns]
       .some(rule => rule.kind === 'ADDRESS' && words(rule.value).includes(value));
-    return !(named || completePattern || address);
+    // A value found only inside complete pattern matches, such as the domain of a masked email, is masked with them.
+    const occurrences = clauses.flatMap((clause, i) => findOccurrences(clause.text, entity.value).map(o => ({ ...o, i })));
+    const insidePatterns = occurrences.length > 0 && occurrences.every(o =>
+      patternsByClause[o.i]!.some(p => p.start <= o.start && o.end <= p.end));
+    return !(named || completePattern || address || insidePatterns);
   });
   const coordinated = separateCoordinatedNames(found);
   if (coordinated.ambiguousOrganizations.length) {
