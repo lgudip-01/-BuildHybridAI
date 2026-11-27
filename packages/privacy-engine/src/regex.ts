@@ -180,6 +180,38 @@ export function isGeneric(value: string): boolean {
   return words.length === 0 || words.every((w) => LEGAL_WORDS.has(w) || (w.endsWith('s') && LEGAL_WORDS.has(w.slice(0, -1))));
 }
 
+// Contextual references, not a global stop list: a company called Purpose Inc.
+// or a document title containing a private name must still be masked.
+function genericReferenceRanges(text: string): [number, number][] {
+  const ranges: [number, number][] = [];
+  const definitions = [...text.matchAll(/\(\s*the\s+["“](Purpose)["”]\s*\)/dgiu)];
+  if (definitions.length) {
+    for (const match of definitions) ranges.push(match.indices![1]!);
+    for (const match of text.matchAll(/\bthe\s+Purpose\b/giu)) ranges.push([match.index, match.index + match[0].length]);
+  }
+  for (const match of text.matchAll(/\bstandard[^\S\r\n]+((?:[\p{L}-]+[^\S\r\n]+){1,11}Agreement)\b/dgiu)) {
+    // A descriptive-looking company can also be a sentence subject. Require
+    // a document action before the caption, not merely the word standard.
+    if (!/\b(?:sign(?:s|ed|ing)?|execut(?:e|es|ed|ing)|review(?:s|ed|ing)?|attach(?:es|ed|ing)?|deliver(?:s|ed|ing)?)\b[^.!?\n]{0,100}$/i.test(text.slice(0, match.index))) continue;
+    // Only descriptive vocabulary is exempted; Northwind Inventions Agreement
+    // still contains a private stem and is therefore not a generic reference.
+    const description = match[1]!.replace(/\b(?:proprietary|inventions?)\b/giu, '');
+    if (isGeneric(description)) ranges.push(match.indices![1]!);
+  }
+  return ranges;
+}
+
+/** Every occurrence must be a context-established generic reference. An
+ * independent mention as a name keeps the conservative masking behavior.
+ */
+export function isGenericReference(text: string, value: string): boolean {
+  const ranges = genericReferenceRanges(text);
+  if (!ranges.length) return false;
+  const escaped = value.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\s+/g, '\\s+');
+  const mentions = [...text.matchAll(new RegExp(`${START}${escaped}${END}`, 'giu'))];
+  return mentions.length > 0 && mentions.every(m => ranges.some(([start, end]) => m.index >= start && m.index + m[0].length <= end));
+}
+
 /** "Oregon" or "the United States": places that set the law of a contract and identify no one. */
 export function isJurisdiction(value: string): boolean {
   return JURISDICTION.test(value.trim());
@@ -255,6 +287,7 @@ export function findPatterns(text: string): Span[] {
  * capitalized phrase that isn't contract vocabulary, and names in capitals on their own line of a signature block.
  */
 export function findNames(text: string, broad: boolean): Span[] {
+  const genericReferences = genericReferenceRanges(text);
   const spans = [
     ...collect(text, 'ORG', ORG),
     ...collect(text, 'PERSON', TITLED_PERSON),
@@ -276,6 +309,7 @@ export function findNames(text: string, broad: boolean): Span[] {
   }
   return spans
     .map((s) => trimLeadingArticle(text, s))
+    .filter(s => !genericReferences.some(([start, end]) => s.start >= start && s.end <= end))
     .filter((s) => !isGeneric(stripOrgSuffix(s.value)))
     .filter((s) => s.kind !== 'NAME' || !(JOB_TITLE.test(s.value) || JURISDICTION.test(s.value)));
 }

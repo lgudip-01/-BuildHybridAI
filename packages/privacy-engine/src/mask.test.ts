@@ -50,6 +50,89 @@ const model: ModelEntity[] = [
 const SENSITIVE = ['Acme', 'Dana', 'Reyes', 'January 1, 2026', '$12,500', 'dana@reyes.dev'];
 
 describe('mask', () => {
+  it.each([true, false])('keeps descriptive document references in the real preview (model available: %s)', async available => {
+    const text = 'The parties evaluate a joint venture (the "Purpose"). Use information for the Purpose only. ' +
+      'You must sign the Company\'s standard Proprietary Information and Inventions Agreement before your first day.';
+    const bridge = fakeBridge([
+      { text: 'the Purpose', kind: 'organization', party: false },
+      { text: 'Purpose', kind: 'person', party: false },
+      { text: 'Proprietary Information and Inventions Agreement', kind: 'organization', party: false },
+    ], { status: available ? 'available' : 'unavailable' });
+    const result = await mask(`generic-references-${available}`, [{ id: 'c1', index: 0, text }], bridge);
+    expect(result.ok).toBe(true);
+    if (!result.ok) throw new Error('Expected reviewable preview');
+    expect(result.clauses[0]!.text).toBe(text);
+    expect(result.ledger).toEqual([]);
+  });
+
+  it.each([true, false])('preserves masking of private names beside generic references (model available: %s)', async available => {
+    const text = 'Purpose Labs LLC ("Purpose Labs") and Dana Reyes agree to evaluate a project (the "Purpose"). ' +
+      'Use data for the Purpose only. Sign the standard Northwind Inventions Agreement. ' +
+      'Purpose Labs LLC signs the standard Proprietary Information and Inventions Agreement.';
+    const result = await mask(`private-names-${available}`, [{ id: 'c1', index: 0, text }], fakeBridge([
+      { text: 'Purpose Labs LLC', kind: 'organization', party: true },
+      { text: 'Dana Reyes', kind: 'person', party: true },
+      { text: 'Northwind Inventions Agreement', kind: 'organization', party: false },
+      { text: 'Purpose', kind: 'organization', party: false },
+    ], { status: available ? 'available' : 'unavailable' }));
+    expect(result.ok).toBe(true);
+    if (!result.ok) throw new Error('Expected masked preview');
+    const preview = result.clauses[0]!.text;
+    expect(preview).not.toMatch(/Purpose Labs|Dana|Reyes|Northwind/i);
+    // Purpose also starts a real company name here. Keep conservative alias
+    // masking in that collision; no generic-term exemption may reveal it.
+    // Agreement is also an alias of the privately named document in this
+    // synthetic collision. Its generic use may stay masked for privacy.
+    expect(preview).toContain('standard Proprietary Information and Inventions ');
+  });
+
+  it.each([
+    'Purpose Inc. ("Purpose") evaluates a project (the "Purpose"). Purpose Inc. signs.',
+    'The standard Proprietary Information and Inventions Agreement LLC ("PIIA") signs. PIIA agrees.',
+    'The standard Proprietary Information and Inventions Agreement ("PIIA") signs. PIIA agrees.',
+  ])('does not exempt a company whose name resembles descriptive vocabulary: %s', async text => {
+    const result = await mask(crypto.randomUUID(), [{ id: 'c1', index: 0, text }], fakeBridge([], { status: 'unavailable' }));
+    expect(result.ok).toBe(true);
+    if (!result.ok) throw new Error('Expected private company masking');
+    expect(result.clauses[0]!.text).not.toMatch(/Purpose|Proprietary|PIIA/);
+    expect(result.ledger.length).toBeGreaterThan(0);
+  });
+
+  it.each([true, false])('binds explicit non-prefix aliases only to adjacent names (model available: %s)', async available => {
+    const text = 'Northwind Analytics Inc. ("NWA") hires Bellhaven Robotics LLC ("BHR"). ' +
+      'NWA pays BHR. The project ("Launch") starts tomorrow.';
+    const result = await mask(crypto.randomUUID(), [{ id: 'c1', index: 0, text }], fakeBridge([
+      { text: 'Northwind Analytics Inc.', kind: 'organization', party: true },
+      { text: 'Bellhaven Robotics LLC', kind: 'organization', party: true },
+    ], { status: available ? 'available' : 'unavailable' }));
+    expect(result.ok).toBe(true);
+    if (!result.ok) throw new Error('Expected masked explicit aliases');
+    expect(result.clauses[0]!.text).not.toMatch(/Northwind|Bellhaven|NWA|BHR/);
+    expect(result.clauses[0]!.text).toContain('("Launch")');
+    const [restored] = await unmask(result.docId, [{ clauseId: 'c1', risk: 'low',
+      explanation: result.clauses[0]!.text, redline: '', questions: [] }]);
+    expect(restored!.explanation).toContain('Northwind Analytics Inc. pays Bellhaven Robotics LLC.');
+  });
+
+  it('does not assign an explicit group alias to either separately named person', async () => {
+    const text = 'Jane Smith and Sam Ortega ("TeamJ") sign. Jane Smith works. Sam Ortega works.';
+    const result = await mask(crypto.randomUUID(), [{ id: 'c1', index: 0, text }], fakeBridge([
+      { text: 'Jane Smith and Sam Ortega', kind: 'person', party: true },
+      { text: 'Jane Smith', kind: 'person', party: true },
+      { text: 'Sam Ortega', kind: 'person', party: true },
+    ]));
+    expect(result).toMatchObject({ ok: false, leaks: [{ reason: expect.stringContaining('ambiguous group') }] });
+  });
+
+  it('retains an explicit uppercase non-identifying role', async () => {
+    const result = await mask(crypto.randomUUID(), [{ id: 'c1', index: 0,
+      text: 'Acme Corp ("CLIENT") pays the Contractor.' }], fakeBridge([], { status: 'unavailable' }));
+    expect(result.ok).toBe(true);
+    if (!result.ok) throw new Error('Expected private name and readable role');
+    expect(result.clauses[0]!.text).not.toContain('Acme');
+    expect(result.clauses[0]!.text).toContain('"CLIENT"');
+  });
+
   it('preserves the full pronoun set from merged PR #26 without excluding compound organization names', async () => {
     const pronouns = ['I', 'Me', 'My', 'Mine', 'We', 'Us', 'Our', 'Ours', 'You', 'Your', 'Yours',
       'He', 'Him', 'His', 'She', 'Her', 'Hers', 'They', 'Them', 'Their', 'Theirs', 'It', 'Its', 'Yourself', 'Yourselves'];

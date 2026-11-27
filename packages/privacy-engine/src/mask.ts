@@ -4,10 +4,15 @@ import { leakCheck } from './leakCheck';
 import { dedupeEntities, findOccurrences, normalize, resolveOverlaps, separateCoordinatedNames, toEntity, type Candidate, type Entity } from './merge';
 import { readClause } from './onDevice';
 import { PlaceholderRegistry } from './placeholders';
-import { findDefinedTerms, findNames, findPatterns, looksLikePersonName, type Span } from './regex';
+import { findDefinedTerms, findNames, findPatterns, isGeneric, looksLikePersonName, type Span } from './regex';
 import { loadVault, saveVault } from './vault';
 import { chatSnapshot } from './chatSnapshot';
 import { applyManualMasks, editList, type ManualMask, type ReviewEdit, type SuccessfulMask } from './manualReview';
+
+// Non-identifying roles remain readable. Other explicit aliases that are also
+// generic vocabulary need clarification; silently ignoring them could leak an
+// acronym, while replacing every ordinary use could change the clause meaning.
+const ROLE_ALIAS = /^(?:the\s+)?(?:company|client|customer|contractor|consultant|vendor|supplier|provider|licensor|licensee|employer|employee|buyer|seller|landlord|tenants?|lessor|lessee|disclosing party|receiving party|recipient|discloser|borrower|lender|guarantor|holder|debtor|creditor|premises|part(?:y|ies))$/i;
 
 /**
  * Masks every clause of one document and leak-checks the result.
@@ -62,6 +67,25 @@ export async function mask(
   // Complete rule-derived short forms before checking coverage. The same entity
   // objects are in ruleNames and found, so only aliases of a rule-matched name
   // count here; aliases of a model-only name still require review.
+  // An explicit adjacent definition can also introduce a non-prefix alias,
+  // e.g. Acme Holdings LLC ("AH"). Bind it to that actual name occurrence,
+  // never to an unrelated quoted term elsewhere in the document.
+  const explicitAliases: { name: string; alias: string; clauseId: string }[] = [];
+  for (const entity of found) {
+    for (const clause of clauses) {
+      for (const occurrence of findOccurrences(clause.text, entity.value)) {
+        const alias = /^\s*\(\s*(?:the\s+)?["“]([^"”\n]{2,60})["”]\s*\)/.exec(clause.text.slice(occurrence.end))?.[1]?.trim();
+        if (alias && isGeneric(alias) && !ROLE_ALIAS.test(alias)) {
+          return seal({ ok: false, docId, leaks: [{ clauseId: clause.id, snippet: alias,
+            reason: 'An explicit name alias is also ordinary contract vocabulary. Clarify the alias before analysis.' }] }, run);
+        }
+        if (alias && !isGeneric(alias)) {
+          entity.variants.push(alias);
+          explicitAliases.push({ name: entity.value, alias, clauseId: clause.id });
+        }
+      }
+    }
+  }
   for (const term of clauses.flatMap((c) => findDefinedTerms(c.text))) {
     found.find((e) => normalize(e.value).startsWith(`${normalize(term)} `))?.variants.push(term);
   }
@@ -89,6 +113,15 @@ export async function mask(
     }, run);
   }
   needsReview ||= coordinated.needsReview;
+  for (const binding of explicitAliases) {
+    const owner = coordinated.entities.find(e => normalize(e.value) === normalize(binding.name));
+    // Coordination can discard inferred personal short forms. Preserve only
+    // the explicit alias of the surviving whole name; never give a group alias
+    // to one of several separately identified people.
+    if (!owner) return seal({ ok: false, docId, leaks: [{ clauseId: binding.clauseId, snippet: binding.alias,
+      reason: 'An explicit alias names an ambiguous group. Clarify the named parties before analysis.' }] }, run);
+    owner.variants.push(binding.alias);
+  }
   const entities = dedupeEntities(coordinated.entities);
 
   const registry = new PlaceholderRegistry();
