@@ -37,6 +37,58 @@ function answer(id = 'c1'): Analysis {
 function output(id = 'c1', source = 'in_cloud', data: unknown = answer(id)) {
   return { response: { inferenceSource: source, text: () => JSON.stringify(data) } };
 }
+
+describe('question grounding of captured main acceptance failures', () => {
+  const cases = [
+    {
+      clause: 'A breach may cause irreparable harm, and the disclosing party may seek injunctive relief. [PARTY_B] acknowledges that damages alone may not be adequate.',
+      explanation: 'The disclosing party may seek injunctive relief for a breach.',
+      question: 'Should the injunctive relief remedy be made mutual for both parties rather than applying only to the disclosing party?',
+    },
+    {
+      clause: 'For 12 months after your employment ends, you will not work for a direct competitor of the Company within the United States.',
+      explanation: 'The restriction lasts 12 months and applies within the United States.',
+      question: 'What specific geographic scope and business definition of a direct competitor are intended?',
+    },
+    {
+      clause: 'Rent paid more than 5 days late incurs a late fee of [AMOUNT_2].',
+      explanation: 'A late fee applies when rent is paid more than 5 days late.',
+      question: 'What is the grace period or exact mechanism for calculating the late fee?',
+    },
+    {
+      clause: 'If any payment is more than 10 days late, Lender may declare the full balance due immediately.',
+      explanation: 'Lender may accelerate the balance when a payment is more than 10 days late.',
+      question: 'What specific grace period or notice is required before Lender can accelerate the full balance?',
+    },
+  ];
+  it.each(cases.flatMap(c => ['in_cloud', 'on_device'].map(source => ({ ...c, source }))))(
+    'rejects an otherwise valid answer with an unsupported question: $question ($source)', async c => {
+      mocks.generate.mockResolvedValueOnce(output('c1', c.source, {
+        clauseId: 'c1', risk: 'medium', explanation: c.explanation, redline: '', questions: [c.question],
+      }));
+      const result = await new WebBridge(ai).analyze(batch(1, c.clause));
+      expect(result.results).toEqual([]);
+      expect(result.failed).toMatchObject([{ clauseId: 'c1', reason: 'invalid_response', ranOn: c.source === 'in_cloud' ? 'cloud' : 'device' }]);
+      expect(mocks.generate).toHaveBeenCalledTimes(1);
+    },
+  );
+  it.each([
+    ['The disclosing party may seek injunctive relief.', 'Can either party be the disclosing party under the full agreement?'],
+    ['The disclosing party may seek injunctive relief. This right belongs only to [PARTY_A].', 'Should the remedy be mutual rather than applying only to the disclosing party?'],
+    ['Do not work for a direct competitor within the United States.', 'Would a narrower geographic scope be appropriate?'],
+    ['Do not work for a direct competitor within the United States.', 'How is a direct competitor defined?'],
+    ['Do not work for a direct competitor.', 'What geographic scope is intended?'],
+    ['Do not work for a direct competitor within the Term.', 'What geographic scope is intended?'],
+    ['Do not work for a direct competitor within the United States.', 'What exceptions apply to the stated geographic scope?'],
+    ['Rent paid more than 5 days late incurs a late fee.', 'May that fee be waived for a documented delay?'],
+    ['Rent paid more than 5 days late incurs a late fee.', 'Should the late-payment threshold be extended?'],
+    ['Rent paid more than 5 days late incurs a late fee.', 'Is an additional grace period available beyond the stated threshold?'],
+    ['Payment is due monthly.', 'What is the grace period before a late fee applies?'],
+    ['Invoices must be sent within 5 days; a late fee may apply.', 'What grace period applies to late payment?'],
+  ])('preserves a source-supported or genuinely open question: %s / %s', (source, question) => {
+    expect(() => validateExplanationGrounding({ ...answer(), explanation: 'Preliminary review of the supplied wording.', questions: [question] }, source as CleanText)).not.toThrow();
+  });
+});
 beforeEach(() => {
   vi.clearAllMocks(); mocks.approved = new WeakSet();
   vi.mocked(loadAnalysisConfig).mockResolvedValue(DEFAULT_ANALYSIS_CONFIG);
