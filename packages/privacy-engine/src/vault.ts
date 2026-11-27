@@ -4,7 +4,15 @@ import { openDB, type IDBPDatabase } from 'idb';
 /** Placeholder → real value. */
 export type VaultEntries = Record<string, string>;
 
-type Sealed = { iv: Uint8Array<ArrayBuffer>; data: ArrayBuffer };
+type Sealed = { iv: Uint8Array<ArrayBuffer>; data: ArrayBuffer; savedAt?: number };
+
+/**
+ * How long a vault is kept after its last save. A document id lives only as long as the page that made it,
+ * so a vault left by an earlier visit can never be read again; this bounds how long its real values stay on disk.
+ */
+export const VAULT_TTL_MS = 24 * 60 * 60 * 1000;
+// A record from before savedAt existed counts as expired.
+const expired = (sealed: Sealed, now: number) => !(now - (sealed.savedAt ?? -Infinity) < VAULT_TTL_MS);
 
 const DB_NAME = 'clause-guard';
 const KEY_ID = 'vault-key';
@@ -86,14 +94,14 @@ export function saveVault(docId: string, entries: VaultEntries): Promise<void> {
       await vaultKey(),
       new TextEncoder().encode(JSON.stringify(entries)),
     );
-    const sealed: Sealed = { iv, data };
+    const sealed: Sealed = { iv, data, savedAt: Date.now() };
     await (await db()).put('vaults', sealed, docId);
   });
 }
 
 export async function loadVault(docId: string): Promise<VaultEntries | undefined> {
   const sealed: Sealed | undefined = await (await db()).get('vaults', docId);
-  if (!sealed) return undefined;
+  if (!sealed || expired(sealed, Date.now())) return undefined;
   const plain = await crypto.subtle.decrypt(
     { name: 'AES-GCM', iv: sealed.iv, additionalData: docBytes(docId) },
     await vaultKey(),
@@ -105,4 +113,15 @@ export async function loadVault(docId: string): Promise<VaultEntries | undefined
 export async function deleteVault(docId: string): Promise<void> {
   forgetRun(docId);
   await inWriteOrder(docId, async () => (await db()).delete('vaults', docId));
+}
+
+/** Deletes every vault not saved in the last VAULT_TTL_MS. Call it once at startup. */
+export async function purgeExpiredVaults(now = Date.now()): Promise<void> {
+  const database = await db();
+  const docIds = (await database.getAllKeys('vaults')).map(String);
+  await Promise.all(docIds.map(docId => inWriteOrder(docId, async () => {
+    // Checked again in write order, so a save that landed after the scan is kept.
+    const sealed: Sealed | undefined = await database.get('vaults', docId);
+    if (sealed && expired(sealed, now)) await database.delete('vaults', docId);
+  })));
 }
