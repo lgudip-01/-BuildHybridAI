@@ -1755,3 +1755,29 @@ complete earlier stacked history is preserved; no local/remote ref was reset.
 Evidence, runtime observations and lexical-guard limits:
 QUESTION_GROUNDING_20261127.md. Native/Android/attestation/chat and submission
 gates remain separate. #66's original source/tests are unchanged in this branch.
+
+
+## Generic-reference masking candidate — November 27, 2026
+
+- [x] Refresh GitHub; main remains 1ac26a9; #68/#69 have no new review comments.
+  Separate candidate starts from published #69/59b5533.
+- [x] Reproduce generic Purpose/agreement-caption redaction in real mask() with
+  patterns and synthetic model entities; preserve original captured failures.
+- [x] Add contextual filters to both entity paths without a global word exemption.
+  Private-name/company counterexamples remain masked.
+- [x] Countertest/fix explicit non-prefix aliases; duplicate aliases refuse chat;
+  private aliases colliding with ordinary vocabulary block document analysis.
+- [x] Original source fails nine new mask regressions; fixed source passes.
+  Six fixtures x two modes retain 70/70 mask and 35/35 keep checks per mode.
+- [x] 627 tests, three typechecks, build and whitespace checks pass.
+- [x] Investigate classification: current instructions already state structural
+  other/main-subject rule. No broad relabeling or fixture weakening; errors remain.
+- [x] Publish and verify all five implementation/test files; complete-tree
+  verification accompanies the PR after this evidence batch.
+- [ ] Engine-owner review/adoption of this stacked candidate.
+- [ ] Bounded genuine local-model acceptance of the concrete accepted revision,
+  classification increment, coordinated corrected-main/Hosting release.
+
+Evidence and privacy/conservative-blocking limits:
+GENERIC_REFERENCE_MASKING_20261127.md. No new provider call or deployment.
+#66/#69 source and prior runtime/phone failures remain preserved.
