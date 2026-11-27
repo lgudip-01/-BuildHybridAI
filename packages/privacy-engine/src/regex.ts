@@ -159,6 +159,8 @@ const REFERENCE = new RegExp(`\\b(?:${REFERENCE_WORDS})s?${SP}(?:[A-Z]{1,3}|\\d+
 const JOB_TITLE = new RegExp(
   '^(?:Head|VP|Director|Chief) of\\s|\\b(?:Officer|Counsel|Engineer|Director|Manager|President|Secretary|Treasurer|Analyst|Designer|Developer|Architect|Scientist|Accountant|Attorney)s?$',
 );
+// The title of another document: "Proprietary Information and Inventions Agreement", "Employee Handbook".
+const DOCUMENT_TITLE = /\s(?:Agreement|Addendum|Amendment|Policy|Plan|Handbook|Guidelines|Procedures)s?$/;
 const JURISDICTION =
   /^(?:(?:State|Commonwealth|Province|Republic|District) of\s.+|United States(?: of America)?|United Kingdom|European Union|United Arab Emirates|New Zealand|South Africa|Hong Kong|New (?:York|Jersey|Mexico|Hampshire)|(?:North|South) (?:Carolina|Dakota)|West Virginia|Rhode Island)$/;
 // The short form a contract defines for a name: Northwind Analytics, Inc. ("Northwind").
@@ -277,7 +279,7 @@ export function findNames(text: string, broad: boolean): Span[] {
   return spans
     .map((s) => trimLeadingArticle(text, s))
     .filter((s) => !isGeneric(stripOrgSuffix(s.value)))
-    .filter((s) => s.kind !== 'NAME' || !(JOB_TITLE.test(s.value) || JURISDICTION.test(s.value)));
+    .filter((s) => s.kind !== 'NAME' || !(JOB_TITLE.test(s.value) || JURISDICTION.test(s.value) || DOCUMENT_TITLE.test(s.value)));
 }
 
 /** Whether a capitalized phrase is shaped like a person's name, such as "Jane Q. Smith" or "Eline de Vries". */

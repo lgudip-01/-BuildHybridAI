@@ -283,6 +283,26 @@ describe('mask', () => {
     expect(result.needsReview).toBe(false);
   });
 
+  it('does not ask for review when the model reports the domain of an email the patterns masked', async () => {
+    const texts = ['Privacy questions go to privacy@halcyon-cloud.de within 30 days.'];
+    const result = await mask('doc-model-domain', texts.map((text, index) => ({ id: `c${index + 1}`, index, text })), fakeBridge([
+      { text: 'halcyon-cloud.de', kind: 'organization', party: true },
+    ]));
+    if (!result.ok) throw new Error(JSON.stringify(result.leaks));
+
+    expect(result.clauses[0]!.text).toBe('Privacy questions go to [EMAIL_1] within 30 days.');
+    expect(result.needsReview).toBe(false);
+  });
+
+  it('does not mask or flag the title of another agreement without a model', async () => {
+    const texts = ["You must sign the Company's standard Proprietary Information and Inventions Agreement before your first day."];
+    const result = await mask('doc-title', texts.map((text, index) => ({ id: `c${index + 1}`, index, text })), fakeBridge([]));
+    if (!result.ok) throw new Error(JSON.stringify(result.leaks));
+
+    expect(result.clauses[0]!.text).toBe(texts[0]);
+    expect(result.needsReview).toBe(false);
+  });
+
   it('labels each masked clause with the type the on-device model gives it, in one call per clause', async () => {
     const working = fakeBridge(model);
     const prompts: string[] = [];
